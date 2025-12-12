@@ -1,0 +1,28 @@
+package com.jacqulin.calcalc.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import com.jacqulin.calcalc.feature.home.navigation.HomeBaseRoute
+import com.jacqulin.calcalc.main.AppState
+
+@Composable
+fun MainNavHost(
+    appState: AppState,
+    modifier: Modifier = Modifier
+) {
+    val navController = appState.navController
+    NavHost(
+        navController = navController,
+        startDestination = HomeBaseRoute,
+        modifier = modifier
+    ) {
+//        homeSection {
+//
+//        }
+//
+//        friendsSection {
+//
+//        }
+    }
+}
