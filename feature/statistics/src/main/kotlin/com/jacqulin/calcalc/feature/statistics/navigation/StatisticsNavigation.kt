@@ -16,7 +16,7 @@ data object StatisticsBaseRoute
 
 fun NavController.navigateToStatistics(navOptions: NavOptions) = navigate(route = StatisticsRoute, navOptions)
 
-fun NavGraphBuilder.friendsSection(
+fun NavGraphBuilder.statisticsSection(
     friendDestinations: NavGraphBuilder.() -> Unit
 ) {
     navigation<StatisticsBaseRoute>(startDestination = StatisticsRoute) {

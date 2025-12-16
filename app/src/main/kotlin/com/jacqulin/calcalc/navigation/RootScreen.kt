@@ -9,6 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.jacqulin.calcalc.main.App
+import com.jacqulin.calcalc.main.rememberAppState
 
 @Composable
 fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
@@ -24,8 +26,8 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
             }
         RootUiState.Onboarding -> OnboardingNavGraph()
         RootUiState.Main -> {
-//            val appState = rememberAppState()
-//            App(appState = appState)
+            val appState = rememberAppState()
+            App(appState = appState)
         }
     }
 }
