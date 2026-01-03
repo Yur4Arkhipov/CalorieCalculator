@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.jacqulin.calcalc.feature.home.navigation.HomeBaseRoute
+import com.jacqulin.calcalc.feature.home.navigation.homeSection
+import com.jacqulin.calcalc.feature.statistics.navigation.statisticsSection
 import com.jacqulin.calcalc.main.AppState
 
 @Composable
@@ -17,12 +19,12 @@ fun MainNavHost(
         startDestination = HomeBaseRoute,
         modifier = modifier
     ) {
-//        homeSection {
-//
-//        }
-//
-//        friendsSection {
-//
-//        }
+        homeSection {
+
+        }
+
+        statisticsSection {
+
+        }
     }
 }
