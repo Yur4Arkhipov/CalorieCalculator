@@ -59,6 +59,7 @@ dependencies {
 
     implementation(project(":feature:home"))
     implementation(project(":feature:statistics"))
+    implementation(project(":feature:profile"))
 
 
 //    implementation(libs.androidx.core.ktx)

@@ -13,6 +13,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.jacqulin.calcalc.feature.home.navigation.navigateToHome
+import com.jacqulin.calcalc.feature.profile.navigation.navigateToProfile
 import com.jacqulin.calcalc.feature.statistics.navigation.navigateToStatistics
 import com.jacqulin.calcalc.navigation.TopLevelDestination
 import kotlinx.coroutines.CoroutineScope
@@ -99,6 +100,7 @@ class AppState(
             when (topLevelDestination) {
                 TopLevelDestination.STATISTICS -> navController.navigateToStatistics(topLevelNavOptions)
                 TopLevelDestination.HOME -> navController.navigateToHome(topLevelNavOptions)
+                TopLevelDestination.PROFILE -> navController.navigateToProfile(topLevelNavOptions)
 //                INTERESTS -> navController.navigateToInterests(null, topLevelNavOptions)
             }
         }

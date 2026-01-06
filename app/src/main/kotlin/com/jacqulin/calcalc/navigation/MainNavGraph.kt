@@ -5,6 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.jacqulin.calcalc.feature.home.navigation.HomeBaseRoute
 import com.jacqulin.calcalc.feature.home.navigation.homeSection
+import com.jacqulin.calcalc.feature.home.navigation.navigateToMacroDetail
+import com.jacqulin.calcalc.feature.profile.navigation.profileSection
 import com.jacqulin.calcalc.feature.statistics.navigation.statisticsSection
 import com.jacqulin.calcalc.main.AppState
 
@@ -19,11 +21,20 @@ fun MainNavHost(
         startDestination = HomeBaseRoute,
         modifier = modifier
     ) {
-        homeSection {
+        homeSection(
+            onNavigateToMacroDetail = {
+                navController.navigateToMacroDetail()
+            },
+            onBack = {
+                navController.popBackStack()
+            }
+        )
+
+        statisticsSection {
 
         }
 
-        statisticsSection {
+        profileSection {
 
         }
     }
