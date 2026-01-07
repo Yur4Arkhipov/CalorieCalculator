@@ -3,12 +3,10 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
 }
 
 android {
-    namespace = "com.jacqulin.calcalc.core.data"
+    namespace = "com.jacqulin.calcalc.core.domain"
     compileSdk {
         version = release(36)
     }
@@ -42,13 +40,7 @@ kotlin {
 }
 
 dependencies {
-
-    implementation(project(":core:domain"))
-
-    // Dagger hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
-
-    //Datastore
-    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
 }

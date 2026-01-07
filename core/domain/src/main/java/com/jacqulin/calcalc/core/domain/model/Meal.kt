@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.feature.home.ui.model
+package com.jacqulin.calcalc.core.domain.model
 
 data class Meal(
     val name: String,

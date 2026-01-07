@@ -32,8 +32,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.jacqulin.calcalc.feature.home.HomeUiState
-import com.jacqulin.calcalc.feature.home.ui.model.MacroNutrients
+import com.jacqulin.calcalc.core.domain.model.MacroNutrients
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin

@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.feature.home.ui
+package com.jacqulin.calcalc.feature.home.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,11 +46,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.jacqulin.calcalc.feature.home.HomeViewModel
-import com.jacqulin.calcalc.feature.home.ui.home.CalendarSection
-import com.jacqulin.calcalc.feature.home.ui.home.CaloriesSection
-import com.jacqulin.calcalc.feature.home.ui.model.Meal
-import com.jacqulin.calcalc.feature.home.ui.model.MealType
+import com.jacqulin.calcalc.core.domain.model.Meal
+import com.jacqulin.calcalc.core.domain.model.MealType
 
 @Composable
 fun HomeScreen(
@@ -77,8 +74,8 @@ fun HomeScreen(
         ) {
             item {
                 CalendarSection(
-                    weekDays = uiState.weekDays,
                     currentWeekIndex = uiState.currentWeekIndex,
+                    selectedDate = uiState.selectedDate,
                     onDateSelected = viewModel::onDateSelected,
                     onWeekChanged = viewModel::onWeekChanged
                 )

@@ -2,7 +2,6 @@ package com.jacqulin.calcalc.feature.home.ui.macrodetail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +28,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,8 +37,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.jacqulin.calcalc.feature.home.HomeUiState
-import com.jacqulin.calcalc.feature.home.ui.model.Meal
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.jacqulin.calcalc.core.domain.model.Meal
 import kotlin.math.roundToInt
 
 private val ProteinColor = Color(0xFFE91E63)
@@ -47,9 +48,11 @@ private val FatsColor = Color(0xFFFF9800)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MacroDetailScreen(
-    uiState: HomeUiState,
+    viewModel: MacroDetailViewModel = hiltViewModel(),
     onBackClick: () -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -122,7 +125,7 @@ fun MacroDetailScreen(
 }
 
 @Composable
-private fun MacroProgressCards(uiState: HomeUiState) {
+private fun MacroProgressCards(uiState: MacroDetailUiState) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -217,7 +220,7 @@ private fun MacroProgressCard(
 }
 
 @Composable
-private fun CaloriesCard(uiState: HomeUiState) {
+private fun CaloriesCard(uiState: MacroDetailUiState) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
