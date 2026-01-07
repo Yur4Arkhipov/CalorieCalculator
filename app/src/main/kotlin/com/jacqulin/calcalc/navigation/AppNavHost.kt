@@ -6,16 +6,17 @@ import androidx.navigation.compose.NavHost
 import com.jacqulin.calcalc.feature.home.navigation.HomeBaseRoute
 import com.jacqulin.calcalc.feature.home.navigation.homeSection
 import com.jacqulin.calcalc.feature.home.navigation.navigateToMacroDetail
-import com.jacqulin.calcalc.feature.profile.navigation.profileSection
-import com.jacqulin.calcalc.feature.statistics.navigation.statisticsSection
+import com.jacqulin.calcalc.feature.profile.navigation.profileScreen
+import com.jacqulin.calcalc.feature.statistics.navigation.statisticsScreen
 import com.jacqulin.calcalc.main.AppState
 
 @Composable
-fun MainNavHost(
+fun AppNavHost(
     appState: AppState,
     modifier: Modifier = Modifier
 ) {
     val navController = appState.navController
+
     NavHost(
         navController = navController,
         startDestination = HomeBaseRoute,
@@ -30,12 +31,12 @@ fun MainNavHost(
             }
         )
 
-        statisticsSection {
+        statisticsScreen(
+            onBackClick = navController::popBackStack
+        )
 
-        }
-
-        profileSection {
-
-        }
+        profileScreen(
+            onBackClick = navController::popBackStack
+        )
     }
 }

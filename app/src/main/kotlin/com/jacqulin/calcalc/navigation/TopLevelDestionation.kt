@@ -9,8 +9,7 @@ import com.jacqulin.calcalc.feature.statistics.navigation.StatisticsRoute
 import kotlin.reflect.KClass
 
 enum class TopLevelDestination(
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector,
+    val icon: ImageVector,
 //    @StringRes val iconTextId: Int,
     val iconTextId: String,
 //    @StringRes val titleTextId: Int,
@@ -19,30 +18,24 @@ enum class TopLevelDestination(
     val baseRoute: KClass<*> = route
 ) {
     STATISTICS(
-        selectedIcon = AppIcons.StatisticsSelected,
-        unselectedIcon = AppIcons.StatisticsUnselected,
+        icon = AppIcons.StatisticsSelected,
         iconTextId = "Statistics",
         titleTextId = "Statistics",
         route = StatisticsRoute::class,
         baseRoute = StatisticsRoute::class
     ),
     HOME(
-        selectedIcon = AppIcons.HomeSelected,
-        unselectedIcon = AppIcons.HomeUnselected,
+        icon = AppIcons.HomeSelected,
         iconTextId = "Home",
         titleTextId = "Home",
         route = HomeRoute::class,
         baseRoute = HomeBaseRoute::class
     ),
     PROFILE(
-        selectedIcon = AppIcons.ProfileSelected,
-        unselectedIcon = AppIcons.ProfileUnselected,
+        icon = AppIcons.ProfileSelected,
         iconTextId = "Profile",
         titleTextId = "Profile",
         route = ProfileRoute::class,
         baseRoute = ProfileRoute::class
     )
-//    CHALLENGES(
-//
-//    ),
 }

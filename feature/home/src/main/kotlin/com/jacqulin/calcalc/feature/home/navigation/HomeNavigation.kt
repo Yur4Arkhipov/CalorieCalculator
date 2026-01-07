@@ -29,7 +29,7 @@ fun NavGraphBuilder.homeSection(
     navigation<HomeBaseRoute>(startDestination = HomeRoute) {
         composable<HomeRoute> {
             HomeScreen(
-                onNavigateToMacroDetail = onNavigateToMacroDetail
+                onNavigateToMacroDetail = onNavigateToMacroDetail,
             )
         }
 
