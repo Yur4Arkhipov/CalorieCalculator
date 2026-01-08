@@ -1,78 +1,60 @@
 package com.jacqulin.calcalc.main
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
-import com.jacqulin.calcalc.navigation.MainNavHost
-import kotlin.reflect.KClass
+import androidx.compose.ui.unit.dp
+import com.jacqulin.calcalc.core.designsystem.component.TopAppBar
+import com.jacqulin.calcalc.navigation.AppNavHost
 
 @Composable
-internal fun App(
+fun App(
     appState: AppState,
     modifier: Modifier = Modifier,
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()
 ) {
+//    val isOffline by appState.isOffline.collectAsStateWithLifecycle()
 
-    val currentDestination = appState.currentDestination
-
-    val layoutType = NavigationSuiteScaffoldDefaults
-        .calculateFromAdaptiveInfo(windowAdaptiveInfo)
-
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            appState.topLevelDestinations.forEach { destination ->
-                val selected = currentDestination.isRouteInHierarchy(destination.baseRoute)
-                item(
-                    selected = selected,
-                    onClick = { appState.navigateToTopLevelDestination(destination) },
-                    icon = {
-                        if (selected) {
-                            Icon(
-                                imageVector = destination.selectedIcon,
-                                contentDescription = null
-                            )
-                        } else {
-                            Icon(
-                                imageVector = destination.unselectedIcon,
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    label = { Text(destination.iconTextId) },
-//                    modifier = Modifier
-//                        .testTag("NiaNavItem")
-//                        .then(if (hasUnread) Modifier.notificationDot() else Modifier),
-                )
-            }
-        },
-        layoutType = layoutType,
-    ) {
-        Box(
-            modifier = modifier
-                .semantics { testTagsAsResourceId = true }
-//                .background(Color.White) // вместо containerColor
-        ) {
-            MainNavHost(
-                appState = appState,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-    }
+    App(
+        appState = appState,
+        onNavigateToProfile = { appState.navigateToProfile() },
+        onNavigateToStatistics = { appState.navigateToStatistics() },
+    )
 }
 
-private fun NavDestination?.isRouteInHierarchy(route: KClass<*>) =
-    this?.hierarchy?.any {
-        it.hasRoute(route)
-    } ?: false
+@Composable
+internal fun App(
+    appState: AppState,
+    onNavigateToProfile: () -> Unit,
+    onNavigateToStatistics: () -> Unit,
+    modifier: Modifier = Modifier,
+    windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                onNavigateToProfile = onNavigateToProfile,
+                onNavigateToStatistics = onNavigateToStatistics
+            )
+        }
+    ) { paddingValues ->
+        AppNavHost(
+            appState = appState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    PaddingValues(
+                        top = paddingValues.calculateTopPadding(),
+                        start = 10.dp,
+                        end = 10.dp,
+                        bottom = 16.dp
+                    )
+                )
+        )
+    }
+}

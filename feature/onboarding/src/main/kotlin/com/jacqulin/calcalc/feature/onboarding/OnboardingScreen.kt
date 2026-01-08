@@ -1,30 +1,54 @@
 package com.jacqulin.calcalc.feature.onboarding
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jacqulin.calcalc.core.domain.model.ActivityLevel
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val pagerState = rememberPagerState { state.totalPages }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(state.currentPage) {
+        if (pagerState.currentPage != state.currentPage) {
+            pagerState.animateScrollToPage(state.currentPage)
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage != state.currentPage) {
+            if (pagerState.currentPage > state.currentPage) {
+                viewModel.onEvent(OnboardingEvent.NextPage)
+            } else {
+                viewModel.onEvent(OnboardingEvent.PreviousPage)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(20.dp)
     ) {
-        // Кнопка пропустить
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
@@ -34,18 +58,16 @@ fun OnboardingScreen(
             }
         }
 
-        // Индикатор прогресса
         OnboardingProgressIndicator(
             currentPage = state.currentPage,
             totalPages = state.totalPages,
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
-        // Контент страниц
-        AnimatedContent(
-            targetState = state.currentPage,
-            modifier = Modifier.weight(1f),
-            label = "page_content"
+        // Контент страниц с HorizontalPager
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.weight(1f)
         ) { page ->
             when (page) {
                 0 -> WelcomePage()
@@ -66,13 +88,18 @@ fun OnboardingScreen(
             }
         }
 
-        // Навигационные кнопки
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 15.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             if (state.currentPage > 0) {
-                OutlinedButton(onClick = { viewModel.onEvent(OnboardingEvent.PreviousPage) }) {
+                OutlinedButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(state.currentPage - 1)
+                        }
+                    }
+                ) {
                     Text("Назад")
                 }
             } else {
@@ -84,7 +111,9 @@ fun OnboardingScreen(
                     if (state.currentPage == state.totalPages - 1) {
                         viewModel.onEvent(OnboardingEvent.Complete)
                     } else {
-                        viewModel.onEvent(OnboardingEvent.NextPage)
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(state.currentPage + 1)
+                        }
                     }
                 }
             ) {
@@ -143,7 +172,7 @@ private fun WelcomePage() {
 }
 
 @Composable
-private fun AgePage(age: String, onAgeChange: (String) -> Unit) {
+private fun AgePage(age: Int?, onAgeChange: (Int) -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -152,8 +181,8 @@ private fun AgePage(age: String, onAgeChange: (String) -> Unit) {
         Text("Сколько вам лет?", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(24.dp))
         OutlinedTextField(
-            value = age,
-            onValueChange = { if (it.all { c -> c.isDigit() }) onAgeChange(it) },
+            value = age.toString(),
+            onValueChange = { if (it.all { c -> c.isDigit() }) onAgeChange(it.toInt()) },
             label = { Text("Возраст") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true
@@ -163,10 +192,10 @@ private fun AgePage(age: String, onAgeChange: (String) -> Unit) {
 
 @Composable
 private fun BodyMetricsPage(
-    height: String,
-    weight: String,
-    onHeightChange: (String) -> Unit,
-    onWeightChange: (String) -> Unit
+    height: Float?,
+    weight: Float?,
+    onHeightChange: (Float?) -> Unit,
+    onWeightChange: (Float?) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -176,16 +205,22 @@ private fun BodyMetricsPage(
         Text("Ваши параметры", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(24.dp))
         OutlinedTextField(
-            value = height,
-            onValueChange = onHeightChange,
+            value = height.toString(),
+            onValueChange = { newValue ->
+                val parsed = newValue.toFloatOrNull()
+                onHeightChange(parsed)
+            },
             label = { Text("Рост (см)") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true
         )
         Spacer(Modifier.height(16.dp))
         OutlinedTextField(
-            value = weight,
-            onValueChange = onWeightChange,
+            value = weight.toString(),
+            onValueChange = { newValue ->
+                val parsed = newValue.toFloatOrNull()
+                onHeightChange(parsed)
+            },
             label = { Text("Вес (кг)") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true

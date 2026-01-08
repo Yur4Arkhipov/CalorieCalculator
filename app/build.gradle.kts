@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -36,11 +38,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+
     buildFeatures {
         compose = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 
@@ -50,9 +56,11 @@ dependencies {
 
     implementation(project(":core:designsystem"))
     implementation(project(":core:data"))
+    implementation(project(":core:domain"))
 
     implementation(project(":feature:home"))
     implementation(project(":feature:statistics"))
+    implementation(project(":feature:profile"))
 
 
 //    implementation(libs.androidx.core.ktx)
@@ -78,6 +86,9 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
+
+    // for dagger hilt support with kotlin 2.3.0
+    ksp(libs.kotlin.metadata.jvm)
 
     // Like in Nia app
     implementation(libs.androidx.compose.adaptive)

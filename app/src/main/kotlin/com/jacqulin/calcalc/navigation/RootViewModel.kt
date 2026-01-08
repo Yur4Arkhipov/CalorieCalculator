@@ -2,7 +2,7 @@ package com.jacqulin.calcalc.navigation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jacqulin.calcalc.core.data.onboarding.OnboardingManager
+import com.jacqulin.calcalc.core.domain.repository.OnboardingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,10 +12,10 @@ import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class RootViewModel @Inject constructor(
-    onboardingManager: OnboardingManager
+    onboardingRepository: OnboardingRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<RootUiState> = onboardingManager.isOnboardingCompleted
+    val uiState: StateFlow<RootUiState> = onboardingRepository.isOnboardingCompleted
         .map { completed ->
             if (completed) RootUiState.Main else RootUiState.Onboarding
         }
