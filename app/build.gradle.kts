@@ -90,6 +90,10 @@ dependencies {
     // for dagger hilt support with kotlin 2.3.0
     ksp(libs.kotlin.metadata.jvm)
 
+    // Icons
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.material.icons.extended)
+
     // Like in Nia app
     implementation(libs.androidx.compose.adaptive)
     implementation(libs.androidx.compose.adaptive.layout)

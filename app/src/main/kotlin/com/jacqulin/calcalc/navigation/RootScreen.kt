@@ -26,11 +26,7 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
             }
         RootUiState.Onboarding -> OnboardingNavGraph()
         RootUiState.Main -> {
-            val appState = rememberAppState(
-//                networkMonitor = networkMonitor,
-//                userNewsResourceRepository = userNewsResourceRepository,
-//                timeZoneMonitor = timeZoneMonitor,
-            )
+            val appState = rememberAppState()
             App(appState = appState)
         }
     }
