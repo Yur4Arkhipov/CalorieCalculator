@@ -24,7 +24,6 @@ fun NavController.navigateToMacroDetail() = navigate(route = MacroDetailRoute)
 
 fun NavGraphBuilder.homeSection(
     onNavigateToMacroDetail: () -> Unit,
-    onBack: () -> Unit
 ) {
     navigation<HomeBaseRoute>(startDestination = HomeRoute) {
         composable<HomeRoute> {
@@ -34,9 +33,7 @@ fun NavGraphBuilder.homeSection(
         }
 
         composable<MacroDetailRoute> {
-            MacroDetailScreen(
-                onBackClick = onBack
-            )
+            MacroDetailScreen()
         }
     }
 }

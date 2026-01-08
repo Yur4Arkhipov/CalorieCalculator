@@ -25,9 +25,6 @@ fun AppNavHost(
         homeSection(
             onNavigateToMacroDetail = {
                 navController.navigateToMacroDetail()
-            },
-            onBack = {
-                navController.popBackStack()
             }
         )
 

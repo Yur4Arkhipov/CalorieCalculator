@@ -1,12 +1,18 @@
 package com.jacqulin.calcalc.main
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.TopAppBar
@@ -36,8 +42,17 @@ fun App(appState: AppState) {
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            AppNavHost(appState = appState)
+        Box(
+            modifier = Modifier.padding(
+                top = paddingValues.calculateTopPadding(),
+                bottom = paddingValues.calculateBottomPadding() + 10.dp,
+                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current) + 10.dp,
+                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 10.dp
+            )
+        ) {
+            AppNavHost(
+                appState = appState,
+            )
         }
     }
 }
