@@ -16,6 +16,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jacqulin.calcalc.core.domain.model.ActivityLevel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -171,7 +172,7 @@ private fun WelcomePage() {
 }
 
 @Composable
-private fun AgePage(age: String, onAgeChange: (String) -> Unit) {
+private fun AgePage(age: Int?, onAgeChange: (Int) -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -180,8 +181,8 @@ private fun AgePage(age: String, onAgeChange: (String) -> Unit) {
         Text("Сколько вам лет?", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(24.dp))
         OutlinedTextField(
-            value = age,
-            onValueChange = { if (it.all { c -> c.isDigit() }) onAgeChange(it) },
+            value = age.toString(),
+            onValueChange = { if (it.all { c -> c.isDigit() }) onAgeChange(it.toInt()) },
             label = { Text("Возраст") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true
@@ -191,10 +192,10 @@ private fun AgePage(age: String, onAgeChange: (String) -> Unit) {
 
 @Composable
 private fun BodyMetricsPage(
-    height: String,
-    weight: String,
-    onHeightChange: (String) -> Unit,
-    onWeightChange: (String) -> Unit
+    height: Float?,
+    weight: Float?,
+    onHeightChange: (Float?) -> Unit,
+    onWeightChange: (Float?) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -204,16 +205,22 @@ private fun BodyMetricsPage(
         Text("Ваши параметры", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(24.dp))
         OutlinedTextField(
-            value = height,
-            onValueChange = onHeightChange,
+            value = height.toString(),
+            onValueChange = { newValue ->
+                val parsed = newValue.toFloatOrNull()
+                onHeightChange(parsed)
+            },
             label = { Text("Рост (см)") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true
         )
         Spacer(Modifier.height(16.dp))
         OutlinedTextField(
-            value = weight,
-            onValueChange = onWeightChange,
+            value = weight.toString(),
+            onValueChange = { newValue ->
+                val parsed = newValue.toFloatOrNull()
+                onHeightChange(parsed)
+            },
             label = { Text("Вес (кг)") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true

@@ -2,7 +2,10 @@ package com.jacqulin.calcalc.feature.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jacqulin.calcalc.core.data.onboarding.OnboardingManager
+import com.jacqulin.calcalc.core.domain.model.ActivityLevel
+import com.jacqulin.calcalc.core.domain.model.UserProfile
+import com.jacqulin.calcalc.core.domain.repository.OnboardingRepository
+import com.jacqulin.calcalc.core.domain.repository.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,34 +17,27 @@ import kotlinx.coroutines.launch
 data class OnboardingState(
     val currentPage: Int = 0,
     val totalPages: Int = 4,
-    val age: String = "",
-    val height: String = "",
-    val weight: String = "",
-    val activityLevel: ActivityLevel? = null
+    val age: Int? = 0,
+    val height: Float? = 0f,
+    val weight: Float? = 0f,
+    val activityLevel: ActivityLevel? = ActivityLevel.ACTIVE
 )
-
-enum class ActivityLevel {
-    SEDENTARY,
-    LIGHT,
-    MODERATE,
-    ACTIVE,
-    VERY_ACTIVE
-}
 
 sealed interface OnboardingEvent {
     data object NextPage : OnboardingEvent
     data object PreviousPage : OnboardingEvent
     data object Skip : OnboardingEvent
     data object Complete : OnboardingEvent
-    data class UpdateAge(val age: String) : OnboardingEvent
-    data class UpdateHeight(val height: String) : OnboardingEvent
-    data class UpdateWeight(val weight: String) : OnboardingEvent
-    data class UpdateActivityLevel(val level: ActivityLevel) : OnboardingEvent
+    data class UpdateAge(val age: Int?) : OnboardingEvent
+    data class UpdateHeight(val height: Float?) : OnboardingEvent
+    data class UpdateWeight(val weight: Float?) : OnboardingEvent
+    data class UpdateActivityLevel(val level: ActivityLevel?) : OnboardingEvent
 }
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    private val onboardingManager: OnboardingManager
+    private val onboardingRepository: OnboardingRepository,
+    private val userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(OnboardingState())
@@ -66,19 +62,21 @@ class OnboardingViewModel @Inject constructor(
 
     private fun skipOnboarding() {
         viewModelScope.launch {
-            onboardingManager.setOnboardingCompleted(skipped = true)
+            onboardingRepository.setOnboardingCompleted(skipped = true)
         }
     }
 
     private fun completeOnboarding() {
         viewModelScope.launch {
-            onboardingManager.saveUserData(
-                age = _state.value.age.toIntOrNull(),
-                height = _state.value.height.toFloatOrNull(),
-                weight = _state.value.weight.toFloatOrNull(),
-                activityLevel = _state.value.activityLevel
+            userPreferencesRepository.saveUserData(
+                UserProfile(
+                    age = state.value.age,
+                    height = state.value.height,
+                    weight = state.value.weight,
+                    activityLevel = state.value.activityLevel
+                )
             )
-            onboardingManager.setOnboardingCompleted(skipped = false)
+            onboardingRepository.setOnboardingCompleted()
         }
     }
 }
