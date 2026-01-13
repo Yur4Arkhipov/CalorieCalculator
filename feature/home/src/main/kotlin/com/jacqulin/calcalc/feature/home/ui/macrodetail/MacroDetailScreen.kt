@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -47,7 +46,7 @@ fun MacroDetailScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         item { CaloriesCard(uiState = uiState) }
         item { MacroProgressCards(uiState = uiState) }
@@ -60,9 +59,7 @@ fun MacroDetailScreen(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
-        items(uiState.mealsToday) { meal ->
-            MealCard(meal = meal)
-        }
+        item { MealCards(uiState.mealsToday) }
         if (uiState.mealsToday.isEmpty()) {
             item {
                 Card(
@@ -83,101 +80,7 @@ fun MacroDetailScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun MacroProgressCards(uiState: MacroDetailUiState) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        MacroProgressCard(
-            title = "Белки",
-            current = uiState.todayMacros.proteins.roundToInt(),
-            goal = uiState.todayMacros.proteinsGoal.roundToInt(),
-            color = ProteinColor
-        )
-        MacroProgressCard(
-            title = "Углеводы",
-            current = uiState.todayMacros.carbs.roundToInt(),
-            goal = uiState.todayMacros.carbsGoal.roundToInt(),
-            color = CarbsColor
-        )
-        MacroProgressCard(
-            title = "Жиры",
-            current = uiState.todayMacros.fats.roundToInt(),
-            goal = uiState.todayMacros.fatsGoal.roundToInt(),
-            color = FatsColor
-        )
-    }
-}
-
-@Composable
-private fun MacroProgressCard(
-    title: String,
-    current: Int,
-    goal: Int,
-    color: Color
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .clip(CircleShape),
-                        color = color
-                    ) {}
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-
-                Text(
-                    text = "$current / $goal г",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = color
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LinearProgressIndicator(
-                progress = { (current.toFloat() / goal.toFloat()).coerceIn(0f, 1f) },
-                modifier = Modifier.fillMaxWidth(),
-                color = color,
-                trackColor = color.copy(alpha = 0.2f)
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            val percentage = ((current.toFloat() / goal.toFloat()) * 100).roundToInt()
-            Text(
-                text = "$percentage% от дневной нормы",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
-        }
+        item { Spacer(Modifier.height(12.dp)) }
     }
 }
 
@@ -187,8 +90,7 @@ private fun CaloriesCard(uiState: MacroDetailUiState) {
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        )
     ) {
         Column(
             modifier = Modifier.padding(20.dp)
@@ -253,13 +155,115 @@ private fun CaloriesCard(uiState: MacroDetailUiState) {
 }
 
 @Composable
+private fun MacroProgressCards(uiState: MacroDetailUiState) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        MacroProgressCard(
+            title = "Белки",
+            current = uiState.todayMacros.proteins.roundToInt(),
+            goal = uiState.todayMacros.proteinsGoal.roundToInt(),
+            color = ProteinColor
+        )
+        MacroProgressCard(
+            title = "Углеводы",
+            current = uiState.todayMacros.carbs.roundToInt(),
+            goal = uiState.todayMacros.carbsGoal.roundToInt(),
+            color = CarbsColor
+        )
+        MacroProgressCard(
+            title = "Жиры",
+            current = uiState.todayMacros.fats.roundToInt(),
+            goal = uiState.todayMacros.fatsGoal.roundToInt(),
+            color = FatsColor
+        )
+    }
+}
+
+@Composable
+private fun MacroProgressCard(
+    title: String,
+    current: Int,
+    goal: Int,
+    color: Color
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clip(CircleShape),
+                        color = color
+                    ) {}
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Text(
+                    text = "$current / $goal г",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = color
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LinearProgressIndicator(
+                progress = { (current.toFloat() / goal.toFloat()).coerceIn(0f, 1f) },
+                modifier = Modifier.fillMaxWidth(),
+                color = color,
+                trackColor = color.copy(alpha = 0.2f)
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            val percentage = ((current.toFloat() / goal.toFloat()) * 100).roundToInt()
+            Text(
+                text = "$percentage% от дневной нормы",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+@Composable
+fun MealCards(meals: List<Meal>) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        meals.forEach { meal ->
+            MealCard(meal)
+        }
+    }
+}
+
+@Composable
 private fun MealCard(meal: Meal) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        )
     ) {
         Row(
             modifier = Modifier
@@ -279,6 +283,11 @@ private fun MealCard(meal: Meal) {
                 )
                 Text(
                     text = "${meal.type.displayName} • ${meal.time}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                Text(
+                    text = "Б: ${meal.proteins} г • Ж: ${meal.fats} г • У: ${meal.carbs} г",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
