@@ -53,6 +53,7 @@ import com.jacqulin.calcalc.core.domain.model.MealType
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToMacroDetail: () -> Unit = {},
+    onNavigateToAiMealDescription: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddFoodSheet by remember { mutableStateOf(false) }
@@ -98,6 +99,10 @@ fun HomeScreen(
                     showAddFoodSheet = false
                     // TODO navigation
                 },
+                onAiDescription = {
+                    showAddFoodSheet = false
+                    onNavigateToAiMealDescription()
+                },
                 onCamera = {
                     showAddFoodSheet = false
                     // TODO camera
@@ -137,6 +142,7 @@ private fun AddFoodButton(
 @Composable
 fun AddFoodBottomSheet(
     onManual: () -> Unit,
+    onAiDescription: () -> Unit,
     onCamera: () -> Unit,
     onGallery: () -> Unit,
     onDismiss: () -> Unit
@@ -158,6 +164,12 @@ fun AddFoodBottomSheet(
                 icon = Icons.Default.Edit,
                 text = "Ввести вручную",
                 onClick = onManual
+            )
+
+            AddFoodOption(
+                icon = Icons.Default.Edit,
+                text = "Описать для ИИ",
+                onClick = onAiDescription
             )
 
             AddFoodOption(

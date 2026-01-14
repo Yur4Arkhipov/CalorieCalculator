@@ -4,4 +4,5 @@
     <string name="statistics_title">Statistics</string>
     <string name="profile_title">Profile</string>
     <string name="macro_detail_title">Детальная информация</string>
+    <string name="ai_meal_description_title">Описание блюда</string>
 </resources>

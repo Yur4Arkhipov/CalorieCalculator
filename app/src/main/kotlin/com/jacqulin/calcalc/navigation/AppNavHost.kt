@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.jacqulin.calcalc.feature.home.navigation.HomeBaseRoute
 import com.jacqulin.calcalc.feature.home.navigation.homeSection
+import com.jacqulin.calcalc.feature.home.navigation.navigateToAiMealDescription
 import com.jacqulin.calcalc.feature.home.navigation.navigateToMacroDetail
 import com.jacqulin.calcalc.feature.profile.navigation.profileScreen
 import com.jacqulin.calcalc.feature.statistics.navigation.statisticsScreen
@@ -25,6 +26,9 @@ fun AppNavHost(
         homeSection(
             onNavigateToMacroDetail = {
                 navController.navigateToMacroDetail()
+            },
+            onNavigateToAiMealDescription = {
+                navController.navigateToAiMealDescription()
             }
         )
 

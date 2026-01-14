@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,6 +18,7 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.TopAppBar
 import com.jacqulin.calcalc.core.designsystem.component.TopAppBarConfig
+import com.jacqulin.calcalc.feature.home.navigation.AiMealDescriptionRoute
 import com.jacqulin.calcalc.feature.home.navigation.MacroDetailRoute
 import com.jacqulin.calcalc.navigation.AppNavHost
 import com.jacqulin.calcalc.navigation.mapDestinationToActions
@@ -72,6 +74,13 @@ fun resolveTopAppBarConfig(appState: AppState): TopAppBarConfig? {
         current?.hasRoute(MacroDetailRoute::class) == true ->
             TopAppBarConfig(
                 titleRes = R.string.macro_detail_title,
+                navigationIcon = Icons.Default.ArrowBack,
+                onNavigationClick = { appState.navController.popBackStack() }
+            )
+
+        current?.hasRoute(AiMealDescriptionRoute::class) == true ->
+            TopAppBarConfig(
+                titleRes = R.string.ai_meal_description_title,
                 navigationIcon = Icons.Default.ArrowBack,
                 onNavigationClick = { appState.navController.popBackStack() }
             )
