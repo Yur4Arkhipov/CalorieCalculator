@@ -83,17 +83,17 @@ class MacroDetailViewModel @Inject constructor(
             }
 
             val updatedCalories = updatedMeals.sumOf { it.calories }
-            val updatedProteins = updatedMeals.sumOf { it.proteins }.toFloat()
-            val updatedCarbs = updatedMeals.sumOf { it.carbs }.toFloat()
-            val updatedFats = updatedMeals.sumOf { it.fats }.toFloat()
+            val updatedProteins = updatedMeals.sumOf { it.proteins }
+            val updatedCarbs = updatedMeals.sumOf { it.carbs }
+            val updatedFats = updatedMeals.sumOf { it.fats }
 
             currentState.copy(
                 mealsToday = updatedMeals,
                 consumedCalories = updatedCalories,
                 todayMacros = currentState.todayMacros.copy(
-                    proteins = updatedProteins,
-                    carbs = updatedCarbs,
-                    fats = updatedFats
+                    protein = updatedProteins,
+                    carb = updatedCarbs,
+                    fat = updatedFats
                 ),
                 editingMeal = null,
                 isEditingSheetOpen = false

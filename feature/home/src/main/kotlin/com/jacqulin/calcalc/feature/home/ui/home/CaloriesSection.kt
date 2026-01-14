@@ -110,15 +110,15 @@ fun MacroRadialChart(
     modifier: Modifier = Modifier
 ) {
     val proteinProgress by animateFloatAsState(
-        targetValue = macros.proteins / macros.proteinsGoal,
+        targetValue = macros.protein / macros.proteinsGoal,
         label = "protein"
     )
     val carbsProgress by animateFloatAsState(
-        targetValue = macros.carbs / macros.carbsGoal,
+        targetValue = macros.carb / macros.carbsGoal,
         label = "carbs"
     )
     val fatsProgress by animateFloatAsState(
-        targetValue = macros.fats / macros.fatsGoal,
+        targetValue = macros.fat / macros.fatsGoal,
         label = "fats"
     )
     fun overflowAlpha(progress: Float) =
@@ -204,19 +204,19 @@ private fun MacroPieChartLegend(macros: MacroNutrients) {
         MacroLegendItem(
             color = ProteinColor,
             name = "Белки",
-            current = macros.proteins.roundToInt(),
+            current = macros.protein,
             goal = macros.proteinsGoal.roundToInt()
         )
         MacroLegendItem(
             color = CarbsColor,
             name = "Углеводы",
-            current = macros.carbs.roundToInt(),
+            current = macros.carb,
             goal = macros.carbsGoal.roundToInt()
         )
         MacroLegendItem(
             color = FatsColor,
             name = "Жиры",
-            current = macros.fats.roundToInt(),
+            current = macros.fat,
             goal = macros.fatsGoal.roundToInt()
         )
     }

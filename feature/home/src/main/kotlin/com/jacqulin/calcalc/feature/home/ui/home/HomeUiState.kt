@@ -14,6 +14,6 @@ data class HomeUiState(
     val remainingCalories: Int = 2000,
     val dailyCaloriesGoal: Int = 2000,
     val mealsToday: List<Meal> = emptyList(),
-    val todayMacros: MacroNutrients = MacroNutrients(0f, 0f, 0f, 150f, 240f, 67f),
+    val todayMacros: MacroNutrients = MacroNutrients(0, 0, 0, 150f, 240f, 67f),
     val isLoading: Boolean = true
 )

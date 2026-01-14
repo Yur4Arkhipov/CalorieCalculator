@@ -188,19 +188,19 @@ private fun MacroProgressCards(uiState: MacroDetailUiState) {
     ) {
         MacroProgressCard(
             title = "Белки",
-            current = uiState.todayMacros.proteins.roundToInt(),
+            current = uiState.todayMacros.protein,
             goal = uiState.todayMacros.proteinsGoal.roundToInt(),
             color = ProteinColor
         )
         MacroProgressCard(
             title = "Углеводы",
-            current = uiState.todayMacros.carbs.roundToInt(),
+            current = uiState.todayMacros.carb,
             goal = uiState.todayMacros.carbsGoal.roundToInt(),
             color = CarbsColor
         )
         MacroProgressCard(
             title = "Жиры",
-            current = uiState.todayMacros.fats.roundToInt(),
+            current = uiState.todayMacros.fat,
             goal = uiState.todayMacros.fatsGoal.roundToInt(),
             color = FatsColor
         )
