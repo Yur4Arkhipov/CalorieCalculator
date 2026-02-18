@@ -16,12 +16,12 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.component.BottomBarItem
+import com.jacqulin.calcalc.core.designsystem.component.FloatingBottomBar
 import com.jacqulin.calcalc.core.designsystem.component.TopAppBar
 import com.jacqulin.calcalc.feature.home.navigation.AiMealDescriptionRoute
 import com.jacqulin.calcalc.feature.home.navigation.MacroDetailRoute
 import com.jacqulin.calcalc.navigation.AppNavHost
-import com.jacqulin.calcalc.core.designsystem.component.FloatingBottomBar
-import com.jacqulin.calcalc.core.designsystem.component.BottomBarItem
 
 @Composable
 fun App(appState: AppState) {
@@ -68,7 +68,7 @@ fun App(appState: AppState) {
                 .fillMaxSize()
                 .padding(
                     top = paddingValues.calculateTopPadding(),
-                    bottom = paddingValues.calculateBottomPadding() + 6.dp,
+//                    bottom = paddingValues.calculateBottomPadding() + 6.dp,
                     start = paddingValues.calculateStartPadding(LocalLayoutDirection.current) + 6.dp,
                     end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 6.dp
                 )
@@ -80,7 +80,7 @@ fun App(appState: AppState) {
                     items = bottomBarItems,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                        .padding(horizontal = 20.dp, vertical = 4.dp)
                         .navigationBarsPadding()
                 )
             }

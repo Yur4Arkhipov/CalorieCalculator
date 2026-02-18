@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,7 +22,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Photo
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jacqulin.calcalc.core.designsystem.component.AddMealFloatingActionButton
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 
@@ -66,74 +67,65 @@ fun HomeScreen(
             CircularProgressIndicator()
         }
     } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item {
-                CalendarSection(
-                    currentWeekIndex = uiState.currentWeekIndex,
-                    selectedDate = uiState.selectedDate,
-                    onDateSelected = viewModel::onDateSelected,
-                    onWeekChanged = viewModel::onWeekChanged
-                )
-            }
-            item {
-                CaloriesSection(
-                    uiState = uiState,
-                    onDetailClick = onNavigateToMacroDetail
-                )
-            }
-            item {
-                AddFoodButton(
-                    onAddFoodClick = { showAddFoodSheet = true }
-                )
-            }
-            item { TodayMealsSection(uiState.mealsToday) }
-        }
-        if (showAddFoodSheet) {
-            AddFoodBottomSheet(
-                onManual = {
-                    showAddFoodSheet = false
-                    // TODO navigation
-                },
-                onAiDescription = {
-                    showAddFoodSheet = false
-                    onNavigateToAiMealDescription()
-                },
-                onCamera = {
-                    showAddFoodSheet = false
-                    // TODO camera
-                },
-                onGallery = {
-                    showAddFoodSheet = false
-                    // TODO gallery
-                },
-                onDismiss = {
-                    showAddFoodSheet = false
+        Box(
+            modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    CalendarSection(
+                        currentWeekIndex = uiState.currentWeekIndex,
+                        selectedDate = uiState.selectedDate,
+                        onDateSelected = viewModel::onDateSelected,
+                        onWeekChanged = viewModel::onWeekChanged
+                    )
                 }
-            )
-        }
-    }
-}
+                item {
+                    CaloriesSection(
+                        uiState = uiState,
+                        onDetailClick = onNavigateToMacroDetail
+                    )
+                }
+                item { TodayMealsSection(uiState.mealsToday) }
+            }
 
-@Composable
-private fun AddFoodButton(
-    onAddFoodClick: () -> Unit
-) {
-    Row(
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Button(
-            onClick = onAddFoodClick,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Добавить еду")
+            AddMealFloatingActionButton(
+                icon = Icons.Default.Add,
+                contentDescription = "Add meal",
+                onClick = { showAddFoodSheet = true },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 12.dp)
+                    .padding(bottom = 74.dp)
+                    .navigationBarsPadding()
+            )
+
+            if (showAddFoodSheet) {
+                AddFoodBottomSheet(
+                    onManual = {
+                        showAddFoodSheet = false
+                        // TODO navigation
+                    },
+                    onAiDescription = {
+                        showAddFoodSheet = false
+                        onNavigateToAiMealDescription()
+                    },
+                    onCamera = {
+                        showAddFoodSheet = false
+                        // TODO camera
+                    },
+                    onGallery = {
+                        showAddFoodSheet = false
+                        // TODO gallery
+                    },
+                    onDismiss = {
+                        showAddFoodSheet = false
+                    }
+                )
+            }
         }
     }
 }
