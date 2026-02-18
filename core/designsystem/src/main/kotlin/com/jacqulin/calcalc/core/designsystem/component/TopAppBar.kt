@@ -14,18 +14,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 
-data class TopAppBarConfig(
-    val titleRes: Int,
-    val navigationIcon: ImageVector? = null,
-    val onNavigationClick: (() -> Unit)? = null
-)
-
-data class TopBarAction(
-    val icon: ImageVector,
-    val contentDescription: String,
-    val onClick: () -> Unit,
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBar(
@@ -33,7 +21,6 @@ fun TopAppBar(
     modifier: Modifier = Modifier,
     navigationIcon: ImageVector? = null,
     onNavigationClick: (() -> Unit)? = null,
-    actions: List<TopBarAction> = emptyList(),
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors()
 ) {
     CenterAlignedTopAppBar(
@@ -42,16 +29,6 @@ fun TopAppBar(
             if (navigationIcon != null && onNavigationClick != null) {
                 IconButton(onClick = onNavigationClick) {
                     Icon(navigationIcon, contentDescription = null)
-                }
-            }
-        },
-        actions = {
-            actions.forEach { action ->
-                IconButton(onClick = action.onClick) {
-                    Icon(
-                        imageVector = action.icon,
-                        contentDescription = action.contentDescription
-                    )
                 }
             }
         },

@@ -38,6 +38,7 @@ class AppState(
     val navController: NavHostController,
     coroutineScope: CoroutineScope,
 ) {
+    val topLevelDestinations: List<TopLevelDestination> = TopLevelDestination.entries
 
     private val previousDestination = mutableStateOf<NavDestination?>(null)
 

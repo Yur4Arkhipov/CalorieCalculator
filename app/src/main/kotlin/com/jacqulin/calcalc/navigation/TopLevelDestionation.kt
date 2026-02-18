@@ -2,7 +2,6 @@ package com.jacqulin.calcalc.navigation
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.jacqulin.calcalc.core.designsystem.R
-import com.jacqulin.calcalc.core.designsystem.component.TopBarAction
 import com.jacqulin.calcalc.core.designsystem.icon.AppIcons
 import com.jacqulin.calcalc.feature.home.navigation.HomeBaseRoute
 import com.jacqulin.calcalc.feature.home.navigation.HomeRoute
@@ -40,21 +39,4 @@ enum class TopLevelDestination(
         route = ProfileRoute::class,
         baseRoute = ProfileBaseRoute::class
     )
-}
-
-fun mapDestinationToActions(
-    current: TopLevelDestination?,
-    onNavigateToTop: (TopLevelDestination) -> Unit
-): List<TopBarAction> {
-    if (current == null) return emptyList()
-
-    return TopLevelDestination.entries
-        .filter { it != current }
-        .map { dest ->
-            TopBarAction(
-                icon = dest.icon,
-                contentDescription = dest.iconTextId,
-                onClick = { onNavigateToTop(dest) }
-            )
-        }
 }
