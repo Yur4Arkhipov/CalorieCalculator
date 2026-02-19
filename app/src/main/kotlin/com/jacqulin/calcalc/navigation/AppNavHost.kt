@@ -7,6 +7,7 @@ import com.jacqulin.calcalc.feature.home.navigation.HomeBaseRoute
 import com.jacqulin.calcalc.feature.home.navigation.homeSection
 import com.jacqulin.calcalc.feature.home.navigation.navigateToAiMealDescription
 import com.jacqulin.calcalc.feature.home.navigation.navigateToMacroDetail
+import com.jacqulin.calcalc.feature.home.navigation.navigateToManualAddMeal
 import com.jacqulin.calcalc.feature.profile.navigation.profileScreen
 import com.jacqulin.calcalc.feature.statistics.navigation.statisticsScreen
 import com.jacqulin.calcalc.main.AppState
@@ -29,7 +30,11 @@ fun AppNavHost(
             },
             onNavigateToAiMealDescription = {
                 navController.navigateToAiMealDescription()
-            }
+            },
+            onNavigateToManualAddMeal = {
+                navController.navigateToManualAddMeal()
+            },
+            onBackClick = navController::popBackStack
         )
 
         statisticsScreen(

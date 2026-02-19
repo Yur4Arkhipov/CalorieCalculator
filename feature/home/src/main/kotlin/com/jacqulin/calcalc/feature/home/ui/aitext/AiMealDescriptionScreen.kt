@@ -40,10 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +53,7 @@ fun AiMealDescriptionScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     Column(
         modifier = Modifier
@@ -94,7 +96,10 @@ fun AiMealDescriptionScreen(
 
                         DropdownMenu(
                             expanded = expanded,
-                            onDismissRequest = { expanded = false },
+                            onDismissRequest = {
+                                expanded = false
+                                focusManager.clearFocus()
+                            },
                             modifier = Modifier
                                 .width(260.dp)
                         ) {

@@ -21,6 +21,7 @@ import com.jacqulin.calcalc.core.designsystem.component.FloatingBottomBar
 import com.jacqulin.calcalc.core.designsystem.component.TopAppBar
 import com.jacqulin.calcalc.feature.home.navigation.AiMealDescriptionRoute
 import com.jacqulin.calcalc.feature.home.navigation.MacroDetailRoute
+import com.jacqulin.calcalc.feature.home.navigation.ManualAddMealRoute
 import com.jacqulin.calcalc.navigation.AppNavHost
 
 @Composable
@@ -48,14 +49,27 @@ fun App(appState: AppState) {
                     )
                 }
 
-                currentDestination?.hasRoute(MacroDetailRoute::class) == true ||
-                        currentDestination?.hasRoute(AiMealDescriptionRoute::class) == true -> {
+                currentDestination?.hasRoute(MacroDetailRoute::class) == true -> {
                     TopAppBar(
                         titleRes = R.string.macro_detail_title,
                         navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                        onNavigationClick = {
-                            appState.navController.popBackStack()
-                        }
+                        onNavigationClick = { appState.navController.popBackStack() }
+                    )
+                }
+
+                currentDestination?.hasRoute(AiMealDescriptionRoute::class) == true -> {
+                    TopAppBar(
+                        titleRes = R.string.ai_meal_description_title,
+                        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                        onNavigationClick = { appState.navController.popBackStack() }
+                    )
+                }
+
+                currentDestination?.hasRoute(ManualAddMealRoute::class) == true  -> {
+                    TopAppBar(
+                        titleRes = R.string.manual_meal_add_title,
+                        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                        onNavigationClick = { appState.navController.popBackStack() }
                     )
                 }
 
@@ -69,8 +83,8 @@ fun App(appState: AppState) {
                 .padding(
                     top = paddingValues.calculateTopPadding(),
 //                    bottom = paddingValues.calculateBottomPadding() + 6.dp,
-                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current) + 6.dp,
-                    end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 6.dp
+                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current) + 12.dp,
+                    end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 12.dp
                 )
         ) {
             AppNavHost(appState = appState)

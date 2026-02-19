@@ -55,6 +55,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToMacroDetail: () -> Unit = {},
     onNavigateToAiMealDescription: () -> Unit = {},
+    onNavigateToManualAddMeal: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddFoodSheet by remember { mutableStateOf(false) }
@@ -107,7 +108,7 @@ fun HomeScreen(
                 AddFoodBottomSheet(
                     onManual = {
                         showAddFoodSheet = false
-                        // TODO navigation
+                        onNavigateToManualAddMeal()
                     },
                     onAiDescription = {
                         showAddFoodSheet = false
