@@ -13,9 +13,9 @@ interface MealDao {
     @Query("SELECT * FROM meal WHERE date = :date ORDER BY time ASC")
     suspend fun getMealsForDate(date: String): List<MealEntity>
 
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun insertMeal(meal: MealEntity)
-//
-//    @Delete
-//    suspend fun deleteMeal(meal: MealEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMeal(meal: MealEntity)
+
+    @Delete
+    suspend fun deleteMeal(meal: MealEntity)
 }

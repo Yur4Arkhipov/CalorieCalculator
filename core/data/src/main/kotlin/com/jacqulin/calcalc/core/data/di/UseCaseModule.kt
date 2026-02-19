@@ -3,12 +3,14 @@ package com.jacqulin.calcalc.core.data.di
 import com.jacqulin.calcalc.core.data.usecase.GenerateWeekDaysUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.GetDayDataUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.ObserveSelectedDateUseCaseImpl
+import com.jacqulin.calcalc.core.data.usecase.SaveManualAddMealDBUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.SetSelectedDateUseCaseImpl
 import com.jacqulin.calcalc.core.domain.repository.MealRepository
 import com.jacqulin.calcalc.core.domain.repository.SelectedDateRepository
 import com.jacqulin.calcalc.core.domain.usecase.GenerateWeekDaysUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GetDayDataUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
+import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SetSelectedDateUseCase
 import dagger.Module
 import dagger.Provides
@@ -37,5 +39,10 @@ object UseCaseModule {
     @Provides
     fun setSelectedDateUseCase(selectedDateRepository: SelectedDateRepository) : SetSelectedDateUseCase {
         return SetSelectedDateUseCaseImpl(selectedDateRepository)
+    }
+
+    @Provides
+    fun provideSaveManualAddMealDBUseCase(mealRepository: MealRepository): SaveManualAddMealDBUseCase {
+        return SaveManualAddMealDBUseCaseImpl(mealRepository)
     }
 }

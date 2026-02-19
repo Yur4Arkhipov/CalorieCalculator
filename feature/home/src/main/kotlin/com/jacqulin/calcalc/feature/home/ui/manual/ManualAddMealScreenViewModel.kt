@@ -1,12 +1,22 @@
 package com.jacqulin.calcalc.feature.home.ui.manual
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
+import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 data class ManualAddMealUiState(
@@ -25,16 +35,31 @@ sealed class ManualAddMealEvent {
     data class ProteinsChanged(val proteins: String) : ManualAddMealEvent()
     data class FatsChanged(val fats: String) : ManualAddMealEvent()
     data class CarbsChanged(val carbs: String) : ManualAddMealEvent()
-    object SaveClicked : ManualAddMealEvent()
+    object OnSaveClick : ManualAddMealEvent()
 }
+
+sealed interface ManualAddMealEffect {
+    data object CloseScreen : ManualAddMealEffect
+    data class ShowSnackbar(val message: String, val type: SnackbarType) : ManualAddMealEffect
+}
+
+enum class SnackbarType { SUCCESS, ERROR }
+
+data class SnackbarData(
+    val message: String,
+    val type: SnackbarType
+)
 
 @HiltViewModel
 class ManualAddMealScreenViewModel @Inject constructor(
-
+    private val saveManualAddMealDBUseCase: SaveManualAddMealDBUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ManualAddMealUiState())
     val uiState: StateFlow<ManualAddMealUiState> = _uiState.asStateFlow()
+
+    private val _effect = Channel<ManualAddMealEffect>()
+    val effect = _effect.receiveAsFlow()
 
     fun onEvent(event: ManualAddMealEvent) {
         when (event) {
@@ -70,11 +95,32 @@ class ManualAddMealScreenViewModel @Inject constructor(
                     it.copy(carbs = event.carbs)
                 }
             }
-//            ManualAddMealEvent.SaveClicked -> {
-//                saveMeal()
-//            }
-            else -> {}
+            ManualAddMealEvent.OnSaveClick -> {
+                saveMeal()
+            }
         }
     }
 
+    private fun saveMeal() {
+        val state = _uiState.value
+        viewModelScope.launch {
+            try {
+                val meal = Meal(
+                    name = state.mealName,
+                    calories = state.calories.toIntOrNull() ?: 0,
+                    proteins = state.proteins.toIntOrNull() ?: 0,
+                    fats = state.fats.toIntOrNull() ?: 0,
+                    carbs = state.carbs.toIntOrNull() ?: 0,
+                    time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
+                    type = state.selectedMealType
+                )
+                saveManualAddMealDBUseCase(Date(), meal)
+                _effect.send(ManualAddMealEffect.ShowSnackbar("Блюдо успешно сохранено!", SnackbarType.SUCCESS))
+                delay(1500)
+                _effect.send(ManualAddMealEffect.CloseScreen)
+            } catch (_: Exception) {
+                _effect.send(ManualAddMealEffect.ShowSnackbar("Ошибка сохранения", SnackbarType.ERROR))
+            }
+        }
+    }
 }

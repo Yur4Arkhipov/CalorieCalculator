@@ -6,4 +6,13 @@
     <string name="macro_detail_title">Детальная информация</string>
     <string name="ai_meal_description_title">Описание блюда ИИ</string>
     <string name="manual_meal_add_title">Добавление вручную</string>
+    <string name="field_product_name">Название продукта</string>
+    <string name="calories">Калории</string>
+    <string name="proteins">Белки</string>
+    <string name="fats">Жиры</string>
+    <string name="carbs">Углеводы</string>
+    <string name="calories_suffix">ккал</string>
+    <string name="weight_suffix">г</string>
+    <string name="save">Сохранить</string>
+    <string name="save_meal_snackbar">"Блюдо успешно сохранено!"</string>
 </resources>
