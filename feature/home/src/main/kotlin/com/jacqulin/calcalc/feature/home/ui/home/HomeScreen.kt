@@ -79,6 +79,7 @@ fun HomeScreen(
                 item {
                     CalendarSection(
                         currentWeekIndex = uiState.currentWeekIndex,
+                        weekDays = uiState.weekDays,
                         selectedDate = uiState.selectedDate,
                         onDateSelected = viewModel::onDateSelected,
                         onWeekChanged = viewModel::onWeekChanged

@@ -25,26 +25,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.jacqulin.calcalc.core.domain.model.CalendarDay
+import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 private const val MAX_FUTURE_WEEKS = 1
-private const val MAX_PAST_WEEKS = 260
+private const val MAX_PAST_WEEKS = 20
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun CalendarSection(
     currentWeekIndex: Int,
+    weekDays: List<CalendarDay>,
     selectedDate: Date,
     onDateSelected: (Date) -> Unit,
     onWeekChanged: (Int) -> Unit
@@ -57,20 +57,17 @@ internal fun CalendarSection(
         pageCount = { pageCount }
     )
 
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }
-            .collect { page ->
-                val weekOffset = page - initialPage
-                if (weekOffset != currentWeekIndex) {
-                    onWeekChanged(weekOffset)
-                }
-            }
-    }
-
     LaunchedEffect(currentWeekIndex) {
         val targetPage = initialPage + currentWeekIndex
         if (pagerState.currentPage != targetPage) {
             pagerState.animateScrollToPage(targetPage)
+        }
+    }
+
+    LaunchedEffect(pagerState) {
+        val newWeekIndex = pagerState.currentPage - initialPage
+        if (newWeekIndex != currentWeekIndex) {
+            onWeekChanged(newWeekIndex)
         }
     }
 

@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.core.domain.model
+package com.jacqulin.calcalc.feature.home.model
 
 import java.util.Date
 

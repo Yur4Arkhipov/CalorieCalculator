@@ -1,6 +1,6 @@
 package com.jacqulin.calcalc.feature.home.ui.home
 
-import com.jacqulin.calcalc.core.domain.model.CalendarDay
+import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import com.jacqulin.calcalc.core.domain.model.MacroNutrients
 import com.jacqulin.calcalc.core.domain.model.Meal
 import java.util.Date
