@@ -9,6 +9,7 @@ data class HomeUiState(
     val selectedDate: Date = Date(),
     val currentDate: String = "",
     val weekDays: List<CalendarDay> = emptyList(),
+    val weeks: Map<Int, List<CalendarDay>> = emptyMap(),
     val currentWeekIndex: Int = 0,
     val consumedCalories: Int = 0,
     val remainingCalories: Int = 2000,

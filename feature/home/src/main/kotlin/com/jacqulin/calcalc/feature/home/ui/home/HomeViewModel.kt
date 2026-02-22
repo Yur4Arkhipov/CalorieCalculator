@@ -18,6 +18,9 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
+const val MAX_FUTURE_WEEKS = 1
+const val MAX_PAST_WEEKS = 20
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getDayDataUseCase: GetDayDataUseCase,
@@ -29,36 +32,51 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
-        onWeekChanged(0)
+        preloadAllWeeks()
         onDateSelected(Date())
     }
 
     fun onDateSelected(date: Date) {
         viewModelScope.launch {
             setSelectedDateUseCase(date)
-            Log.d("CURDATE", "$date")
             refreshState(date)
         }
     }
 
     fun onWeekChanged(weekIndex: Int) {
-        Log.d("onWeekChanged", "week idx: $weekIndex")
+        val weekDays = _uiState.value.weeks[weekIndex] ?: return
+        _uiState.value = _uiState.value.copy(
+            currentWeekIndex = weekIndex,
+            weekDays = weekDays
+        )
+
+            Log.d("onWeekChanged", "weekIdx: $weekIndex")
+    }
+
+    private fun preloadAllWeeks() {
         viewModelScope.launch {
-            val dates = generateWeekDaysUseCase(weekIndex)
-            Log.d("onWeekChanged", "dates: $dates")
-            val weekDays = mapToCalendarDays(dates)
-            Log.d("onWeekChanged", "weekDays: $weekDays")
+            val today = Date()
+            val allWeeks = mutableMapOf<Int, List<CalendarDay>>()
+            for (weekIndex in -MAX_PAST_WEEKS..MAX_FUTURE_WEEKS) {
+                val dates = generateWeekDaysUseCase(weekIndex)
+                allWeeks[weekIndex] = mapToCalendarDays(dates, today)
+            }
             _uiState.value = _uiState.value.copy(
-                currentWeekIndex = weekIndex,
-                weekDays = weekDays
+                weeks = allWeeks,
+                currentWeekIndex = 0,
+                weekDays = allWeeks[0] ?: emptyList()
             )
         }
     }
 
-    private fun mapToCalendarDays(dates: List<Date>): List<CalendarDay> {
-        val selectedDate = _uiState.value.selectedDate
-        Log.d("mapToCalendarDays", "selectedDate: $selectedDate")
-        val today = Date()
+    private fun mapToCalendarDays(dates: List<Date>, selectedDate: Date): List<CalendarDay> {
+        val today = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }
+        val todayDate = today.time
         val dayFormat = SimpleDateFormat("EEE", Locale.forLanguageTag("ru"))
         val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
         return dates.map { date ->
@@ -66,8 +84,9 @@ class HomeViewModel @Inject constructor(
                 date = date,
                 displayDay = dayFormat.format(date),
                 displayDate = dateFormat.format(date),
-                isToday = isSameDay(date, today),
-                isSelected = isSameDay(date, selectedDate)
+                isToday = isSameDay(date, todayDate),
+                isSelected = isSameDay(date, selectedDate),
+                isFuture = date.after(today.time)
             )
         }
     }
@@ -76,8 +95,13 @@ class HomeViewModel @Inject constructor(
         val selectedDateData = getDayDataUseCase(date)
         val consumed = selectedDateData.meals.sumOf { it.calories }
 
+        val updatedWeeks = _uiState.value.weeks.mapValues { (_, days) ->
+            days.map { day -> day.copy(isSelected = isSameDay(day.date, date)) }
+        }
+
         _uiState.value = _uiState.value.copy(
             selectedDate = date,
+            weeks = updatedWeeks,
             consumedCalories = consumed,
             remainingCalories = (_uiState.value.dailyCaloriesGoal - consumed)
                 .coerceAtLeast(0),

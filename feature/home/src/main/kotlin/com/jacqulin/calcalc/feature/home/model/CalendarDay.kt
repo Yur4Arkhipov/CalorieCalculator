@@ -7,5 +7,6 @@ data class CalendarDay(
     val displayDay: String,
     val displayDate: String,
     val isToday: Boolean = false,
-    val isSelected: Boolean = false
+    val isSelected: Boolean = false,
+    val isFuture: Boolean = false
 )
