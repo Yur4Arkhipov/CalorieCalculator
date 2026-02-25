@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
+import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -52,11 +53,14 @@ data class SnackbarData(
 
 @HiltViewModel
 class ManualAddMealScreenViewModel @Inject constructor(
-    private val saveManualAddMealDBUseCase: SaveManualAddMealDBUseCase
+    private val saveManualAddMealDBUseCase: SaveManualAddMealDBUseCase,
+    observeSelectedDate: ObserveSelectedDateUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ManualAddMealUiState())
     val uiState: StateFlow<ManualAddMealUiState> = _uiState.asStateFlow()
+
+    private val selectedDate = observeSelectedDate()
 
     private val _effect = Channel<ManualAddMealEffect>()
     val effect = _effect.receiveAsFlow()
@@ -114,7 +118,7 @@ class ManualAddMealScreenViewModel @Inject constructor(
                     time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
                     type = state.selectedMealType
                 )
-                saveManualAddMealDBUseCase(Date(), meal)
+                saveManualAddMealDBUseCase(selectedDate.value, meal)
                 _effect.send(ManualAddMealEffect.ShowSnackbar("Блюдо успешно сохранено!", SnackbarType.SUCCESS))
                 delay(1500)
                 _effect.send(ManualAddMealEffect.CloseScreen)

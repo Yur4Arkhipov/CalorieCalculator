@@ -6,12 +6,13 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.jacqulin.calcalc.core.data.local.entities.MealEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MealDao {
 
     @Query("SELECT * FROM meal WHERE date = :date ORDER BY time ASC")
-    suspend fun getMealsForDate(date: String): List<MealEntity>
+    fun observeMealsForDate(date: String): Flow<List<MealEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMeal(meal: MealEntity)

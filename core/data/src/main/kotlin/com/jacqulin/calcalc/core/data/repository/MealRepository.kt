@@ -7,6 +7,8 @@ import com.jacqulin.calcalc.core.domain.model.DayData
 import com.jacqulin.calcalc.core.domain.model.MacroNutrients
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.repository.MealRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -22,25 +24,28 @@ class MealRepositoryImpl @Inject constructor(
         return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
     }
 
-    override suspend fun getDayData(date: Date): DayData {
+    override fun observeDayData(date: Date): Flow<DayData> {
         val dateKey = getDateKey(date)
-        val meals = mealDao
-            .getMealsForDate(dateKey)
-            .map { it.toDomain() }
 
-        val macros = MacroNutrients(
-            protein = meals.sumOf { it.proteins },
-            carb = meals.sumOf { it.carbs },
-            fat = meals.sumOf { it.fats },
-            proteinsGoal = 150f,
-            carbsGoal = 250f,
-            fatsGoal = 67f
-        )
+        return mealDao.observeMealsForDate(dateKey)
+            .map { entities ->
 
-        return DayData(
-            meals = meals,
-            macros = macros
-        )
+                val meals = entities.map { it.toDomain() }
+
+                val macros = MacroNutrients(
+                    protein = meals.sumOf { it.proteins },
+                    carb = meals.sumOf { it.carbs },
+                    fat = meals.sumOf { it.fats },
+                    proteinsGoal = 150f,
+                    carbsGoal = 250f,
+                    fatsGoal = 67f
+                )
+
+                DayData(
+                    meals = meals,
+                    macros = macros
+                )
+            }
     }
 
     override suspend fun addMeal(date: Date, meal: Meal) {
