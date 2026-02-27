@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.jacqulin.calcalc.core.domain.model.ActivityLevel
+import com.jacqulin.calcalc.core.domain.model.Gender
+import com.jacqulin.calcalc.core.domain.model.Goal
 import com.jacqulin.calcalc.core.domain.model.UserProfile
 import com.jacqulin.calcalc.core.domain.repository.UserPreferencesRepository
 import jakarta.inject.Inject
@@ -23,6 +25,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         private val USER_AGE = intPreferencesKey("user_age")
         private val USER_HEIGHT = floatPreferencesKey("user_height")
         private val USER_WEIGHT = floatPreferencesKey("user_weight")
+        private val USER_GENDER = stringPreferencesKey("user_gender")
+        private val USER_GOAL = stringPreferencesKey("user_goal")
         private val USER_ACTIVITY = stringPreferencesKey("user_activity")
     }
 
@@ -31,6 +35,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
             age = prefs[USER_AGE],
             height = prefs[USER_HEIGHT],
             weight = prefs[USER_WEIGHT],
+            gender = prefs[USER_GENDER]?.let { Gender.valueOf(it) },
+            goal = prefs[USER_GOAL]?.let { Goal.valueOf(it) },
             activityLevel = prefs[USER_ACTIVITY]?.let { ActivityLevel.valueOf(it) }
         )
     }
@@ -40,6 +46,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
             profile.age?.let { prefs[USER_AGE] = it }
             profile.height?.let { prefs[USER_HEIGHT] = it }
             profile.weight?.let { prefs[USER_WEIGHT] = it }
+            profile.gender?.let { prefs[USER_GENDER] = it.name }
             profile.activityLevel?.let { prefs[USER_ACTIVITY] = it.name }
         }
     }
