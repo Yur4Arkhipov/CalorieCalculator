@@ -1,35 +1,51 @@
 package com.jacqulin.calcalc.feature.profile
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlin.math.roundToInt
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = hiltViewModel(),
-    onBackClick: () -> Unit
+    viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -45,15 +61,11 @@ fun ProfileScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item { ProfileHeader(uiState.userProfile, onEditClick = viewModel::showEditDialog) }
-                item { ProgressCard(uiState.userProfile) }
-                item { WeeklyStatsCard(uiState.weeklyStats, onDetailsClick = viewModel::showStatsDialog) }
                 item { QuickActionsCard() }
-                item { AchievementsSection(uiState.achievements) }
-                item { SettingsSection(onLogoutClick = viewModel::logout) }
+                item { SettingsSection() }
             }
         }
 
-        // Диалоги
         if (uiState.showEditDialog) {
             EditProfileDialog(
                 profile = uiState.userProfile,
@@ -99,29 +111,6 @@ private fun ProfileHeader(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Аватар
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                            CircleShape
-                        )
-                        .border(
-                            3.dp,
-                            MaterialTheme.colorScheme.primary,
-                            CircleShape
-                        )
-                ) {
-                    Text(
-                        text = profile.avatarEmoji,
-                        style = MaterialTheme.typography.headlineLarge
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 Text(
                     text = profile.name,
                     style = MaterialTheme.typography.headlineMedium,
@@ -175,219 +164,6 @@ private fun ProfileHeader(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun ProgressCard(profile: UserProfile) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Прогресс к цели",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-                Text(
-                    text = profile.goal,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Вычисляем оставшийся вес для сброса
-            val remaining = profile.currentWeight - profile.targetWeight
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                ProgressItem(
-                    label = "Текущий вес",
-                    value = "${profile.currentWeight} кг",
-                    icon = "⚖️",
-                    color = MaterialTheme.colorScheme.secondary
-                )
-
-                ProgressItem(
-                    label = "Цель",
-                    value = "${profile.targetWeight} кг",
-                    icon = "🎯",
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                ProgressItem(
-                    label = "Осталось",
-                    value = "${String.format("%.1f", remaining)} кг",
-                    icon = "📉",
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Прогресс бар
-            val initialWeight = profile.currentWeight + 5f // Предполагаем начальный вес на 5кг больше
-            val weightProgress = if (initialWeight > profile.targetWeight) {
-                ((initialWeight - profile.currentWeight) / (initialWeight - profile.targetWeight)).coerceIn(0f, 1f)
-            } else {
-                0f
-            }
-            val animatedProgress by animateFloatAsState(targetValue = weightProgress, label = "weight_progress")
-
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Прогресс",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Text(
-                        text = "${(animatedProgress * 100).roundToInt()}%",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                LinearProgressIndicator(
-                    progress = { animatedProgress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                    color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProgressItem(
-    label: String,
-    value: String,
-    icon: String,
-    color: Color
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = icon,
-            style = MaterialTheme.typography.headlineSmall
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = color
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
-private fun WeeklyStatsCard(
-    stats: WeeklyStats,
-    onDetailsClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onDetailsClick() },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Статистика недели",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                )
-                TextButton(onClick = onDetailsClick) {
-                    Text("Подробнее")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                StatItem(
-                    label = "Выполнено",
-                    value = "${stats.completedDays}/${stats.totalDays}",
-                    color = MaterialTheme.colorScheme.primary
-                )
-                StatItem(
-                    label = "Ср. калории",
-                    value = "${stats.avgCalories}",
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                StatItem(
-                    label = "За неделю",
-                    value = "-${stats.weightLoss} кг",
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatItem(label: String, value: String, color: Color) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = color
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
-        )
     }
 }
 
@@ -509,120 +285,7 @@ private fun QuickActionButton(
 }
 
 @Composable
-private fun AchievementsSection(achievements: List<Achievement>) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = "Достижения",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(achievements) { achievement ->
-                    AchievementCard(achievement)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun AchievementCard(achievement: Achievement) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = achievement.progress,
-        label = "achievement_progress"
-    )
-
-    Card(
-        modifier = Modifier.width(160.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (achievement.isUnlocked)
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
-            else
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (achievement.isUnlocked) 6.dp else 2.dp
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = achievement.icon,
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(8.dp)
-            )
-
-            Text(
-                text = achievement.title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = if (achievement.isUnlocked)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = achievement.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center,
-                maxLines = 2
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (!achievement.isUnlocked) {
-                LinearProgressIndicator(
-                    progress = { animatedProgress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp)),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "${(animatedProgress * achievement.maxProgress).roundToInt()}/${achievement.maxProgress}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            } else {
-                Text(
-                    text = "Выполнено! ✅",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SettingsSection(onLogoutClick: () -> Unit) {
+private fun SettingsSection() {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -650,33 +313,12 @@ private fun SettingsSection(onLogoutClick: () -> Unit) {
             }
 
             SettingItem(
-                title = "Экспорт данных",
-                description = "Сохранить статистику",
-                icon = "📊"
-            ) {
-                // TODO: Export data functionality
-            }
-
-            SettingItem(
                 title = "О приложении",
                 description = "Версия и информация",
                 icon = "ℹ️"
             ) {
                 // TODO: Show about dialog
             }
-
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-            )
-
-            SettingItem(
-                title = "Выйти из аккаунта",
-                description = "Очистить все данные",
-                icon = "🚪",
-                isDestructive = true,
-                onClick = onLogoutClick
-            )
         }
     }
 }

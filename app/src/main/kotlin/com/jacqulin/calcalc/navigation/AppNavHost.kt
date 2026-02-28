@@ -41,8 +41,6 @@ fun AppNavHost(
             onBackClick = navController::popBackStack
         )
 
-        profileScreen(
-            onBackClick = navController::popBackStack
-        )
+        profileScreen()
     }
 }

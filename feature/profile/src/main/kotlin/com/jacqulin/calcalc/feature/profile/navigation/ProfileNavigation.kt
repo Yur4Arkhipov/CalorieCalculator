@@ -17,10 +17,8 @@ data object ProfileBaseRoute
 fun NavController.navigateToProfile(navOptions: NavOptions? = null) =
     navigate(ProfileRoute, navOptions)
 
-fun NavGraphBuilder.profileScreen(
-    onBackClick: () -> Unit
-) {
+fun NavGraphBuilder.profileScreen() {
     composable<ProfileRoute>() {
-        ProfileScreen(onBackClick = onBackClick)
+        ProfileScreen()
     }
 }
