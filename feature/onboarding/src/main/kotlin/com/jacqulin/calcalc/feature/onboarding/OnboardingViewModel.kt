@@ -18,10 +18,10 @@ import kotlinx.coroutines.launch
 
 data class OnboardingState(
     val currentPage: Int = 0,
-    val totalPages: Int = 4,
-    val age: Int = 0,
-    val height: Float = 0f,
-    val weight: Float = 0f,
+    val totalPages: Int = 7,
+    val age: Int = 20,
+    val height: Float = 165f,
+    val weight: Float = 65f,
     val gender: Gender = Gender.MALE,
     val goal: Goal = Goal.MAINTAIN,
     val activityLevel: ActivityLevel = ActivityLevel.ACTIVE

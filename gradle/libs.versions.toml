@@ -21,6 +21,7 @@ hiltNavigationCompose = "1.3.0"
 datastorePreferences = "1.2.0"
 coreSplashscreen = "1.2.0"
 room = "2.8.4"
+wheel = "1.0.0"
 
 
 [libraries]
@@ -71,6 +72,9 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 
 # Datastore
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+
+# For wheel picker in onboarding
+wheel-picker = { module = "io.github.plovotok:android-wheel-picker", version.ref = "wheel" }
 
 # Room
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }

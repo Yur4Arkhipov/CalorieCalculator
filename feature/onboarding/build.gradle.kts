@@ -66,4 +66,7 @@ dependencies {
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // Wheel picker
+    implementation(libs.wheel.picker)
 }
