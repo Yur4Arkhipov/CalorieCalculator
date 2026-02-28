@@ -21,8 +21,8 @@ enum class Goal {
 
 data class UserProfile(
     val age: Int?,
-    val height: Float?,
-    val weight: Float?,
+    val height: Int?,
+    val weight: Int?,
     val gender: Gender?,
     val goal: Goal?,
     val activityLevel: ActivityLevel?

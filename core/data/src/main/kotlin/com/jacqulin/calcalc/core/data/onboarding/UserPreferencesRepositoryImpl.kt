@@ -3,7 +3,6 @@ package com.jacqulin.calcalc.core.data.onboarding
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.jacqulin.calcalc.core.domain.model.ActivityLevel
@@ -23,8 +22,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 
     companion object {
         private val USER_AGE = intPreferencesKey("user_age")
-        private val USER_HEIGHT = floatPreferencesKey("user_height")
-        private val USER_WEIGHT = floatPreferencesKey("user_weight")
+        private val USER_HEIGHT = intPreferencesKey("user_height")
+        private val USER_WEIGHT = intPreferencesKey("user_weight")
         private val USER_GENDER = stringPreferencesKey("user_gender")
         private val USER_GOAL = stringPreferencesKey("user_goal")
         private val USER_ACTIVITY = stringPreferencesKey("user_activity")

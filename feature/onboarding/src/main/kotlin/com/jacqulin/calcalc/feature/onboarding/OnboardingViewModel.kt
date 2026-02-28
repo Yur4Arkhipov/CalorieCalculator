@@ -18,13 +18,17 @@ import kotlinx.coroutines.launch
 
 data class OnboardingState(
     val currentPage: Int = 0,
-    val totalPages: Int = 7,
+    val totalPages: Int = 9,
     val age: Int = 20,
-    val height: Float = 165f,
-    val weight: Float = 65f,
+    val height: Int = 165,
+    val weight: Int = 65,
     val gender: Gender = Gender.MALE,
     val goal: Goal = Goal.MAINTAIN,
-    val activityLevel: ActivityLevel = ActivityLevel.ACTIVE
+    val activityLevel: ActivityLevel = ActivityLevel.ACTIVE,
+    val calories: Int = 0,
+    val protein: Int = 0,
+    val fat: Int = 0,
+    val carbs: Int = 0
 )
 
 sealed interface OnboardingEvent {
@@ -35,8 +39,12 @@ sealed interface OnboardingEvent {
     data class UpdateGoal(val goal: Goal) : OnboardingEvent
     data class UpdateActivityLevel(val level: ActivityLevel) : OnboardingEvent
     data class UpdateAge(val age: Int) : OnboardingEvent
-    data class UpdateHeight(val height: Float) : OnboardingEvent
-    data class UpdateWeight(val weight: Float) : OnboardingEvent
+    data class UpdateHeight(val height: Int) : OnboardingEvent
+    data class UpdateWeight(val weight: Int) : OnboardingEvent
+    data class UpdateCalories(val calories: Int) : OnboardingEvent
+    data class UpdateProtein(val protein: Int) : OnboardingEvent
+    data class UpdateFat(val fat: Int) : OnboardingEvent
+    data class UpdateCarbs(val carbs: Int) : OnboardingEvent
 }
 
 @HiltViewModel
@@ -62,7 +70,57 @@ class OnboardingViewModel @Inject constructor(
             is OnboardingEvent.UpdateHeight -> _state.update { it.copy(height = event.height) }
             is OnboardingEvent.UpdateWeight -> _state.update { it.copy(weight = event.weight) }
             is OnboardingEvent.UpdateActivityLevel -> _state.update { it.copy(activityLevel = event.level) }
-            is OnboardingEvent. UpdateGoal -> _state.update { it.copy(goal = event.goal) }
+            is OnboardingEvent.UpdateGoal -> _state.update { it.copy(goal = event.goal) }
+            is OnboardingEvent.UpdateCalories -> _state.update { it.copy(calories = event.calories) }
+            is OnboardingEvent.UpdateProtein -> _state.update { it.copy(protein = event.protein) }
+            is OnboardingEvent.UpdateFat -> _state.update { it.copy(fat = event.fat) }
+            is OnboardingEvent.UpdateCarbs -> _state.update { it.copy(carbs = event.carbs) }
+        }
+    }
+
+    fun jumpToPage(page: Int) {
+        _state.update { it.copy(currentPage = page.coerceIn(0, it.totalPages - 1)) }
+    }
+
+    fun calculateAndGoToLoading() {
+        val s = state.value
+
+        val bmr = if (s.gender == Gender.MALE) {
+            10 * s.weight + 6.25 * s.height - 5 * s.age + 5
+        } else {
+            10 * s.weight + 6.25 * s.height - 5 * s.age - 161
+        }
+
+        val activityMultiplier = when (s.activityLevel) {
+            ActivityLevel.SEDENTARY   -> 1.2f
+            ActivityLevel.LIGHT       -> 1.375f
+            ActivityLevel.MODERATE    -> 1.55f
+            ActivityLevel.ACTIVE      -> 1.725f
+            ActivityLevel.VERY_ACTIVE -> 1.9f
+        }
+
+        val tdee = bmr * activityMultiplier
+        val calories = when (s.goal) {
+            Goal.LOSE_WEIGHT -> (tdee * 0.85).toInt()
+            Goal.MAINTAIN    -> tdee.toInt()
+            Goal.GAIN_WEIGHT -> (tdee * 1.15).toInt()
+        }
+
+        val protein = (s.weight * 1.8).toInt()
+        val fat = (s.weight * 1.0).toInt()
+        val proteinCalories = protein * 4
+        val fatCalories = fat * 9
+        val carbsCalories = calories - proteinCalories - fatCalories
+        val carbs = carbsCalories / 4
+
+        _state.update {
+            it.copy(
+                calories = calories,
+                protein  = protein,
+                fat      = fat,
+                carbs    = carbs,
+                currentPage = 7
+            )
         }
     }
 
@@ -70,11 +128,11 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferencesRepository.saveUserData(
                 UserProfile(
-                    age = state.value.age,
-                    height = state.value.height,
-                    weight = state.value.weight,
-                    gender = state.value.gender,
-                    goal = state.value.goal,
+                    age          = state.value.age,
+                    height       = state.value.height,
+                    weight       = state.value.weight,
+                    gender       = state.value.gender,
+                    goal         = state.value.goal,
                     activityLevel = state.value.activityLevel
                 )
             )
