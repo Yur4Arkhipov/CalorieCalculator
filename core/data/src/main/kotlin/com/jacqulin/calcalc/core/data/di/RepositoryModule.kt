@@ -2,8 +2,10 @@ package com.jacqulin.calcalc.core.data.di
 
 import com.jacqulin.calcalc.core.data.onboarding.OnboardingRepositoryImpl
 import com.jacqulin.calcalc.core.data.onboarding.UserPreferencesRepositoryImpl
+import com.jacqulin.calcalc.core.data.repository.AiRepositoryImpl
 import com.jacqulin.calcalc.core.data.repository.MealRepositoryImpl
 import com.jacqulin.calcalc.core.data.repository.SelectedDateHolderImpl
+import com.jacqulin.calcalc.core.domain.repository.AiRepository
 import com.jacqulin.calcalc.core.domain.repository.MealRepository
 import com.jacqulin.calcalc.core.domain.repository.OnboardingRepository
 import com.jacqulin.calcalc.core.domain.repository.SelectedDateHolder
@@ -36,4 +38,9 @@ interface RepositoryModule {
     fun bindOnboardingRepository(
         impl: OnboardingRepositoryImpl
     ): OnboardingRepository
+
+    @Binds
+    fun bindAiRepository(
+        impl: AiRepositoryImpl
+    ): AiRepository
 }
