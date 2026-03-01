@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.jacqulin.calcalc.core.domain.usecase.GenerateWeekDaysUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GetDayDataUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
+import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SetSelectedDateUseCase
 import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +32,7 @@ class HomeViewModel @Inject constructor(
     observeSelectedDateUseCase: ObserveSelectedDateUseCase,
     private val getDayDataUseCase: GetDayDataUseCase,
     private val generateWeekDaysUseCase: GenerateWeekDaysUseCase,
+    observeUserProfileUseCase: ObserveUserProfileUseCase,
     private val setSelectedDateUseCase: SetSelectedDateUseCase
 ) : ViewModel() {
 
@@ -52,12 +54,12 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> =
         combine(
             observeSelectedDateUseCase(),
-            currentWeekIndexFlow
-        ) { selectedDate, weekIndex ->
-            selectedDate to weekIndex
+            currentWeekIndexFlow,
+            observeUserProfileUseCase()
+        ) { selectedDate, weekIndex, profile ->
+            Triple(selectedDate, weekIndex, profile)
         }
-            .flatMapLatest { (selectedDate, weekIndex) ->
-
+            .flatMapLatest { (selectedDate, weekIndex, profile) ->
                 combine(
                     getDayDataUseCase(selectedDate),
                     weeksFlow
@@ -71,21 +73,24 @@ class HomeViewModel @Inject constructor(
                         }
                     }
 
+                    val macrosWithGoals = dayData.macros.copy(
+                        caloriesGoal = profile.caloriesGoal,
+                        proteinsGoal = profile.proteinGoal,
+                        carbsGoal = profile.carbsGoal,
+                        fatsGoal = profile.fatGoal
+                    )
+
                     HomeUiState(
                         selectedDate = selectedDate,
-
                         weeks = updatedWeeks,
-
                         currentWeekIndex = weekIndex,
                         weekDays = updatedWeeks[weekIndex] ?: emptyList(),
-
                         mealsToday = dayData.meals,
-                        todayMacros = dayData.macros,
-
+                        todayMacros = macrosWithGoals,
                         consumedCalories = consumedCalories,
-                        remainingCalories = (2000 - consumedCalories)
+                        dailyCaloriesGoal = profile.caloriesGoal,
+                        remainingCalories = (profile.caloriesGoal - consumedCalories)
                             .coerceAtLeast(0),
-
                         isLoading = false
                     )
                 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.usecase.GetDayDataUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
+import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MacroDetailViewModel @Inject constructor(
     private val getDayDataUseCase: GetDayDataUseCase,
-    observeSelectedDateUseCase: ObserveSelectedDateUseCase
+    observeSelectedDateUseCase: ObserveSelectedDateUseCase,
+    private val observeUserProfileUseCase: ObserveUserProfileUseCase
 ) : ViewModel() {
 
     private val uiLocalState = MutableStateFlow(
@@ -30,21 +32,31 @@ class MacroDetailViewModel @Inject constructor(
     val uiState: StateFlow<MacroDetailUiState> =
         observeSelectedDateUseCase()
             .flatMapLatest { date ->
-                getDayDataUseCase(date)
-            }
-            .combine(uiLocalState) { data, local ->
+                combine(
+                    getDayDataUseCase(date),
+                    observeUserProfileUseCase(),
+                    uiLocalState
+                ) { data, profile, local ->
 
-                MacroDetailUiState(
-                    consumedCalories = data.meals.sumOf { it.calories },
-                    mealsToday = data.meals,
-                    todayMacros = data.macros,
-
-                    editingMeal = local.editingMeal,
-                    isEditingSheetOpen = local.isEditingSheetOpen,
-
-                    isLoading = false
-                )
-
+                    val consumedCalories = data.meals.sumOf { it.calories }
+                    val macrosWithGoals = data.macros.copy(
+                        caloriesGoal = profile.caloriesGoal,
+                        proteinsGoal = profile.proteinGoal,
+                        carbsGoal = profile.carbsGoal,
+                        fatsGoal = profile.fatGoal
+                    )
+                    MacroDetailUiState(
+                        consumedCalories = consumedCalories,
+                        dailyCaloriesGoal = profile.caloriesGoal,
+                        remainingCalories = (profile.caloriesGoal - consumedCalories)
+                                .coerceAtLeast(0),
+                        mealsToday = data.meals,
+                        todayMacros = macrosWithGoals,
+                        editingMeal = local.editingMeal,
+                        isEditingSheetOpen = local.isEditingSheetOpen,
+                        isLoading = false
+                    )
+                }
             }
             .stateIn(
                 viewModelScope,

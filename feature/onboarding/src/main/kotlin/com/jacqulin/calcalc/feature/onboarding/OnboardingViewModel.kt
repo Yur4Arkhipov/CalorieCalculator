@@ -128,12 +128,16 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferencesRepository.saveUserData(
                 UserProfile(
-                    age          = state.value.age,
-                    height       = state.value.height,
-                    weight       = state.value.weight,
-                    gender       = state.value.gender,
-                    goal         = state.value.goal,
-                    activityLevel = state.value.activityLevel
+                    age = state.value.age,
+                    height = state.value.height,
+                    weight = state.value.weight,
+                    gender = state.value.gender,
+                    goal = state.value.goal,
+                    activityLevel = state.value.activityLevel,
+                    caloriesGoal = state.value.calories,
+                    carbsGoal = state.value.carbs,
+                    fatGoal = state.value.fat,
+                    proteinGoal = state.value.protein
                 )
             )
             onboardingRepository.setOnboardingCompleted()

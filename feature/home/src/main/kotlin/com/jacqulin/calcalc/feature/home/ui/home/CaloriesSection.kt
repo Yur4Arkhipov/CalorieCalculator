@@ -34,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jacqulin.calcalc.core.domain.model.MacroNutrients
 import kotlin.math.cos
-import kotlin.math.roundToInt
 import kotlin.math.sin
 
 private val ProteinColor = Color(0xFFE91E63)
@@ -109,18 +108,24 @@ fun MacroRadialChart(
     macros: MacroNutrients,
     modifier: Modifier = Modifier
 ) {
+    fun progress(current: Int, goal: Int): Float {
+        if (goal == 0) return 0f
+        return (current.toFloat() / goal.toFloat()).coerceIn(0f, 1f)
+    }
+
     val proteinProgress by animateFloatAsState(
-        targetValue = macros.protein / macros.proteinsGoal,
+        targetValue = progress(macros.protein, macros.proteinsGoal),
         label = "protein"
     )
     val carbsProgress by animateFloatAsState(
-        targetValue = macros.carb / macros.carbsGoal,
+        targetValue = progress(macros.carb, macros.carbsGoal),
         label = "carbs"
     )
     val fatsProgress by animateFloatAsState(
-        targetValue = macros.fat / macros.fatsGoal,
+        targetValue = progress(macros.fat, macros.fatsGoal),
         label = "fats"
     )
+
     fun overflowAlpha(progress: Float) =
         if (progress > 1f) 0.8f else 1f
 
@@ -205,19 +210,19 @@ private fun MacroPieChartLegend(macros: MacroNutrients) {
             color = ProteinColor,
             name = "Белки",
             current = macros.protein,
-            goal = macros.proteinsGoal.roundToInt()
+            goal = macros.proteinsGoal
         )
         MacroLegendItem(
             color = CarbsColor,
             name = "Углеводы",
             current = macros.carb,
-            goal = macros.carbsGoal.roundToInt()
+            goal = macros.carbsGoal
         )
         MacroLegendItem(
             color = FatsColor,
             name = "Жиры",
             current = macros.fat,
-            goal = macros.fatsGoal.roundToInt()
+            goal = macros.fatsGoal
         )
     }
 }

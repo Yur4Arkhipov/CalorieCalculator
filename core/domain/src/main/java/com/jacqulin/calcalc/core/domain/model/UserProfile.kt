@@ -20,10 +20,14 @@ enum class Goal {
 }
 
 data class UserProfile(
-    val age: Int?,
-    val height: Int?,
-    val weight: Int?,
-    val gender: Gender?,
-    val goal: Goal?,
-    val activityLevel: ActivityLevel?
+    val age: Int,
+    val height: Int,
+    val weight: Int,
+    val gender: Gender,
+    val goal: Goal,
+    val activityLevel: ActivityLevel,
+    val caloriesGoal: Int,
+    val proteinGoal: Int,
+    val carbsGoal: Int,
+    val fatGoal: Int
 )

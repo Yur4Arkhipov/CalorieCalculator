@@ -2,6 +2,7 @@ package com.jacqulin.calcalc.feature.home.ui.macrodetail
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +59,16 @@ fun MacroDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val sheetState = rememberModalBottomSheetState()
 
+    if (uiState.isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+    
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -189,19 +201,19 @@ private fun MacroProgressCards(uiState: MacroDetailUiState) {
         MacroProgressCard(
             title = "Белки",
             current = uiState.todayMacros.protein,
-            goal = uiState.todayMacros.proteinsGoal.roundToInt(),
+            goal = uiState.todayMacros.proteinsGoal,
             color = ProteinColor
         )
         MacroProgressCard(
             title = "Углеводы",
             current = uiState.todayMacros.carb,
-            goal = uiState.todayMacros.carbsGoal.roundToInt(),
+            goal = uiState.todayMacros.carbsGoal,
             color = CarbsColor
         )
         MacroProgressCard(
             title = "Жиры",
             current = uiState.todayMacros.fat,
-            goal = uiState.todayMacros.fatsGoal.roundToInt(),
+            goal = uiState.todayMacros.fatsGoal,
             color = FatsColor
         )
     }

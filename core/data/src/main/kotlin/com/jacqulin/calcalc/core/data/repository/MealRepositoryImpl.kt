@@ -7,8 +7,9 @@ import com.jacqulin.calcalc.core.domain.model.DayData
 import com.jacqulin.calcalc.core.domain.model.MacroNutrients
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.repository.MealRepository
+import com.jacqulin.calcalc.core.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -17,7 +18,8 @@ import javax.inject.Singleton
 
 @Singleton
 class MealRepositoryImpl @Inject constructor(
-    private val mealDao: MealDao
+    private val mealDao: MealDao,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : MealRepository {
 
     private fun getDateKey(date: Date): String {
@@ -27,25 +29,29 @@ class MealRepositoryImpl @Inject constructor(
     override fun observeDayData(date: Date): Flow<DayData> {
         val dateKey = getDateKey(date)
 
-        return mealDao.observeMealsForDate(dateKey)
-            .map { entities ->
+        return combine(
+            mealDao.observeMealsForDate(dateKey),
+            userPreferencesRepository.observeUserProfile()
+        ) { entities, profile ->
 
-                val meals = entities.map { it.toDomain() }
+            val meals = entities.map { it.toDomain() }
 
-                val macros = MacroNutrients(
-                    protein = meals.sumOf { it.proteins },
-                    carb = meals.sumOf { it.carbs },
-                    fat = meals.sumOf { it.fats },
-                    proteinsGoal = 150f,
-                    carbsGoal = 250f,
-                    fatsGoal = 67f
-                )
+            val macros = MacroNutrients(
+                calories = meals.sumOf { it.calories },
+                protein = meals.sumOf { it.proteins },
+                carb = meals.sumOf { it.carbs },
+                fat = meals.sumOf { it.fats },
+                caloriesGoal = profile.caloriesGoal,
+                proteinsGoal = profile.proteinGoal,
+                carbsGoal = profile.carbsGoal,
+                fatsGoal = profile.fatGoal
+            )
 
-                DayData(
-                    meals = meals,
-                    macros = macros
-                )
-            }
+            DayData(
+                meals = meals,
+                macros = macros
+            )
+        }
     }
 
     override suspend fun addMeal(date: Date, meal: Meal) {
