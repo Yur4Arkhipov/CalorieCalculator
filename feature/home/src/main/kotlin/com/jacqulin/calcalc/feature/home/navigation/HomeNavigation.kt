@@ -54,7 +54,7 @@ fun NavGraphBuilder.homeSection(
         }
 
         composable<AiMealDescriptionRoute> {
-            AiMealDescriptionScreen()
+            AiMealDescriptionScreen(onClose = onBackClick)
         }
 
         composable<ManualAddMealRoute> {
