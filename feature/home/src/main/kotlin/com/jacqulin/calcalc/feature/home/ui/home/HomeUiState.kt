@@ -3,6 +3,7 @@ package com.jacqulin.calcalc.feature.home.ui.home
 import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import com.jacqulin.calcalc.core.domain.model.MacroNutrients
 import com.jacqulin.calcalc.core.domain.model.Meal
+import com.jacqulin.calcalc.core.domain.model.PendingMeal
 import java.util.Date
 
 data class HomeUiState(
@@ -15,6 +16,7 @@ data class HomeUiState(
     val remainingCalories: Int = 0,
     val dailyCaloriesGoal: Int = 0,
     val mealsToday: List<Meal> = emptyList(),
+    val pendingMeals: List<PendingMeal> = emptyList(),
     val todayMacros: MacroNutrients = MacroNutrients(
         calories = 0,
         protein = 0,

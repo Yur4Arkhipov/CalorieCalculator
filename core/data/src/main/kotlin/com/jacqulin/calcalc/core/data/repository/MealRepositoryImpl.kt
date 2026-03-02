@@ -65,7 +65,8 @@ class MealRepositoryImpl @Inject constructor(
                 carbs = meal.carbs,
                 time = meal.time,
                 type = meal.type,
-                date = dateKey
+                date = dateKey,
+                imageUri = meal.imageUri
             )
         )
     }

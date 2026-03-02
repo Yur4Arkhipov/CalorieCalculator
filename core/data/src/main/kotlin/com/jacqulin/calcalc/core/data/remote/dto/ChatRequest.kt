@@ -15,6 +15,30 @@ data class MessageRequest(
     val content: String
 )
 
+data class MultimodalMessageRequest(
+    val role: String,
+    val content: List<ContentPart>
+)
+
+data class ContentPart(
+    val type: String,
+    @SerializedName("image_url")
+    val imageUrl: ImageUrl? = null,
+    val text: String? = null
+)
+
+data class ImageUrl(
+    val url: String
+)
+
+data class MultimodalChatRequest(
+    val model: String = "glm-4.6v-flash",
+    val messages: List<MultimodalMessageRequest>,
+    val temperature: Double = 0.1,
+    @SerializedName("response_format")
+    val responseFormat: ResponseFormat = ResponseFormat()
+)
+
 data class ResponseFormat(
     val type: String = "json_schema",
     @SerializedName("json_schema")

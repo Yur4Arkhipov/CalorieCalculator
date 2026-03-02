@@ -1,5 +1,6 @@
 package com.jacqulin.calcalc.core.data.di
 
+import com.jacqulin.calcalc.core.data.usecase.AnalyzeMealFromImageUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.AnalyzeMealUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.GenerateWeekDaysUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.GetDayDataUseCaseImpl
@@ -11,6 +12,7 @@ import com.jacqulin.calcalc.core.domain.repository.AiRepository
 import com.jacqulin.calcalc.core.domain.repository.MealRepository
 import com.jacqulin.calcalc.core.domain.repository.SelectedDateHolder
 import com.jacqulin.calcalc.core.domain.repository.UserPreferencesRepository
+import com.jacqulin.calcalc.core.domain.usecase.AnalyzeMealFromImageUseCase
 import com.jacqulin.calcalc.core.domain.usecase.AnalyzeMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GenerateWeekDaysUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GetDayDataUseCase
@@ -60,5 +62,10 @@ object UseCaseModule {
     @Provides
     fun provideAnalyzeMealUseCase(aiRepository: AiRepository): AnalyzeMealUseCase {
         return AnalyzeMealUseCaseImpl(aiRepository)
+    }
+
+    @Provides
+    fun provideAnalyzeMealFromImageUseCase(aiRepository: AiRepository): AnalyzeMealFromImageUseCase {
+        return AnalyzeMealFromImageUseCaseImpl(aiRepository)
     }
 }

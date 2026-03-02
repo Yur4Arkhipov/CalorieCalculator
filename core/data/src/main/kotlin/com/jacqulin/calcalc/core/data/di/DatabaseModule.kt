@@ -22,7 +22,9 @@ object DatabaseModule {
             context,
             MealDatabase::class.java,
             "meal_db"
-        ).build()
+        )
+            .addMigrations(MealDatabase.MIGRATION_1_2)
+            .build()
 
     @Provides
     fun provideMealDao(db: MealDatabase): MealDao = db.mealDao()

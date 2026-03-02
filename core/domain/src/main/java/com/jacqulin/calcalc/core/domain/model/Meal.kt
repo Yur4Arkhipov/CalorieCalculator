@@ -7,7 +7,8 @@ data class Meal(
     val carbs: Int = 0,
     val fats: Int = 0,
     val time: String,
-    val type: MealType
+    val type: MealType,
+    val imageUri: String? = null
 )
 
 enum class MealType(val displayName: String) {

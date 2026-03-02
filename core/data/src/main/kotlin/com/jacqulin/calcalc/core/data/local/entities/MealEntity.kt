@@ -15,7 +15,8 @@ data class MealEntity(
     val carbs: Int,
     val time: String,
     val type: MealType,
-    val date: String
+    val date: String,
+    val imageUri: String? = null
 )
 
 fun MealEntity.toDomain(): Meal =
@@ -26,5 +27,6 @@ fun MealEntity.toDomain(): Meal =
         carbs = carbs,
         fats = fat,
         time = time,
-        type = type
+        type = type,
+        imageUri = imageUri
     )
