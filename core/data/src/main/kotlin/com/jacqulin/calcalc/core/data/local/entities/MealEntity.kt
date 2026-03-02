@@ -21,6 +21,7 @@ data class MealEntity(
 
 fun MealEntity.toDomain(): Meal =
     Meal(
+        id = id,
         name = name,
         calories = calories,
         proteins = protein,

@@ -1,6 +1,7 @@
 package com.jacqulin.calcalc.core.domain.model
 
 data class Meal(
+    val id: Int = 0,
     val name: String,
     val calories: Int,
     val proteins: Int = 0,

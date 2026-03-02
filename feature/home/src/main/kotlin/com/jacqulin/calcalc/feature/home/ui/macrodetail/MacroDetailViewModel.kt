@@ -6,6 +6,7 @@ import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.usecase.GetDayDataUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
+import com.jacqulin.calcalc.core.domain.usecase.UpdateMealUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,13 +16,15 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MacroDetailViewModel @Inject constructor(
     private val getDayDataUseCase: GetDayDataUseCase,
     observeSelectedDateUseCase: ObserveSelectedDateUseCase,
-    private val observeUserProfileUseCase: ObserveUserProfileUseCase
+    private val observeUserProfileUseCase: ObserveUserProfileUseCase,
+    private val updateMealUseCase: UpdateMealUseCase
 ) : ViewModel() {
 
     private val uiLocalState = MutableStateFlow(
@@ -84,9 +87,9 @@ class MacroDetailViewModel @Inject constructor(
     }
 
     fun onUpdateMeal(updatedMeal: Meal) {
-        // В будущем:
-        // updateMealUseCase(updatedMeal)
-
+        viewModelScope.launch {
+            updateMealUseCase(updatedMeal)
+        }
         uiLocalState.update {
             it.copy(
                 editingMeal = null,

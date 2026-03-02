@@ -70,4 +70,18 @@ class MealRepositoryImpl @Inject constructor(
             )
         )
     }
+
+    override suspend fun updateMeal(meal: Meal) {
+        val existing = mealDao.getMealById(meal.id) ?: return
+        mealDao.updateMeal(
+            existing.copy(
+                name = meal.name,
+                calories = meal.calories,
+                protein = meal.proteins,
+                fat = meal.fats,
+                carbs = meal.carbs,
+                imageUri = meal.imageUri
+            )
+        )
+    }
 }

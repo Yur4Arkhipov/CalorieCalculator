@@ -8,6 +8,7 @@ import com.jacqulin.calcalc.core.data.usecase.ObserveSelectedDateUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.ObserveUserProfileUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.SaveManualAddMealDBUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.SetSelectedDateUseCaseImpl
+import com.jacqulin.calcalc.core.data.usecase.UpdateMealUseCaseImpl
 import com.jacqulin.calcalc.core.domain.repository.AiRepository
 import com.jacqulin.calcalc.core.domain.repository.MealRepository
 import com.jacqulin.calcalc.core.domain.repository.SelectedDateHolder
@@ -20,6 +21,7 @@ import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SetSelectedDateUseCase
+import com.jacqulin.calcalc.core.domain.usecase.UpdateMealUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -67,5 +69,10 @@ object UseCaseModule {
     @Provides
     fun provideAnalyzeMealFromImageUseCase(aiRepository: AiRepository): AnalyzeMealFromImageUseCase {
         return AnalyzeMealFromImageUseCaseImpl(aiRepository)
+    }
+
+    @Provides
+    fun provideUpdateMealUseCase(mealRepository: MealRepository): UpdateMealUseCase {
+        return UpdateMealUseCaseImpl(mealRepository)
     }
 }

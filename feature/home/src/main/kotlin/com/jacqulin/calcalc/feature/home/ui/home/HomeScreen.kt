@@ -300,7 +300,6 @@ private fun TodayMealsSection(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            TextButton(onClick = {}) { Text("Посмотреть все") }
         }
 
         val isEmpty = meals.isEmpty() && pendingMeals.isEmpty()
