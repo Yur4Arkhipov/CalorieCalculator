@@ -53,12 +53,13 @@ data class JsonSchema(
 data class SchemaObject(
     val type: String = "object",
     val properties: Map<String, SchemaProperty> = mapOf(
+        "name" to SchemaProperty("string"),
         "calories" to SchemaProperty("number"),
         "protein" to SchemaProperty("number"),
         "fat" to SchemaProperty("number"),
         "carbs" to SchemaProperty("number")
     ),
-    val required: List<String> = listOf("calories", "protein", "fat", "carbs"),
+    val required: List<String> = listOf("name", "calories", "protein", "fat", "carbs"),
     @SerializedName("additionalProperties")
     val additionalProperties: Boolean = false
 )

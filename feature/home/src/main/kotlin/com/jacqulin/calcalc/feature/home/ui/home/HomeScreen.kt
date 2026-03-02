@@ -1,5 +1,9 @@
 package com.jacqulin.calcalc.feature.home.ui.home
 
+import android.Manifest
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,19 +13,21 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,6 +38,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +55,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.component.AddMealFloatingActionButton
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
+import com.jacqulin.calcalc.core.domain.model.PendingMeal
+import java.io.File
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,17 +69,85 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddFoodSheet by remember { mutableStateOf(false) }
+    var showMealTypePicker by remember { mutableStateOf<AddPhotoSource?>(null) }
+
+    var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingCameraMealType by remember { mutableStateOf<MealType?>(null) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        val uri = pendingCameraUri
+        val mealType = pendingCameraMealType
+        if (success && uri != null && mealType != null) {
+            viewModel.onCameraResult(success = true, uri = uri, mealType = mealType)
+        }
+        pendingCameraUri = null
+        pendingCameraMealType = null
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        val mealType = pendingCameraMealType ?: MealType.BREAKFAST
+        viewModel.onCameraPermissionResult(granted, mealType)
+        if (!granted) {
+            pendingCameraMealType = null
+        }
+    }
+
+    var pendingGalleryMealType by remember { mutableStateOf<MealType?>(null) }
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        val mealType = pendingGalleryMealType ?: MealType.BREAKFAST
+        if (uri != null) {
+            viewModel.onGalleryResult(uri, mealType)
+        }
+        pendingGalleryMealType = null
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvents.collect { event ->
+            when (event) {
+                is HomeUiEvent.LaunchCamera -> {
+                    pendingCameraUri = event.uri
+                    pendingCameraMealType = event.mealType
+                    cameraLauncher.launch(event.uri)
+                }
+                is HomeUiEvent.RequestCameraPermission -> {
+                    pendingCameraMealType = event.mealType
+                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                }
+                is HomeUiEvent.LaunchGallery -> {
+                    pendingGalleryMealType = event.mealType
+                    galleryLauncher.launch("image/*")
+                }
+            }
+        }
+    }
+
+    // Диалог: выбор типа пищи
+    showMealTypePicker?.let { source ->
+        MealTypePickerDialog(
+            onSelect = { mealType ->
+                showMealTypePicker = null
+                when (source) {
+                    AddPhotoSource.CAMERA -> viewModel.onRequestCameraPermission(mealType)
+                    AddPhotoSource.GALLERY -> viewModel.onAddPhotoFromGallery(mealType)
+                }
+            },
+            onDismiss = { showMealTypePicker = null }
+        )
+    }
+
 
     if (uiState.isLoading) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
     } else {
-        Box(
-            modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -90,7 +168,13 @@ fun HomeScreen(
                         onDetailClick = onNavigateToMacroDetail
                     )
                 }
-                item { TodayMealsSection(uiState.mealsToday) }
+                item {
+                    TodayMealsSection(
+                        meals = uiState.mealsToday,
+                        pendingMeals = uiState.pendingMeals,
+                        onDismissError = viewModel::dismissPendingError
+                    )
+                }
             }
 
             AddMealFloatingActionButton(
@@ -116,19 +200,44 @@ fun HomeScreen(
                     },
                     onCamera = {
                         showAddFoodSheet = false
-                        // TODO camera
+                        showMealTypePicker = AddPhotoSource.CAMERA
                     },
                     onGallery = {
                         showAddFoodSheet = false
-                        // TODO gallery
+                        showMealTypePicker = AddPhotoSource.GALLERY
                     },
-                    onDismiss = {
-                        showAddFoodSheet = false
-                    }
+                    onDismiss = { showAddFoodSheet = false }
                 )
             }
         }
     }
+}
+
+@Composable
+fun MealTypePickerDialog(
+    onSelect: (MealType) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Выберите приём пищи") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                MealType.entries.forEach { type ->
+                    TextButton(
+                        onClick = { onSelect(type) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(type.displayName, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Отмена") }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,9 +249,7 @@ fun AddFoodBottomSheet(
     onGallery: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss
-    ) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -152,40 +259,16 @@ fun AddFoodBottomSheet(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-
-            AddFoodOption(
-                icon = Icons.Default.Edit,
-                text = "Ввести вручную",
-                onClick = onManual
-            )
-
-            AddFoodOption(
-                icon = Icons.Default.Edit,
-                text = "Описать для ИИ",
-                onClick = onAiDescription
-            )
-
-            AddFoodOption(
-                icon = Icons.Default.CameraAlt,
-                text = "Сделать фото",
-                onClick = onCamera
-            )
-
-            AddFoodOption(
-                icon = Icons.Default.Photo,
-                text = "Выбрать из галереи",
-                onClick = onGallery
-            )
+            AddFoodOption(icon = Icons.Default.Edit, text = "Ввести вручную", onClick = onManual)
+            AddFoodOption(icon = Icons.Default.Edit, text = "Описать для ИИ", onClick = onAiDescription)
+            AddFoodOption(icon = Icons.Default.CameraAlt, text = "Сделать фото", onClick = onCamera)
+            AddFoodOption(icon = Icons.Default.Photo, text = "Выбрать из галереи", onClick = onGallery)
         }
     }
 }
 
 @Composable
-private fun AddFoodOption(
-    icon: ImageVector,
-    text: String,
-    onClick: () -> Unit
-) {
+private fun AddFoodOption(icon: ImageVector, text: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -200,8 +283,12 @@ private fun AddFoodOption(
 }
 
 @Composable
-private fun TodayMealsSection(meals: List<Meal>) {
-    Column {
+private fun TodayMealsSection(
+    meals: List<Meal>,
+    pendingMeals: List<PendingMeal> = emptyList(),
+    onDismissError: (String) -> Unit = {}
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -213,19 +300,14 @@ private fun TodayMealsSection(meals: List<Meal>) {
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            TextButton(
-                onClick = { /* TODO: Открыть полный список */ }
-            ) {
-                Text("Посмотреть все")
-            }
+            TextButton(onClick = {}) { Text("Посмотреть все") }
         }
 
-        if (meals.isEmpty()) {
+        val isEmpty = meals.isEmpty() && pendingMeals.isEmpty()
+        if (isEmpty) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Box(
                     modifier = Modifier
@@ -241,11 +323,94 @@ private fun TodayMealsSection(meals: List<Meal>) {
                 }
             }
         } else {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(meals) { meal ->
-                    MealCard(meal)
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                pendingMeals.forEach { pending ->
+                    PendingMealCard(
+                        pending = pending,
+                        onDismissError = { onDismissError(pending.id) }
+                    )
+                }
+                meals.forEach { meal -> MealCard(meal = meal) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PendingMealCard(
+    pending: PendingMeal,
+    onDismissError: () -> Unit
+) {
+    val isError = pending.error != null
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isError)
+                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.35f)
+            else
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (pending.imageUri != null) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AsyncImage(
+                        model = File(pending.imageUri!!),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        alpha = if (pending.isLoading) 0.4f else 1f
+                    )
+                    if (pending.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            } else if (pending.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = if (isError) "Ошибка анализа фото" else "Анализируем фото...",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isError)
+                        MaterialTheme.colorScheme.error
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+                Text(
+                    text = pending.type.displayName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
+            }
+            if (isError) {
+                TextButton(onClick = onDismissError) {
+                    Text("Убрать", color = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -255,56 +420,69 @@ private fun TodayMealsSection(meals: List<Meal>) {
 @Composable
 private fun MealCard(meal: Meal) {
     Card(
-        modifier = Modifier
-            .width(180.dp)
-            .height(100.dp),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(12.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.Top
-            ) {
-                Text(
-                    text = meal.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
+            if (meal.imageUri != null) {
+                AsyncImage(
+                    model = File(meal.imageUri!!),
+                    contentDescription = meal.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(10.dp))
                 )
-
-                MealTypeChip(meal.type)
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(
-                    text = "${meal.calories} ккал",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Text(
-                    text = meal.time,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Text(
+                        text = meal.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    MealTypeChip(meal.type)
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text(
+                        text = "${meal.calories} ккал",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = meal.time,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
             }
         }
     }
@@ -312,14 +490,10 @@ private fun MealCard(meal: Meal) {
 
 @Composable
 private fun MealTypeChip(type: MealType) {
-    val color = getMealTypeColor(type)
-
+    val color = mealTypeColor(type)
     Box(
         modifier = Modifier
-            .background(
-                color = color.copy(alpha = 0.12f),
-                shape = RoundedCornerShape(6.dp)
-            )
+            .background(color = color.copy(alpha = 0.12f), shape = RoundedCornerShape(6.dp))
             .padding(horizontal = 6.dp, vertical = 2.dp)
     ) {
         Text(
@@ -332,7 +506,7 @@ private fun MealTypeChip(type: MealType) {
 }
 
 @Composable
-private fun getMealTypeColor(mealType: MealType): Color {
+private fun mealTypeColor(mealType: MealType): Color {
     return when (mealType) {
         MealType.BREAKFAST -> MaterialTheme.colorScheme.tertiary
         MealType.LUNCH -> MaterialTheme.colorScheme.primary
@@ -340,3 +514,5 @@ private fun getMealTypeColor(mealType: MealType): Color {
         MealType.SNACK -> MaterialTheme.colorScheme.error
     }
 }
+
+private enum class AddPhotoSource { CAMERA, GALLERY }

@@ -85,7 +85,7 @@ class AiMealDescriptionViewModel @Inject constructor(
             _uiState.value = state.copy(isSaving = true)
             try {
                 val meal = Meal(
-                    name = state.mealName.ifBlank { "Блюдо (ИИ)" },
+                    name = nutrition.name.ifBlank { state.mealName.ifBlank { "Блюдо (ИИ)" } },
                     calories = nutrition.calories.toInt(),
                     proteins = nutrition.protein.toInt(),
                     fats = nutrition.fat.toInt(),

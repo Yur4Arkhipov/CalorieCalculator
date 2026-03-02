@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NutritionDto(
+    val name: String? = null,
     val calories: Double,
     val protein: Double,
     val fat: Double,
@@ -12,6 +13,7 @@ data class NutritionDto(
 )
 
 fun NutritionDto.toDomain() = Nutrition(
+    name = name ?: "",
     calories,
     protein,
     fat,

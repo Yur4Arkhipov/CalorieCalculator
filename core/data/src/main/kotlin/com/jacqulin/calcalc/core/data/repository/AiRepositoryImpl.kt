@@ -29,7 +29,7 @@ class AiRepositoryImpl @Inject constructor(
                 ),
                 MessageRequest(
                     role = "user",
-                    content = description
+                    content = "$description\n\nОпредели точное название блюда и рассчитай его КБЖУ на 100г. Ответь строго в JSON формате: {\"name\": \"название\", \"calories\": число, \"protein\": число, \"fat\": число, \"carbs\": число}"
                 )
             )
         )
@@ -51,7 +51,7 @@ class AiRepositoryImpl @Inject constructor(
                         ),
                         ContentPart(
                             type = "text",
-                            text = "Определи название блюда на фото и рассчитай его КБЖУ (калории, белки, жиры, углеводы) на 100г. Ответь строго в JSON формате: {\"calories\": число, \"protein\": число, \"fat\": число, \"carbs\": число}"
+                            text = "Определи название блюда на фото и рассчитай его КБЖУ (калории, белки, жиры, углеводы) на 100г. Ответь строго в JSON формате: {\"name\": \"название блюда\", \"calories\": число, \"protein\": число, \"fat\": число, \"carbs\": число}"
                         )
                     )
                 )
