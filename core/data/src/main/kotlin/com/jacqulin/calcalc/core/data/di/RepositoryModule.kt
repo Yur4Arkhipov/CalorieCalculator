@@ -5,10 +5,12 @@ import com.jacqulin.calcalc.core.data.onboarding.UserPreferencesRepositoryImpl
 import com.jacqulin.calcalc.core.data.repository.AiRepositoryImpl
 import com.jacqulin.calcalc.core.data.repository.MealRepositoryImpl
 import com.jacqulin.calcalc.core.data.repository.SelectedDateHolderImpl
+import com.jacqulin.calcalc.core.data.repository.UiPreferencesRepositoryImpl
 import com.jacqulin.calcalc.core.domain.repository.AiRepository
 import com.jacqulin.calcalc.core.domain.repository.MealRepository
 import com.jacqulin.calcalc.core.domain.repository.OnboardingRepository
 import com.jacqulin.calcalc.core.domain.repository.SelectedDateHolder
+import com.jacqulin.calcalc.core.domain.repository.UiPreferencesRepository
 import com.jacqulin.calcalc.core.domain.repository.UserPreferencesRepository
 import dagger.Binds
 import dagger.Module
@@ -43,4 +45,9 @@ interface RepositoryModule {
     fun bindAiRepository(
         impl: AiRepositoryImpl
     ): AiRepository
+
+    @Binds
+    fun bindUiPreferencesRepository(
+        impl: UiPreferencesRepositoryImpl
+    ): UiPreferencesRepository
 }

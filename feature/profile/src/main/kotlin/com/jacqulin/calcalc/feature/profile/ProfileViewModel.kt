@@ -2,135 +2,144 @@ package com.jacqulin.calcalc.feature.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jacqulin.calcalc.core.domain.model.ActivityLevel
+import com.jacqulin.calcalc.core.domain.model.Gender
+import com.jacqulin.calcalc.core.domain.model.Goal
+import com.jacqulin.calcalc.core.domain.model.UserProfile
+import com.jacqulin.calcalc.core.domain.repository.UserPreferencesRepository
+import com.jacqulin.calcalc.core.domain.usecase.DismissMacrosHintUseCase
+import com.jacqulin.calcalc.core.domain.usecase.ObserveMacrosHintDismissedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class ProfileUiState(
     val isLoading: Boolean = true,
-    val userProfile: UserProfile = UserProfile(),
-    val showEditDialog: Boolean = false,
-    val showStatsDialog: Boolean = false,
-    val achievements: List<Achievement> = emptyList(),
-    val weeklyStats: WeeklyStats = WeeklyStats()
+    val userProfile: UserProfile = UserProfile(
+        age = 20,
+        height = 165,
+        weight = 65,
+        gender = Gender.MALE,
+        goal = Goal.MAINTAIN,
+        activityLevel = ActivityLevel.MODERATE,
+        caloriesGoal = 2000,
+        proteinGoal = 150,
+        carbsGoal = 250,
+        fatGoal = 70
+    ),
+    val isParamsSheetOpen: Boolean = false,
+    val isMacrosSheetOpen: Boolean = false,
+    val isMacrosHintDismissed: Boolean = false
 )
 
-data class UserProfile(
-    val name: String = "Пользователь",
-    val age: Int = 25,
-    val height: Float = 170f,
-    val currentWeight: Float = 70f,
-    val targetWeight: Float = 65f,
-    val activityLevel: String = "Умеренная активность",
-    val goal: String = "Похудение",
-    val dailyCaloriesGoal: Int = 2000,
-    val joinDate: String = "Январь 2024",
-    val streak: Int = 7, // дней подряд выполнения целей
-    val avatarEmoji: String = "👤"
-)
-
-data class Achievement(
-    val id: String,
-    val title: String,
-    val description: String,
-    val icon: String,
-    val isUnlocked: Boolean = false,
-    val progress: Float = 0f, // от 0 до 1
-    val maxProgress: Int = 100
-)
-
-data class WeeklyStats(
-    val totalDays: Int = 7,
-    val completedDays: Int = 5,
-    val avgCalories: Int = 1850,
-    val avgWater: Int = 7,
-    val weightLoss: Float = 0.5f, // за неделю
-    val totalWeightLoss: Float = 2.3f // с начала
-)
+sealed interface ProfileEvent {
+    data object OpenParamsSheet : ProfileEvent
+    data object CloseParamsSheet : ProfileEvent
+    data class SaveParams(
+        val age: Int, val height: Int, val weight: Int,
+        val gender: Gender, val goal: Goal, val activityLevel: ActivityLevel
+    ) : ProfileEvent
+    data object OpenMacrosSheet : ProfileEvent
+    data object CloseMacrosSheet : ProfileEvent
+    data class SaveMacros(
+        val calories: Int, val protein: Int,
+        val carbs: Int, val fat: Int
+    ) : ProfileEvent
+    data object DismissMacrosHint : ProfileEvent
+}
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor() : ViewModel() {
+class ProfileViewModel @Inject constructor(
+    private val userPreferencesRepository: UserPreferencesRepository,
+    observeMacrosHintDismissedUseCase: ObserveMacrosHintDismissedUseCase,
+    private val dismissMacrosHintUseCase: DismissMacrosHintUseCase
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ProfileUiState())
-    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+    private val localState = MutableStateFlow(ProfileUiState())
 
-    init {
-        loadProfile()
-    }
+    val uiState: StateFlow<ProfileUiState> = combine(
+        userPreferencesRepository.observeUserProfile(),
+        localState,
+        observeMacrosHintDismissedUseCase()
+    ) { profile, local, hintDismissed ->
+        local.copy(
+            isLoading = false,
+            userProfile = profile,
+            isMacrosHintDismissed = hintDismissed
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        ProfileUiState(isLoading = true)
+    )
 
-    private fun loadProfile() {
-        viewModelScope.launch {
-            // Имитация загрузки данных
-            val mockProfile = UserProfile(
-                name = "Анна",
-                age = 28,
-                height = 165f,
-                currentWeight = 68.5f,
-                targetWeight = 62f,
-                activityLevel = "Активный образ жизни",
-                goal = "Похудение и поддержание формы",
-                dailyCaloriesGoal = 1800,
-                joinDate = "Декабрь 2023",
-                streak = 12,
-                avatarEmoji = "👩‍💼"
-            )
-
-            val mockAchievements = listOf(
-                Achievement("first_week", "Первая неделя", "Ведите дневник питания 7 дней подряд", "🏆", true, 1f, 7),
-                Achievement("water_master", "Мастер воды", "Выпейте цель по воде 30 дней", "💧", false, 0.6f, 30),
-                Achievement("calorie_tracker", "Точный трекер", "Отслеживайте калории 50 дней", "🎯", false, 0.24f, 50),
-                Achievement("weight_loss", "Цель достигнута", "Сбросьте 5 кг", "⚖️", false, 0.46f, 5),
-                Achievement("healthy_meals", "Здоровое питание", "Ешьте 5 порций овощей/фруктов в день", "🥗", true, 1f, 100),
-                Achievement("streak_master", "Чемпион постоянства", "Выполняйте цели 30 дней подряд", "🔥", false, 0.4f, 30)
-            )
-
-            val mockWeeklyStats = WeeklyStats(
-                completedDays = 5,
-                avgCalories = 1750,
-                avgWater = 8,
-                weightLoss = 0.3f,
-                totalWeightLoss = 1.5f
-            )
-
-            _uiState.value = _uiState.value.copy(
-                isLoading = false,
-                userProfile = mockProfile,
-                achievements = mockAchievements,
-                weeklyStats = mockWeeklyStats
-            )
+    fun onEvent(event: ProfileEvent) {
+        when (event) {
+            ProfileEvent.OpenParamsSheet   -> localState.update { it.copy(isParamsSheetOpen = true) }
+            ProfileEvent.CloseParamsSheet  -> localState.update { it.copy(isParamsSheetOpen = false) }
+            ProfileEvent.OpenMacrosSheet   -> localState.update { it.copy(isMacrosSheetOpen = true) }
+            ProfileEvent.CloseMacrosSheet  -> localState.update { it.copy(isMacrosSheetOpen = false) }
+            ProfileEvent.DismissMacrosHint -> viewModelScope.launch { dismissMacrosHintUseCase() }
+            is ProfileEvent.SaveParams     -> saveParams(event)
+            is ProfileEvent.SaveMacros     -> saveMacros(event)
         }
     }
 
-    fun showEditDialog() {
-        _uiState.value = _uiState.value.copy(showEditDialog = true)
-    }
 
-    fun hideEditDialog() {
-        _uiState.value = _uiState.value.copy(showEditDialog = false)
-    }
+    private fun saveParams(event: ProfileEvent.SaveParams) {
+        val bmr = if (event.gender == Gender.MALE) {
+            10.0 * event.weight + 6.25 * event.height - 5.0 * event.age + 5
+        } else {
+            10.0 * event.weight + 6.25 * event.height - 5.0 * event.age - 161
+        }
+        val activityMultiplier = when (event.activityLevel) {
+            ActivityLevel.SEDENTARY   -> 1.2
+            ActivityLevel.LIGHT       -> 1.375
+            ActivityLevel.MODERATE    -> 1.55
+            ActivityLevel.ACTIVE      -> 1.725
+            ActivityLevel.VERY_ACTIVE -> 1.9
+        }
+        val tdee = bmr * activityMultiplier
+        val calories = when (event.goal) {
+            Goal.LOSE_WEIGHT -> (tdee * 0.85).toInt()
+            Goal.MAINTAIN    -> tdee.toInt()
+            Goal.GAIN_WEIGHT -> (tdee * 1.15).toInt()
+        }
+        val protein = (event.weight * 1.8).toInt()
+        val fat     = (event.weight * 1.0).toInt()
+        val carbs   = ((calories - protein * 4 - fat * 9) / 4).coerceAtLeast(0)
 
-    fun showStatsDialog() {
-        _uiState.value = _uiState.value.copy(showStatsDialog = true)
-    }
-
-    fun hideStatsDialog() {
-        _uiState.value = _uiState.value.copy(showStatsDialog = false)
-    }
-
-    fun updateProfile(updatedProfile: UserProfile) {
-        _uiState.value = _uiState.value.copy(
-            userProfile = updatedProfile,
-            showEditDialog = false
-        )
-    }
-
-    fun logout() {
-        // TODO: Implement logout logic
         viewModelScope.launch {
-            // Clear user data and navigate to onboarding
+            userPreferencesRepository.saveUserData(
+                UserProfile(
+                    age = event.age, height = event.height, weight = event.weight,
+                    gender = event.gender, goal = event.goal, activityLevel = event.activityLevel,
+                    caloriesGoal = calories, proteinGoal = protein,
+                    carbsGoal = carbs, fatGoal = fat
+                )
+            )
+            localState.update { it.copy(isParamsSheetOpen = false) }
+        }
+    }
+
+    private fun saveMacros(event: ProfileEvent.SaveMacros) {
+        viewModelScope.launch {
+            val current = uiState.value.userProfile
+            userPreferencesRepository.saveUserData(
+                current.copy(
+                    caloriesGoal = event.calories,
+                    proteinGoal  = event.protein,
+                    carbsGoal    = event.carbs,
+                    fatGoal      = event.fat
+                )
+            )
+            localState.update { it.copy(isMacrosSheetOpen = false) }
         }
     }
 }
