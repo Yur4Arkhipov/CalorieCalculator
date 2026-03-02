@@ -15,9 +15,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -70,6 +81,13 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddFoodSheet by remember { mutableStateOf(false) }
     var showMealTypePicker by remember { mutableStateOf<AddPhotoSource?>(null) }
+    val lazyListState = rememberLazyListState()
+    val isFabVisible by remember {
+        derivedStateOf {
+            lazyListState.firstVisibleItemIndex == 0 ||
+                !lazyListState.isScrollInProgress && lazyListState.firstVisibleItemScrollOffset < 100
+        }
+    }
 
     var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
     var pendingCameraMealType by remember { mutableStateOf<MealType?>(null) }
@@ -127,7 +145,6 @@ fun HomeScreen(
         }
     }
 
-    // Диалог: выбор типа пищи
     showMealTypePicker?.let { source ->
         MealTypePickerDialog(
             onSelect = { mealType ->
@@ -149,10 +166,14 @@ fun HomeScreen(
     } else {
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
+                state = lazyListState,
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 60.dp
+                )
             ) {
                 item {
                     CalendarSection(
@@ -177,16 +198,28 @@ fun HomeScreen(
                 }
             }
 
-            AddMealFloatingActionButton(
-                icon = Icons.Default.Add,
-                contentDescription = "Add meal",
-                onClick = { showAddFoodSheet = true },
+            AnimatedVisibility(
+                visible = isFabVisible,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 12.dp)
                     .padding(bottom = 74.dp)
-                    .navigationBarsPadding()
-            )
+                    .navigationBarsPadding(),
+                enter = slideInVertically(
+                    animationSpec = tween(150, easing = LinearEasing),
+                    initialOffsetY = { it + 200 }
+                ),
+                exit = slideOutVertically(
+                    animationSpec = tween(150, easing = LinearEasing),
+                    targetOffsetY = { it + 200 }
+                )
+            ) {
+                AddMealFloatingActionButton(
+                    icon = Icons.Default.Add,
+                    contentDescription = "Add meal",
+                    onClick = { showAddFoodSheet = true },
+                )
+            }
 
             if (showAddFoodSheet) {
                 AddFoodBottomSheet(

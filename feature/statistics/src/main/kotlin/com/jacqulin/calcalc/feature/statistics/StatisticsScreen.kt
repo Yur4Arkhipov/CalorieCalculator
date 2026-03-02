@@ -44,7 +44,12 @@ fun StatisticsScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 16.dp,
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 60.dp
+                ),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
@@ -70,7 +75,6 @@ fun StatisticsScreen(
             }
         }
 
-        // Диалог редактирования
         uiState.selectedDayStats?.let { selectedStats ->
             if (uiState.showEditDialog) {
                 EditDayDialog(
