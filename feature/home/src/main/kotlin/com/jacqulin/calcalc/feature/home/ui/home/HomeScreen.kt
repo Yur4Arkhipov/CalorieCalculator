@@ -184,16 +184,14 @@ fun HomeScreen(
                     )
                 }
                 item {
-                    CaloriesSection(
-                        uiState = uiState,
-                        onDetailClick = onNavigateToMacroDetail
-                    )
+                    CaloriesSection(uiState = uiState)
                 }
                 item {
                     TodayMealsSection(
                         meals = uiState.mealsToday,
                         pendingMeals = uiState.pendingMeals,
-                        onDismissError = viewModel::dismissPendingError
+                        onDismissError = viewModel::dismissPendingError,
+                        onDetailClick = onNavigateToMacroDetail
                     )
                 }
             }
@@ -319,7 +317,8 @@ private fun AddFoodOption(icon: ImageVector, text: String, onClick: () -> Unit) 
 private fun TodayMealsSection(
     meals: List<Meal>,
     pendingMeals: List<PendingMeal> = emptyList(),
-    onDismissError: (String) -> Unit = {}
+    onDismissError: (String) -> Unit = {},
+    onDetailClick: () -> Unit = {}
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -333,6 +332,12 @@ private fun TodayMealsSection(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
+
+            TextButton(
+                onClick = onDetailClick
+            ) {
+                Text("Подрбнее")
+            }
         }
 
         val isEmpty = meals.isEmpty() && pendingMeals.isEmpty()

@@ -34,18 +34,14 @@ import com.jacqulin.calcalc.core.designsystem.icon.AppIcons
 import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 
 @Composable
-internal fun CaloriesSection(
-    uiState: HomeUiState,
-    onDetailClick: () -> Unit = {}
-) {
+internal fun CaloriesSection(uiState: HomeUiState) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         CaloriesCard(
             consumed = uiState.consumedCalories,
-            goal = uiState.dailyCaloriesGoal,
-            onDetailClick = onDetailClick
+            goal = uiState.dailyCaloriesGoal
         )
 
         Row(
@@ -80,8 +76,7 @@ internal fun CaloriesSection(
 @Composable
 private fun CaloriesCard(
     consumed: Int,
-    goal: Int,
-    onDetailClick: () -> Unit
+    goal: Int
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -156,20 +151,6 @@ private fun CaloriesCard(
                     size = 100.dp
                 )
             }
-
-//            IconButton(
-//                onClick = onDetailClick,
-//                modifier = Modifier
-//                    .align(Alignment.TopEnd)
-//                    .padding(8.dp)
-//            ) {
-//                Icon(
-//                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-//                    contentDescription = "Подробная информация",
-//                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-//                    modifier = Modifier.size(20.dp)
-//                )
-//            }
         }
     }
 }
@@ -189,19 +170,12 @@ private fun MacroCard(
         else -> AppIcons.calories()
     }
 
-    val remaining = goal - current
-    val statusText = if (remaining >= 0) {
-        "${remaining}g left"
-    } else {
-        "${-remaining}g over"
-    }
-
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -215,12 +189,6 @@ private fun MacroCard(
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = color
-            )
-
-            Text(
-                text = statusText,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
 
             CircularProgressWithIcon(
