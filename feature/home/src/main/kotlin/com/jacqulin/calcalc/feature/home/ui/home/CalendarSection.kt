@@ -1,7 +1,9 @@
 package com.jacqulin.calcalc.feature.home.ui.home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -174,16 +178,28 @@ private fun CalendarDayItem(
     val isFuture = day.isFuture
 
     val backgroundColor = when {
-        isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-        day.isSelected -> MaterialTheme.colorScheme.primary
-        day.isToday -> MaterialTheme.colorScheme.primaryContainer
-        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+        isFuture -> MaterialTheme.colorScheme.background
+        day.isSelected -> MaterialTheme.colorScheme.surface
+        day.isToday -> AppColors.dateToday
+        else -> MaterialTheme.colorScheme.surface
+    }
+
+    val borderColor = when {
+        isFuture -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f)
+        day.isSelected -> MaterialTheme.colorScheme.onSurface
+        day.isToday -> AppColors.dateToday.copy(alpha = 0.6f)
+        else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+    }
+
+    val borderWidth = when {
+        day.isSelected -> 2.dp
+        else -> 1.dp
     }
 
     val textColor = when {
         isFuture -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-        day.isSelected -> MaterialTheme.colorScheme.onPrimary
-        day.isToday -> MaterialTheme.colorScheme.onPrimaryContainer
+        day.isSelected -> MaterialTheme.colorScheme.onSurface
+        day.isToday -> MaterialTheme.colorScheme.onSurface
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
@@ -192,7 +208,17 @@ private fun CalendarDayItem(
             .padding(horizontal = 3.dp)
             .size(56.dp)
             .clip(RoundedCornerShape(20.dp))
-            .clickable(enabled = !isFuture) { onClick() },
+            .border(
+                width = borderWidth,
+                color = borderColor,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .clickable(
+                enabled = !isFuture,
+                onClick = onClick,
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ),
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor
         ),
