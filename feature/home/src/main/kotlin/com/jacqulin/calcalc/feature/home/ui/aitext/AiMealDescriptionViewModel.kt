@@ -22,7 +22,6 @@ import java.util.Locale
 import javax.inject.Inject
 
 data class AiMealDescriptionUiState(
-    val mealName: String = "",
     val description: String = "",
     val selectedMealType: MealType = MealType.BREAKFAST,
     val isProcessing: Boolean = false,
@@ -51,9 +50,6 @@ class AiMealDescriptionViewModel @Inject constructor(
     private val _effect = Channel<AiMealEffect>()
     val effect = _effect.receiveAsFlow()
 
-    fun onMealNameChange(name: String) {
-        _uiState.value = _uiState.value.copy(mealName = name)
-    }
 
     fun onDescriptionChange(description: String) {
         _uiState.value = _uiState.value.copy(description = description, result = null)
@@ -85,7 +81,7 @@ class AiMealDescriptionViewModel @Inject constructor(
             _uiState.value = state.copy(isSaving = true)
             try {
                 val meal = Meal(
-                    name = nutrition.name.ifBlank { state.mealName.ifBlank { "Блюдо (ИИ)" } },
+                    name = nutrition.name.ifBlank { "Блюдо" },
                     calories = nutrition.calories.toInt(),
                     proteins = nutrition.protein.toInt(),
                     fats = nutrition.fat.toInt(),
