@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            CalorieCalculatorTheme(dynamicColor = false) {
+            CalorieCalculatorTheme {
                 RootScreen()
             }
         }
