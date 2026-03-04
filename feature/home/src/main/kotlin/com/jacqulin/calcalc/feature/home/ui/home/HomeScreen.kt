@@ -4,6 +4,8 @@ import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -47,20 +50,29 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -122,6 +134,51 @@ fun HomeScreen(
             viewModel.onGalleryResult(uri, mealType)
         }
         pendingGalleryMealType = null
+    }
+
+    // All for animated FAB
+    val isAtBottom by remember {
+        derivedStateOf {
+            val layoutInfo = lazyListState.layoutInfo
+            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+            lastVisibleItem != null &&
+                    lastVisibleItem.index == layoutInfo.totalItemsCount - 1 &&
+                    lastVisibleItem.offset + lastVisibleItem.size <= layoutInfo.viewportEndOffset
+        }
+    }
+    var fabHeight by remember { mutableFloatStateOf(0f) }
+    var fabOffsetY by remember { mutableFloatStateOf(0f) }
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                val delta = available.y
+                if (isAtBottom) {
+                    fabOffsetY = (fabOffsetY - delta)
+                        .coerceIn(0f, fabHeight)
+                }
+
+                return Offset.Zero
+            }
+
+            override suspend fun onPostFling(
+                consumed: Velocity,
+                available: Velocity
+            ): Velocity {
+                if (fabOffsetY > 0f) {
+                    animate(
+                        initialValue = fabOffsetY,
+                        targetValue = 0f
+                    ) { value, _ ->
+                        fabOffsetY = value
+                    }
+                }
+
+                return Velocity.Zero
+            }
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -196,7 +253,8 @@ fun HomeScreen(
                     state = lazyListState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background),
+                        .background(MaterialTheme.colorScheme.background)
+                        .nestedScroll(nestedScrollConnection),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(
                         bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 60.dp
@@ -223,28 +281,26 @@ fun HomeScreen(
                     }
                 }
 
-    //            AnimatedVisibility(
-    //                visible = isFabVisible,
-    //                modifier = Modifier
-    //                    .align(Alignment.BottomEnd)
-    //                    .padding(end = 12.dp)
-    //                    .padding(bottom = 74.dp)
-    //                    .navigationBarsPadding(),
-    //                enter = slideInVertically(
-    //                    animationSpec = tween(150, easing = LinearEasing),
-    //                    initialOffsetY = { it + 200 }
-    //                ),
-    //                exit = slideOutVertically(
-    //                    animationSpec = tween(150, easing = LinearEasing),
-    //                    targetOffsetY = { it + 200 }
-    //                )
-    //            ) {
+
+                AnimatedVisibility(
+                    visible = true,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 60.dp, end = 12.dp)
+                        .navigationBarsPadding()
+                        .onGloballyPositioned {
+                            fabHeight = it.size.height.toFloat()
+                        }
+                        .graphicsLayer {
+                            translationY = fabOffsetY
+                        }
+                ) {
                     AddMealFloatingActionButton(
                         icon = Icons.Default.Add,
                         contentDescription = stringResource(R.string.home_add_meal),
                         onClick = { showAddFoodSheet = true },
                     )
-    //            }
+                }
 
                 if (showAddFoodSheet) {
                     AddFoodBottomSheet(
