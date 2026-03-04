@@ -50,7 +50,7 @@ fun NavGraphBuilder.homeSection(
         }
 
         composable<MacroDetailRoute> {
-            MacroDetailScreen()
+            MacroDetailScreen(onBackClick = onBackClick)
         }
 
         composable<AiMealDescriptionRoute> {

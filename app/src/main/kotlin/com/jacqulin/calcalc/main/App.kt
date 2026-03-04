@@ -41,38 +41,38 @@ fun App(appState: AppState) {
     Scaffold(
         topBar = {
             when {
-                currentTopLevel != null -> {
-                    TopAppBar(
-                        titleRes = currentTopLevel.titleTextId,
-                        navigationIcon = null,
-                        onNavigationClick = null
-                    )
-                }
-
-                currentDestination?.hasRoute(MacroDetailRoute::class) == true -> {
-                    TopAppBar(
-                        titleRes = R.string.macro_detail_title,
-                        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                        onNavigationClick = { appState.navController.popBackStack() }
-                    )
-                }
-
-                currentDestination?.hasRoute(AiMealDescriptionRoute::class) == true -> {
-                    TopAppBar(
-                        titleRes = R.string.ai_meal_description_title,
-                        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                        onNavigationClick = { appState.navController.popBackStack() }
-                    )
-                }
-
-                currentDestination?.hasRoute(ManualAddMealRoute::class) == true  -> {
-                    TopAppBar(
-                        titleRes = R.string.manual_meal_add_title,
-                        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                        onNavigationClick = { appState.navController.popBackStack() }
-                    )
-                }
-
+//                currentTopLevel != null -> {
+//                    TopAppBar(
+//                        titleRes = currentTopLevel.titleTextId,
+//                        navigationIcon = null,
+//                        onNavigationClick = null
+//                    )
+//                }
+//
+//                currentDestination?.hasRoute(MacroDetailRoute::class) == true -> {
+//                    TopAppBar(
+//                        titleRes = R.string.macro_detail_title,
+//                        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+//                        onNavigationClick = { appState.navController.popBackStack() }
+//                    )
+//                }
+//
+//                currentDestination?.hasRoute(AiMealDescriptionRoute::class) == true -> {
+//                    TopAppBar(
+//                        titleRes = R.string.ai_meal_description_title,
+//                        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+//                        onNavigationClick = { appState.navController.popBackStack() }
+//                    )
+//                }
+//
+//                currentDestination?.hasRoute(ManualAddMealRoute::class) == true  -> {
+//                    TopAppBar(
+//                        titleRes = R.string.manual_meal_add_title,
+//                        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+//                        onNavigationClick = { appState.navController.popBackStack() }
+//                    )
+//                }
+//
                 else -> Unit
             }
         }
