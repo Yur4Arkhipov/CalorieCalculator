@@ -15,4 +15,9 @@
     <string name="weight_suffix">г</string>
     <string name="save">Сохранить</string>
     <string name="save_meal_snackbar">"Блюдо успешно сохранено!"</string>
+
+    // Home
+    <string name="home_dialog_cancel">Отмена</string>
+    <string name="home_select_meal_type">Выберите приём пищи</string>
+    <string name="home_add_meal">Добавить блюдо</string>
 </resources>
