@@ -179,15 +179,16 @@ private fun CalendarDayItem(
 
     val backgroundColor = when {
         isFuture -> MaterialTheme.colorScheme.background
-        day.isSelected -> MaterialTheme.colorScheme.surface
         day.isToday -> AppColors.dateToday
+        day.isSelected -> MaterialTheme.colorScheme.surface
         else -> MaterialTheme.colorScheme.surface
     }
 
     val borderColor = when {
         isFuture -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f)
-        day.isSelected -> MaterialTheme.colorScheme.onSurface
+        day.isToday && day.isSelected -> MaterialTheme.colorScheme.onSurface
         day.isToday -> AppColors.dateToday.copy(alpha = 0.6f)
+        day.isSelected -> MaterialTheme.colorScheme.onSurface
         else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
     }
 
@@ -198,8 +199,8 @@ private fun CalendarDayItem(
 
     val textColor = when {
         isFuture -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-        day.isSelected -> MaterialTheme.colorScheme.onSurface
         day.isToday -> MaterialTheme.colorScheme.onSurface
+        day.isSelected -> MaterialTheme.colorScheme.onSurface
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 

@@ -581,7 +581,7 @@ private fun PendingMealCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp),
+            .height(96.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isError)
@@ -594,15 +594,15 @@ private fun PendingMealCard(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             if (pending.imageUri != null) {
                 Box(
                     modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .size(68.dp)
+                        .clip(RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
@@ -610,13 +610,13 @@ private fun PendingMealCard(
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .size(56.dp)
-                            .clip(RoundedCornerShape(8.dp)),
+                            .size(68.dp)
+                            .clip(RoundedCornerShape(12.dp)),
                         alpha = if (pending.isLoading) 0.4f else 1f
                     )
                     if (pending.isLoading) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(28.dp),
                             strokeWidth = 2.dp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -624,16 +624,19 @@ private fun PendingMealCard(
                 }
             } else if (pending.isLoading) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(28.dp),
                     strokeWidth = 2.dp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 )
             }
 
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Text(
                     text = if (isError) "Ошибка анализа" else "Анализируем...",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -662,7 +665,7 @@ private fun MealCard(meal: Meal) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp),
+            .height(96.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
@@ -672,8 +675,8 @@ private fun MealCard(meal: Meal) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (meal.imageUri != null) {
@@ -682,14 +685,14 @@ private fun MealCard(meal: Meal) {
                     contentDescription = meal.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .size(68.dp)
+                        .clip(RoundedCornerShape(12.dp))
                 )
             }
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -698,7 +701,7 @@ private fun MealCard(meal: Meal) {
                 ) {
                     Text(
                         text = meal.name,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 2,
@@ -715,7 +718,7 @@ private fun MealCard(meal: Meal) {
                 ) {
                     Text(
                         text = "${meal.calories} ккал",
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
                     )
@@ -753,9 +756,9 @@ private fun MealTypeChip(type: MealType) {
 @Composable
 private fun mealTypeColor(mealType: MealType): Color {
     return when (mealType) {
-        MealType.BREAKFAST -> Color(0xFF8A8A8A)
-        MealType.LUNCH     -> Color(0xFF7A9BB5)
-        MealType.DINNER    -> Color(0xFF8B9E8B)
-        MealType.SNACK     -> Color(0xFFAA9070)
+        MealType.BREAKFAST -> Color(0xFFFC8383)
+        MealType.LUNCH     -> Color(0xFF62B6F8)
+        MealType.DINNER    -> Color(0xFF298C29)
+        MealType.SNACK     -> Color(0xFFFAB35D)
     }
 }
