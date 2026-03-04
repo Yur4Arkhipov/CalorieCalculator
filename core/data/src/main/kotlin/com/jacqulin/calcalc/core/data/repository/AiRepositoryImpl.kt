@@ -11,6 +11,7 @@ import com.jacqulin.calcalc.core.data.remote.dto.yandex.YandexResponseFormat
 import com.jacqulin.calcalc.core.data.remote.service.YandexAiApi
 import com.jacqulin.calcalc.core.domain.model.Nutrition
 import com.jacqulin.calcalc.core.domain.repository.AiRepository
+import com.jacqulin.calcalc.core.util.NotFoodException
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -18,7 +19,7 @@ class AiRepositoryImpl @Inject constructor(
     private val aiApi: YandexAiApi
 ) : AiRepository {
 
-    private val MODEL = "gpt://b1gd0h769ghblmknef7n/gemma-3-27b-it/latest"
+    private val model = "gpt://b1gd0h769ghblmknef7n/gemma-3-27b-it/latest"
 
      private val systemInstructions = """
         Ты профессиональный диетолог.
@@ -36,7 +37,7 @@ class AiRepositoryImpl @Inject constructor(
         - Не придумывай еду там, где её нет.
         - Если на изображении нет еды, или невозможно определить блюдо, пиши 
         {
-          "name": "Not food",
+          "name": "not_food",
           "calories": 0,
           "protein": 0,
           "fat": 0,
@@ -67,6 +68,7 @@ class AiRepositoryImpl @Inject constructor(
             ?: error("AI returned empty response")
 
         val dto = Json.decodeFromString<NutritionDto>(content)
+        if (dto.name?.trim()?.lowercase() == "not_food") throw NotFoodException()
         return dto.toDomain()
     }
 
@@ -81,13 +83,13 @@ class AiRepositoryImpl @Inject constructor(
                 ?: error("AI returned empty response")
 
             val dto = Json.decodeFromString<NutritionDto>(content)
-
+            if (dto.name?.trim()?.lowercase() == "not_food") throw NotFoodException()
             return dto.toDomain()
     }
 
     private fun buildTextRequest(description: String) =
         YandexChatRequest(
-            model = MODEL,
+            model = model,
             messages = listOf(
                 YandexMessage(
                     role = "system",
@@ -119,7 +121,7 @@ class AiRepositoryImpl @Inject constructor(
 
     private fun buildImageRequest(imageBase64: String): YandexChatRequest {
         return YandexChatRequest(
-            model = MODEL,
+            model = model,
             messages = listOf(
                 YandexMessage(
                     role = "system",

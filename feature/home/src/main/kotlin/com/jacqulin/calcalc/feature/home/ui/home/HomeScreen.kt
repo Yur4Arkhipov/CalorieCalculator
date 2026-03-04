@@ -33,11 +33,14 @@ import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -87,6 +90,7 @@ fun HomeScreen(
     var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
     var pendingCameraMealType by remember { mutableStateOf<MealType?>(null) }
     var pendingGalleryMealType by remember { mutableStateOf<MealType?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -136,6 +140,9 @@ fun HomeScreen(
                     pendingGalleryMealType = event.mealType
                     galleryLauncher.launch("image/*")
                 }
+                is HomeUiEvent.ShowNotFoodError -> {
+                    snackbarHostState.showSnackbar("На фото не обнаружена еда")
+                }
             }
         }
     }
@@ -162,81 +169,104 @@ fun HomeScreen(
             CircularProgressIndicator()
         }
     } else {
-        Box(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                state = lazyListState,
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier.padding(
+                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 44.dp
+                    )
+                ) { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.background
+        ) { innerPadding ->
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(
-                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 60.dp
-                )
+                    .padding(top = innerPadding.calculateTopPadding())
             ) {
-                item {
-                    CalendarSection(
-                        currentWeekIndex = uiState.currentWeekIndex,
-                        weeks = uiState.weeks,
-                        onDateSelected = viewModel::onDateSelected,
-                        onWeekChanged = viewModel::onWeekChanged
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(
+                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 60.dp
+                    )
+                ) {
+                    item {
+                        CalendarSection(
+                            currentWeekIndex = uiState.currentWeekIndex,
+                            weeks = uiState.weeks,
+                            onDateSelected = viewModel::onDateSelected,
+                            onWeekChanged = viewModel::onWeekChanged
+                        )
+                    }
+                    item {
+                        CaloriesSection(uiState = uiState)
+                    }
+                    item {
+                        TodayMealsSection(
+                            meals = uiState.mealsToday,
+                            pendingMeals = uiState.pendingMeals,
+                            onDismissError = viewModel::dismissPendingError,
+                            onDetailClick = onNavigateToMacroDetail
+                        )
+                    }
+                }
+
+    //            AnimatedVisibility(
+    //                visible = isFabVisible,
+    //                modifier = Modifier
+    //                    .align(Alignment.BottomEnd)
+    //                    .padding(end = 12.dp)
+    //                    .padding(bottom = 74.dp)
+    //                    .navigationBarsPadding(),
+    //                enter = slideInVertically(
+    //                    animationSpec = tween(150, easing = LinearEasing),
+    //                    initialOffsetY = { it + 200 }
+    //                ),
+    //                exit = slideOutVertically(
+    //                    animationSpec = tween(150, easing = LinearEasing),
+    //                    targetOffsetY = { it + 200 }
+    //                )
+    //            ) {
+                    AddMealFloatingActionButton(
+                        icon = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.home_add_meal),
+                        onClick = { showAddFoodSheet = true },
+                    )
+    //            }
+
+                if (showAddFoodSheet) {
+                    AddFoodBottomSheet(
+                        onManual = {
+                            showAddFoodSheet = false
+                            onNavigateToManualAddMeal()
+                        },
+                        onAiDescription = {
+                            showAddFoodSheet = false
+                            onNavigateToAiMealDescription()
+                        },
+                        onCamera = {
+                            showAddFoodSheet = false
+                            showMealTypePicker = AddPhotoSource.CAMERA
+                        },
+                        onGallery = {
+                            showAddFoodSheet = false
+                            showMealTypePicker = AddPhotoSource.GALLERY
+                        },
+                        onDismiss = { showAddFoodSheet = false }
                     )
                 }
-                item {
-                    CaloriesSection(uiState = uiState)
-                }
-                item {
-                    TodayMealsSection(
-                        meals = uiState.mealsToday,
-                        pendingMeals = uiState.pendingMeals,
-                        onDismissError = viewModel::dismissPendingError,
-                        onDetailClick = onNavigateToMacroDetail
-                    )
-                }
-            }
-
-//            AnimatedVisibility(
-//                visible = isFabVisible,
-//                modifier = Modifier
-//                    .align(Alignment.BottomEnd)
-//                    .padding(end = 12.dp)
-//                    .padding(bottom = 74.dp)
-//                    .navigationBarsPadding(),
-//                enter = slideInVertically(
-//                    animationSpec = tween(150, easing = LinearEasing),
-//                    initialOffsetY = { it + 200 }
-//                ),
-//                exit = slideOutVertically(
-//                    animationSpec = tween(150, easing = LinearEasing),
-//                    targetOffsetY = { it + 200 }
-//                )
-//            ) {
-                AddMealFloatingActionButton(
-                    icon = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.home_add_meal),
-                    onClick = { showAddFoodSheet = true },
-                )
-//            }
-
-            if (showAddFoodSheet) {
-                AddFoodBottomSheet(
-                    onManual = {
-                        showAddFoodSheet = false
-                        onNavigateToManualAddMeal()
-                    },
-                    onAiDescription = {
-                        showAddFoodSheet = false
-                        onNavigateToAiMealDescription()
-                    },
-                    onCamera = {
-                        showAddFoodSheet = false
-                        showMealTypePicker = AddPhotoSource.CAMERA
-                    },
-                    onGallery = {
-                        showAddFoodSheet = false
-                        showMealTypePicker = AddPhotoSource.GALLERY
-                    },
-                    onDismiss = { showAddFoodSheet = false }
-                )
             }
         }
     }
@@ -329,7 +359,7 @@ fun AddFoodBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
+                .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
@@ -339,7 +369,7 @@ fun AddFoodBottomSheet(
                 fontWeight = FontWeight.SemiBold
             )
 
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 AddFoodOptionCard(
                     icon = Icons.Default.Edit,
                     text = "Ввести вручную",
@@ -381,10 +411,13 @@ private fun AddFoodOptionCard(
     subtitle: String,
     onClick: () -> Unit
 ) {
-    ElevatedCard(
+    Card(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -446,7 +479,7 @@ private fun TodayMealsSection(
             TextButton(
                 onClick = onDetailClick
             ) {
-                Text("Подрбнее")
+                Text("Подробнее")
             }
         }
 
@@ -470,7 +503,7 @@ private fun TodayMealsSection(
                 }
             }
         } else {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 pendingMeals.forEach { pending ->
                     PendingMealCard(
                         pending = pending,
@@ -490,7 +523,9 @@ private fun PendingMealCard(
 ) {
     val isError = pending.error != null
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isError)
@@ -502,8 +537,8 @@ private fun PendingMealCard(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+                .fillMaxSize()
+                .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -541,9 +576,11 @@ private fun PendingMealCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = if (isError) "Ошибка анализа фото" else "Анализируем фото...",
+                    text = if (isError) "Ошибка анализа" else "Анализируем...",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     color = if (isError)
                         MaterialTheme.colorScheme.error
                     else
@@ -567,7 +604,9 @@ private fun PendingMealCard(
 @Composable
 private fun MealCard(meal: Meal) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
@@ -576,8 +615,8 @@ private fun MealCard(meal: Meal) {
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+                .fillMaxSize()
+                .padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -587,7 +626,7 @@ private fun MealCard(meal: Meal) {
                     contentDescription = meal.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(64.dp)
+                        .size(56.dp)
                         .clip(RoundedCornerShape(10.dp))
                 )
             }
@@ -599,7 +638,7 @@ private fun MealCard(meal: Meal) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = meal.name,
@@ -616,13 +655,13 @@ private fun MealCard(meal: Meal) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "${meal.calories} ккал",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
                     )
                     Text(
                         text = meal.time,
@@ -640,7 +679,10 @@ private fun MealTypeChip(type: MealType) {
     val color = mealTypeColor(type)
     Box(
         modifier = Modifier
-            .background(color = color.copy(alpha = 0.12f), shape = RoundedCornerShape(6.dp))
+            .background(
+                color = color.copy(alpha = 0.12f),
+                shape = RoundedCornerShape(6.dp)
+            )
             .padding(horizontal = 6.dp, vertical = 2.dp)
     ) {
         Text(
@@ -655,9 +697,9 @@ private fun MealTypeChip(type: MealType) {
 @Composable
 private fun mealTypeColor(mealType: MealType): Color {
     return when (mealType) {
-        MealType.BREAKFAST -> MaterialTheme.colorScheme.tertiary
-        MealType.LUNCH -> MaterialTheme.colorScheme.primary
-        MealType.DINNER -> MaterialTheme.colorScheme.secondary
-        MealType.SNACK -> MaterialTheme.colorScheme.error
+        MealType.BREAKFAST -> Color(0xFF8A8A8A)
+        MealType.LUNCH     -> Color(0xFF7A9BB5)
+        MealType.DINNER    -> Color(0xFF8B9E8B)
+        MealType.SNACK     -> Color(0xFFAA9070)
     }
 }

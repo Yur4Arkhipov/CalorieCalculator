@@ -6,7 +6,6 @@ val BackgroundMain = Color(0xFFF2F3F7)
 val SurfaceWhite = Color(0xFFFFFFFF)
 val BackgroundSecondary = Color(0xFFE9EBF0)
 
-// Текст
 val TextPrimary = Color(0xFF111111)
 val TextSecondary = Color(0xFF6E6E73)
 val TextTertiary = Color(0xFFA0A3AA)

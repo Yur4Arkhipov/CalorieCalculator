@@ -136,10 +136,7 @@ private fun CaloriesCard(
                     Text(
                         text = if (remaining >= 0) "$remaining kcal left" else "${-remaining} kcal over",
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (remaining >= 0)
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        else
-                            MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
 

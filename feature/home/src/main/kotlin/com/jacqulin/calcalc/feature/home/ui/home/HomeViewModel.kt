@@ -19,6 +19,7 @@ import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SetSelectedDateUseCase
+import com.jacqulin.calcalc.core.util.NotFoodException
 import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -164,6 +165,9 @@ class HomeViewModel @Inject constructor(
                 )
                 saveManualAddMealDBUseCase(selectedDate.value, meal)
                 pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
+            } catch (_: NotFoodException) {
+                pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
+                _uiEvents.send(HomeUiEvent.ShowNotFoodError)
             } catch (_: Exception) {
                 pendingMealsFlow.update { list ->
                     list.map {

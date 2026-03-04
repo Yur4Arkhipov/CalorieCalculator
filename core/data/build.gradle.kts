@@ -50,6 +50,7 @@ room {
 dependencies {
 
     implementation(project(":core:domain"))
+    implementation(project(":core:util"))
 
     // Dagger hilt
     implementation(libs.hilt.android)

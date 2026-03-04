@@ -7,4 +7,5 @@ sealed interface HomeUiEvent {
     data class RequestCameraPermission(val mealType: MealType) : HomeUiEvent
     data class LaunchCamera(val uri: Uri, val mealType: MealType) : HomeUiEvent
     data class LaunchGallery(val mealType: MealType) : HomeUiEvent
+    data object ShowNotFoodError : HomeUiEvent
 }
