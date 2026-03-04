@@ -15,11 +15,11 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -69,7 +69,8 @@ fun ProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val onEvent = viewModel::onEvent
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val paramsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val macrosSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (uiState.isLoading) {
@@ -104,7 +105,7 @@ fun ProfileScreen(
     if (uiState.isParamsSheetOpen) {
         ModalBottomSheet(
             onDismissRequest = { onEvent(ProfileEvent.CloseParamsSheet) },
-            sheetState = sheetState
+            sheetState = paramsSheetState
         ) {
             EditParamsSheet(
                 profile = uiState.userProfile,
@@ -119,7 +120,7 @@ fun ProfileScreen(
     if (uiState.isMacrosSheetOpen) {
         ModalBottomSheet(
             onDismissRequest = { onEvent(ProfileEvent.CloseMacrosSheet) },
-            sheetState = sheetState
+            sheetState = macrosSheetState
         ) {
             EditMacrosSheet(
                 profile = uiState.userProfile,
@@ -453,138 +454,144 @@ private fun EditParamsSheet(
     var goal by remember(profile) { mutableStateOf(profile.goal) }
     var activityLevel by remember(profile) { mutableStateOf(profile.activityLevel) }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
-            .padding(bottom = WindowInsets
-                .navigationBars
-                .asPaddingValues()
-                .calculateBottomPadding() + 16.dp
-            ),
+            .fillMaxHeight(0.92f)
+            .imePadding(),
+        contentPadding = PaddingValues(
+            start = 20.dp,
+            end = 20.dp,
+            top = 8.dp,
+            bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 24.dp
+        ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = "Параметры",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedTextField(
-                value = age,
-                onValueChange = { age = it.filter { c -> c.isDigit() } },
-                label = { Text("Возраст") },
-                suffix = { Text("лет") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp)
-            )
-            OutlinedTextField(
-                value = height,
-                onValueChange = { height = it.filter { c -> c.isDigit() } },
-                label = { Text("Рост") },
-                suffix = { Text("см") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp)
-            )
-            OutlinedTextField(
-                value = weight,
-                onValueChange = { weight = it.filter { c -> c.isDigit() } },
-                label = { Text("Вес") },
-                suffix = { Text("кг") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp)
+        item {
+            Text(
+                text = "Параметры",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
             )
         }
 
-        Column {
-            SectionLabel("Пол")
-            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                Gender.entries.forEach { g ->
-                    FilterChip(
-                        selected = gender == g, onClick = { gender = g },
-                        label = {
-                            Text(
-                                text = if (g == Gender.MALE) "Мужской" else "Женский",
-                                modifier = Modifier.padding(vertical = 2.dp)
-                            )
-                        }
-                    )
-                }
-            }
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionLabel("Цель")
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Goal.entries.forEach { g ->
-                    FilterChip(
-                        selected = goal == g,
-                        onClick = { goal = g },
-                        label = { Text(goalDisplayName(g)) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                    )
-                }
-            }
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionLabel("Уровень активности")
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                ActivityLevel.entries.forEach { a ->
-                    FilterChip(
-                        selected = activityLevel == a,
-                        onClick = { activityLevel = a },
-                        label = { Text(activityDisplayName(a)) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                    )
-                }
-            }
-        }
-
-        Spacer(Modifier.height(4.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            OutlinedButton(
-                onClick = onDismiss,
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp)
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("Отмена")
+                OutlinedTextField(
+                    value = age,
+                    onValueChange = { age = it.filter { c -> c.isDigit() } },
+                    label = { Text("Возраст") },
+                    suffix = { Text("лет") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                OutlinedTextField(
+                    value = height,
+                    onValueChange = { height = it.filter { c -> c.isDigit() } },
+                    label = { Text("Рост") },
+                    suffix = { Text("см") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                OutlinedTextField(
+                    value = weight,
+                    onValueChange = { weight = it.filter { c -> c.isDigit() } },
+                    label = { Text("Вес") },
+                    suffix = { Text("кг") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                )
             }
-            Button(
-                onClick = {
-                    onSave(
-                        age.toIntOrNull() ?: profile.age,
-                        height.toIntOrNull() ?: profile.height,
-                        weight.toIntOrNull() ?: profile.weight,
-                        gender,
-                        goal,
-                        activityLevel
-                    )
-                },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                enabled = age.isNotBlank() && height.isNotBlank() && weight.isNotBlank()
+        }
+
+        item {
+            Column {
+                SectionLabel("Пол")
+                Spacer(Modifier.height(4.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Gender.entries.forEach { g ->
+                        FilterChip(
+                            selected = gender == g, onClick = { gender = g },
+                            label = {
+                                Text(
+                                    text = if (g == Gender.MALE) "Мужской" else "Женский",
+                                    modifier = Modifier.padding(vertical = 2.dp)
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            Column {
+                SectionLabel("Цель")
+                Spacer(Modifier.height(8.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Goal.entries.forEach { g ->
+                        FilterChip(
+                            selected = goal == g, onClick = { goal = g },
+                            label = { Text(goalDisplayName(g), modifier = Modifier.padding(vertical = 6.dp)) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            Column {
+                SectionLabel("Уровень активности")
+                Spacer(Modifier.height(8.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    ActivityLevel.entries.forEach { a ->
+                        FilterChip(
+                            selected = activityLevel == a, onClick = { activityLevel = a },
+                            label = { Text(activityDisplayName(a), modifier = Modifier.padding(vertical = 6.dp)) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Сохранить")
+                OutlinedButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                ) { Text("Отмена") }
+                Button(
+                    onClick = {
+                        onSave(
+                            age.toIntOrNull() ?: profile.age,
+                            height.toIntOrNull() ?: profile.height,
+                            weight.toIntOrNull() ?: profile.weight,
+                            gender, goal, activityLevel
+                        )
+                    },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = age.isNotBlank() && height.isNotBlank() && weight.isNotBlank()
+                ) { Text("Сохранить") }
             }
         }
     }
@@ -612,6 +619,7 @@ private fun EditMacrosSheet(
             ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        Spacer(Modifier.height(8.dp))
         Text(
             text = "Суточные нормы",
             style = MaterialTheme.typography.titleLarge,

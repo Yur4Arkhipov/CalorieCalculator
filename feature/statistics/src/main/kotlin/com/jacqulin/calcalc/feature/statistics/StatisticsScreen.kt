@@ -62,7 +62,6 @@ fun StatisticsScreen(
                 item { GoalsProgressCard(uiState.dailyStats) }
                 item { CaloriesChart(uiState.dailyStats) }
                 item { MacronutrientsDonutChart(uiState.dailyStats) }
-                item { WaterProgressChart(uiState.dailyStats) }
                 item {
                     DailyStatsGrid(
                         dailyStats = uiState.dailyStats,
@@ -305,108 +304,6 @@ private fun MacroLegendItem(name: String, value: Float, total: Float, color: Col
                 color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
             )
         }
-    }
-}
-
-@Composable
-private fun WaterProgressChart(dailyStats: List<DailyStats>) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "💧",
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Потребление воды",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                itemsIndexed(dailyStats) { index, dayStat ->
-                    WaterBarItem(
-                        date = dayStat.date,
-                        waterCount = dayStat.water,
-                        waterGoal = dayStat.waterGoal,
-                        isToday = index == dailyStats.size - 1
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun WaterBarItem(
-    date: String,
-    waterCount: Int,
-    waterGoal: Int,
-    isToday: Boolean
-) {
-    val progress = (waterCount.toFloat() / waterGoal).coerceIn(0f, 1.5f)
-    val animatedProgress by animateFloatAsState(targetValue = progress, label = "water_progress")
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(40.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .width(20.dp)
-                .height(100.dp)
-                .background(
-                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
-                    RoundedCornerShape(10.dp)
-                )
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(animatedProgress.coerceIn(0f, 1f))
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
-                                MaterialTheme.colorScheme.tertiary
-                            )
-                        ),
-                        RoundedCornerShape(10.dp)
-                    )
-                    .align(Alignment.BottomCenter)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = date,
-            style = MaterialTheme.typography.labelSmall,
-            color = if (isToday) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onTertiaryContainer,
-            fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
-        )
-
-        Text(
-            text = "$waterCount/$waterGoal",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
-        )
     }
 }
 
