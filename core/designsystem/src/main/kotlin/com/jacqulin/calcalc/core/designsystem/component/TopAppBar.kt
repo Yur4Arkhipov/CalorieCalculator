@@ -1,6 +1,7 @@
 package com.jacqulin.calcalc.core.designsystem.component
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.expandIn
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,6 +23,7 @@ fun TopAppBar(
     modifier: Modifier = Modifier,
     navigationIcon: ImageVector? = null,
     onNavigationClick: (() -> Unit)? = null,
+    expandedHeight: Dp = TopAppBarDefaults.TopAppBarExpandedHeight,
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors()
 ) {
     CenterAlignedTopAppBar(
@@ -34,5 +37,6 @@ fun TopAppBar(
         },
         colors = colors,
         modifier = modifier.testTag("TopAppBar"),
+        expandedHeight = expandedHeight
     )
 }

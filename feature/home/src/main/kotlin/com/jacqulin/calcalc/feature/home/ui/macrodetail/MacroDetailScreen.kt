@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -26,8 +29,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -46,17 +51,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.component.TopAppBar
+import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 import com.jacqulin.calcalc.core.domain.model.Meal
 import kotlin.math.roundToInt
-
-private val ProteinColor = Color(0xFFE91E63)
-private val CarbsColor = Color(0xFF2196F3)
-private val FatsColor = Color(0xFFFF9800)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MacroDetailScreen(
     viewModel: MacroDetailViewModel = hiltViewModel(),
+    onBackClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -70,58 +75,79 @@ fun MacroDetailScreen(
         }
         return
     }
-    
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        item { CaloriesCard(uiState = uiState) }
-        item { MacroProgressCards(uiState = uiState) }
-        item {
-            Text(
-                text = "Съеденные блюда за день",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(vertical = 8.dp)
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                titleRes = R.string.macro_detail_title,
+                navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground
+                ),
+                expandedHeight = 48.dp,
+                onNavigationClick = onBackClick
             )
-        }
-        item {
-            MealCards(
-                meals = uiState.mealsToday,
-                onMealClick = { viewModel.onEditMeal(it) }
-            )
-        }
-        if (uiState.mealsToday.isEmpty()) {
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                top = paddingValues.calculateTopPadding(),
+                bottom = paddingValues.calculateBottomPadding()
+            ),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            item { CaloriesCard(uiState = uiState) }
+            item { MacroProgressCards(uiState = uiState) }
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Text(
-                        text = "Пока не добавлено ни одного блюда",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
-                        textAlign = TextAlign.Center
-                    )
+                Text(
+                    text = "Съеденные блюда за день",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+            item {
+                MealCards(
+                    meals = uiState.mealsToday,
+                    onMealClick = { viewModel.onEditMeal(it) }
+                )
+            }
+            if (uiState.mealsToday.isEmpty()) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Text(
+                            text = "Пока не добавлено ни одного блюда",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
+            item { Spacer(Modifier.height(12.dp)) }
         }
-        item { Spacer(Modifier.height(12.dp)) }
-    }
 
-    if (uiState.isEditingSheetOpen && uiState.editingMeal != null) {
-        EditMealBottomSheet(
-            meal = uiState.editingMeal!!,
-            sheetState = sheetState,
-            onDismiss = { viewModel.onDismissEditMeal() },
-            onSave = { viewModel.onUpdateMeal(it) }
-        )
+        if (uiState.isEditingSheetOpen && uiState.editingMeal != null) {
+            EditMealBottomSheet(
+                meal = uiState.editingMeal!!,
+                sheetState = sheetState,
+                onDismiss = { viewModel.onDismissEditMeal() },
+                onSave = { viewModel.onUpdateMeal(it) }
+            )
+        }
     }
 }
 
@@ -204,19 +230,19 @@ private fun MacroProgressCards(uiState: MacroDetailUiState) {
             title = "Белки",
             current = uiState.todayMacros.protein,
             goal = uiState.todayMacros.proteinsGoal,
-            color = ProteinColor
+            color = AppColors.proteinMain
         )
         MacroProgressCard(
             title = "Углеводы",
             current = uiState.todayMacros.carb,
             goal = uiState.todayMacros.carbsGoal,
-            color = CarbsColor
+            color = AppColors.carbsMain
         )
         MacroProgressCard(
             title = "Жиры",
             current = uiState.todayMacros.fat,
             goal = uiState.todayMacros.fatsGoal,
-            color = FatsColor
+            color = AppColors.fatMain
         )
     }
 }
