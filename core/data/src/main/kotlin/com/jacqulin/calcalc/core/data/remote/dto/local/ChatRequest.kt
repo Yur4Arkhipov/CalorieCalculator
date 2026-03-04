@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.core.data.remote.dto
+package com.jacqulin.calcalc.core.data.remote.dto.local
 
 import com.google.gson.annotations.SerializedName
 

@@ -1,20 +1,13 @@
 package com.jacqulin.calcalc.core.data.remote.service
 
-import com.jacqulin.calcalc.core.data.remote.dto.ChatRequest
-import com.jacqulin.calcalc.core.data.remote.dto.ChatResponse
-import com.jacqulin.calcalc.core.data.remote.dto.MultimodalChatRequest
+import com.jacqulin.calcalc.core.data.remote.dto.yandex.YandexChatRequest
+import com.jacqulin.calcalc.core.data.remote.dto.yandex.YandexChatResponse
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-interface AiApi {
-
-    @POST("/v1/chat/completions")
-    suspend fun chatCompletion(
-        @Body request: ChatRequest
-    ): ChatResponse
-
-    @POST("/v1/chat/completions")
-    suspend fun multimodalChatCompletion(
-        @Body request: MultimodalChatRequest
-    ): ChatResponse
+interface YandexAiApi {
+    @POST("chat/completions")
+    suspend fun chat(
+        @Body request: YandexChatRequest
+    ): YandexChatResponse
 }
