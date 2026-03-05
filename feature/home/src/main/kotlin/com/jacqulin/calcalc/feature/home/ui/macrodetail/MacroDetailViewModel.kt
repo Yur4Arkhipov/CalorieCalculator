@@ -3,6 +3,7 @@ package com.jacqulin.calcalc.feature.home.ui.macrodetail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacqulin.calcalc.core.domain.model.Meal
+import com.jacqulin.calcalc.core.domain.usecase.DeleteMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GetDayDataUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
@@ -24,7 +25,8 @@ class MacroDetailViewModel @Inject constructor(
     private val getDayDataUseCase: GetDayDataUseCase,
     observeSelectedDateUseCase: ObserveSelectedDateUseCase,
     private val observeUserProfileUseCase: ObserveUserProfileUseCase,
-    private val updateMealUseCase: UpdateMealUseCase
+    private val updateMealUseCase: UpdateMealUseCase,
+    private val deleteMealUseCase: DeleteMealUseCase
 ) : ViewModel() {
 
     private val uiLocalState = MutableStateFlow(
@@ -91,10 +93,16 @@ class MacroDetailViewModel @Inject constructor(
             updateMealUseCase(updatedMeal)
         }
         uiLocalState.update {
-            it.copy(
-                editingMeal = null,
-                isEditingSheetOpen = false
-            )
+            it.copy(editingMeal = null, isEditingSheetOpen = false)
+        }
+    }
+
+    fun onDeleteMeal(meal: Meal) {
+        viewModelScope.launch {
+            deleteMealUseCase(meal)
+        }
+        uiLocalState.update {
+            it.copy(editingMeal = null, isEditingSheetOpen = false)
         }
     }
 }

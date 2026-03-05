@@ -27,5 +27,7 @@ data class HomeUiState(
         carbsGoal = 0,
         fatsGoal = 0
     ),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val editingMeal: Meal? = null,
+    val isEditingSheetOpen: Boolean = false
 )

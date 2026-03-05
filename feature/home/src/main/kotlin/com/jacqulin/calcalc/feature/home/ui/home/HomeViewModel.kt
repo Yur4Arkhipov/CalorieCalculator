@@ -17,8 +17,10 @@ import com.jacqulin.calcalc.core.domain.usecase.GenerateWeekDaysUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GetDayDataUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
+import com.jacqulin.calcalc.core.domain.usecase.DeleteMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SetSelectedDateUseCase
+import com.jacqulin.calcalc.core.domain.usecase.UpdateMealUseCase
 import com.jacqulin.calcalc.core.util.NotFoodException
 import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -55,11 +57,14 @@ class HomeViewModel @Inject constructor(
     private val setSelectedDateUseCase: SetSelectedDateUseCase,
     private val analyzeMealFromImageUseCase: AnalyzeMealFromImageUseCase,
     private val saveManualAddMealDBUseCase: SaveManualAddMealDBUseCase,
+    private val updateMealUseCase: UpdateMealUseCase,
+    private val deleteMealUseCase: DeleteMealUseCase,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val currentWeekIndexFlow = MutableStateFlow(0)
     private val pendingMealsFlow = MutableStateFlow<List<PendingMeal>>(emptyList())
+    private val editingMealFlow = MutableStateFlow<Pair<Meal?, Boolean>>(Pair(null, false))
     private val selectedDate = observeSelectedDateUseCase()
 
     private val _uiEvents = Channel<HomeUiEvent>(Channel.BUFFERED)
@@ -90,8 +95,9 @@ class HomeViewModel @Inject constructor(
                 combine(
                     getDayDataUseCase(selectedDate),
                     weeksFlow,
-                    pendingMealsFlow
-                ) { dayData, weeks, pendingMeals ->
+                    pendingMealsFlow,
+                    editingMealFlow
+                ) { dayData, weeks, pendingMeals, editingPair ->
 
                     val consumedCalories = dayData.meals.sumOf { it.calories }
 
@@ -120,6 +126,8 @@ class HomeViewModel @Inject constructor(
                         dailyCaloriesGoal = profile.caloriesGoal,
                         remainingCalories = (profile.caloriesGoal - consumedCalories)
                             .coerceAtLeast(0),
+                        editingMeal = editingPair.first,
+                        isEditingSheetOpen = editingPair.second,
                         isLoading = false
                     )
                 }
@@ -181,6 +189,28 @@ class HomeViewModel @Inject constructor(
 
     fun dismissPendingError(id: String) {
         pendingMealsFlow.update { list -> list.filter { it.id != id } }
+    }
+
+    fun onEditMeal(meal: Meal) {
+        editingMealFlow.value = Pair(meal, true)
+    }
+
+    fun onDismissEditMeal() {
+        editingMealFlow.value = Pair(null, false)
+    }
+
+    fun onUpdateMeal(updatedMeal: Meal) {
+        viewModelScope.launch {
+            updateMealUseCase(updatedMeal)
+        }
+        editingMealFlow.value = Pair(null, false)
+    }
+
+    fun onDeleteMeal(meal: Meal) {
+        viewModelScope.launch {
+            deleteMealUseCase(meal)
+        }
+        editingMealFlow.value = Pair(null, false)
     }
 
     fun onAddPhotoFromCamera(mealType: MealType) {

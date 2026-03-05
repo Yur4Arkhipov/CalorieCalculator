@@ -20,6 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,6 +37,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -159,7 +163,8 @@ fun MacroDetailScreen(
                 meal = uiState.editingMeal!!,
                 sheetState = sheetState,
                 onDismiss = { viewModel.onDismissEditMeal() },
-                onSave = { viewModel.onUpdateMeal(it) }
+                onSave = { viewModel.onUpdateMeal(it) },
+                onDelete = { viewModel.onDeleteMeal(it) }
             )
         }
     }
@@ -466,7 +471,7 @@ private fun MacroBadge(label: String, value: Int, color: Color) {
             }
         }
         Text(
-            text = "${value} г",
+            text = "$value г",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Medium
@@ -480,13 +485,16 @@ fun EditMealBottomSheet(
     meal: Meal,
     sheetState: androidx.compose.material3.SheetState,
     onDismiss: () -> Unit,
-    onSave: (Meal) -> Unit
+    onSave: (Meal) -> Unit,
+    onDelete: (Meal) -> Unit = {}
 ) {
     var editedName by remember(meal) { mutableStateOf(meal.name) }
     var editedCalories by remember(meal) { mutableStateOf(meal.calories.toString()) }
     var editedProteins by remember(meal) { mutableStateOf(meal.proteins.toString()) }
     var editedCarbs by remember(meal) { mutableStateOf(meal.carbs.toString()) }
     var editedFats by remember(meal) { mutableStateOf(meal.fats.toString()) }
+    var isFavorite by remember(meal) { mutableStateOf(meal.isFavorite) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -499,14 +507,36 @@ fun EditMealBottomSheet(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 32.dp)
         ) {
-            Text(
-                text = "Редактировать блюдо",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Редактировать блюдо",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    IconButton(onClick = { isFavorite = !isFavorite }) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = if (isFavorite) "Убрать из избранного" else "В избранное",
+                            tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    IconButton(onClick = { showDeleteConfirm = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Удалить",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
 
+            Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = editedName,
                 onValueChange = { editedName = it },
@@ -593,7 +623,8 @@ fun EditMealBottomSheet(
                             calories = editedCalories.toIntOrNull() ?: meal.calories,
                             proteins = editedProteins.toIntOrNull() ?: meal.proteins,
                             carbs = editedCarbs.toIntOrNull() ?: meal.carbs,
-                            fats = editedFats.toIntOrNull() ?: meal.fats
+                            fats = editedFats.toIntOrNull() ?: meal.fats,
+                            isFavorite = isFavorite
                         )
                         onSave(updatedMeal)
                     },
@@ -609,5 +640,28 @@ fun EditMealBottomSheet(
                 }
             }
         }
+    }
+
+    if (showDeleteConfirm) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Удалить блюдо?") },
+            text = { Text("«${meal.name}» будет удалено из дневника.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirm = false
+                        onDelete(meal)
+                    }
+                ) {
+                    Text("Удалить", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("Отмена")
+                }
+            }
+        )
     }
 }

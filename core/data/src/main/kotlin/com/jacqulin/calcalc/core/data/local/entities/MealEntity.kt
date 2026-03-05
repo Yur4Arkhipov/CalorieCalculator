@@ -16,7 +16,8 @@ data class MealEntity(
     val time: String,
     val type: MealType,
     val date: String,
-    val imageUri: String? = null
+    val imageUri: String? = null,
+    val isFavorite: Boolean = false
 )
 
 fun MealEntity.toDomain(): Meal =
@@ -29,5 +30,6 @@ fun MealEntity.toDomain(): Meal =
         fats = fat,
         time = time,
         type = type,
-        imageUri = imageUri
+        imageUri = imageUri,
+        isFavorite = isFavorite
     )

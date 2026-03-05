@@ -80,8 +80,14 @@ class MealRepositoryImpl @Inject constructor(
                 protein = meal.proteins,
                 fat = meal.fats,
                 carbs = meal.carbs,
-                imageUri = meal.imageUri
+                imageUri = meal.imageUri,
+                isFavorite = meal.isFavorite
             )
         )
+    }
+
+    override suspend fun deleteMeal(meal: Meal) {
+        val existing = mealDao.getMealById(meal.id) ?: return
+        mealDao.deleteMeal(existing)
     }
 }

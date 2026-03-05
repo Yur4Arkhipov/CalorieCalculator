@@ -89,6 +89,7 @@ import com.jacqulin.calcalc.core.designsystem.theme.TextTertiary
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.PendingMeal
+import com.jacqulin.calcalc.feature.home.ui.macrodetail.EditMealBottomSheet
 import java.io.File
 
 private enum class AddPhotoSource { CAMERA, GALLERY }
@@ -109,6 +110,7 @@ fun HomeScreen(
     var pendingCameraMealType by remember { mutableStateOf<MealType?>(null) }
     var pendingGalleryMealType by remember { mutableStateOf<MealType?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -281,7 +283,8 @@ fun HomeScreen(
                             meals = uiState.mealsToday,
                             pendingMeals = uiState.pendingMeals,
                             onDismissError = viewModel::dismissPendingError,
-                            onDetailClick = onNavigateToMacroDetail
+                            onDetailClick = onNavigateToMacroDetail,
+                            onMealClick = viewModel::onEditMeal
                         )
                     }
                 }
@@ -325,6 +328,16 @@ fun HomeScreen(
                             showMealTypePicker = AddPhotoSource.GALLERY
                         },
                         onDismiss = { showAddFoodSheet = false }
+                    )
+                }
+
+                if (uiState.isEditingSheetOpen && uiState.editingMeal != null) {
+                    EditMealBottomSheet(
+                        meal = uiState.editingMeal!!,
+                        sheetState = editSheetState,
+                        onDismiss = viewModel::onDismissEditMeal,
+                        onSave = viewModel::onUpdateMeal,
+                        onDelete = viewModel::onDeleteMeal
                     )
                 }
             }
@@ -521,7 +534,8 @@ private fun TodayMealsSection(
     meals: List<Meal>,
     pendingMeals: List<PendingMeal> = emptyList(),
     onDismissError: (String) -> Unit = {},
-    onDetailClick: () -> Unit = {}
+    onDetailClick: () -> Unit = {},
+    onMealClick: (Meal) -> Unit = {}
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -570,7 +584,7 @@ private fun TodayMealsSection(
                         onDismissError = { onDismissError(pending.id) }
                     )
                 }
-                meals.forEach { meal -> MealCard(meal = meal) }
+                meals.forEach { meal -> MealCard(meal = meal, onClick = { onMealClick(meal) }) }
             }
         }
     }

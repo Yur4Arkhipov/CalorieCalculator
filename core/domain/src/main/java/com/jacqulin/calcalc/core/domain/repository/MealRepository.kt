@@ -9,4 +9,5 @@ interface MealRepository {
     fun observeDayData(date: Date): Flow<DayData>
     suspend fun addMeal(date: Date, meal: Meal)
     suspend fun updateMeal(meal: Meal)
+    suspend fun deleteMeal(meal: Meal)
 }

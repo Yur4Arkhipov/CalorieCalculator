@@ -23,7 +23,7 @@ object DatabaseModule {
             MealDatabase::class.java,
             "meal_db"
         )
-            .addMigrations(MealDatabase.MIGRATION_1_2)
+            .addMigrations(MealDatabase.MIGRATION_1_2, MealDatabase.MIGRATION_2_3)
             .build()
 
     @Provides
