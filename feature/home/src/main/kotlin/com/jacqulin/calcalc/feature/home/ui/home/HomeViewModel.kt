@@ -1,30 +1,24 @@
 package com.jacqulin.calcalc.feature.home.ui.home
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Base64
-import androidx.core.content.FileProvider
-import androidx.core.graphics.scale
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.PendingMeal
+import com.jacqulin.calcalc.core.domain.repository.ImageRepository
 import com.jacqulin.calcalc.core.domain.usecase.AnalyzeMealFromImageUseCase
+import com.jacqulin.calcalc.core.domain.usecase.DeleteMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GenerateWeekDaysUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GetDayDataUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
-import com.jacqulin.calcalc.core.domain.usecase.DeleteMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SetSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.UpdateMealUseCase
 import com.jacqulin.calcalc.core.util.NotFoodException
 import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,8 +31,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.ByteArrayOutputStream
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -59,7 +51,7 @@ class HomeViewModel @Inject constructor(
     private val saveManualAddMealDBUseCase: SaveManualAddMealDBUseCase,
     private val updateMealUseCase: UpdateMealUseCase,
     private val deleteMealUseCase: DeleteMealUseCase,
-    @param:ApplicationContext private val context: Context
+    private val imageRepository: ImageRepository
 ) : ViewModel() {
 
     private val currentWeekIndexFlow = MutableStateFlow(0)
@@ -149,38 +141,28 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onImageCaptured(imageBytes: ByteArray, mealType: MealType) {
-        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-
-        val imageFile = saveImageToFile(bitmap)
-        val imageUri = imageFile?.absolutePath
-
-        val pending = PendingMeal(type = mealType, isLoading = true, imageUri = imageUri)
+        val pending = PendingMeal(type = mealType, isLoading = true, imageUri = null)
         pendingMealsFlow.update { it + pending }
 
         viewModelScope.launch {
             try {
-                val base64 = encodeImageForAi(bitmap)
-                val nutrition = analyzeMealFromImageUseCase(base64)
-
-                val mealName = nutrition.name.ifBlank { "Блюдо" }
+                val result = analyzeMealFromImageUseCase(imageBytes)
                 val meal = Meal(
-                    name = mealName,
-                    calories = nutrition.calories.toInt(),
-                    proteins = nutrition.protein.toInt(),
-                    fats = nutrition.fat.toInt(),
-                    carbs = nutrition.carbs.toInt(),
+                    name = result.nutrition.name.ifBlank { "Блюдо" },
+                    calories = result.nutrition.calories.toInt(),
+                    proteins = result.nutrition.protein.toInt(),
+                    fats = result.nutrition.fat.toInt(),
+                    carbs = result.nutrition.carbs.toInt(),
                     time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
                     type = mealType,
-                    imageUri = imageUri
+                    imageUri = result.savedImagePath
                 )
                 saveManualAddMealDBUseCase(selectedDate.value, meal)
                 pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
             } catch (_: NotFoodException) {
-                if (imageUri != null) File(imageUri).delete()
                 pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
                 _uiEvents.send(HomeUiEvent.ShowNotFoodError)
             } catch (_: Exception) {
-                if (imageUri != null) File(imageUri).delete()
                 pendingMealsFlow.update { list ->
                     list.map {
                         if (it.id == pending.id) it.copy(isLoading = false, error = "Ошибка анализа")
@@ -213,16 +195,14 @@ class HomeViewModel @Inject constructor(
     fun onDeleteMeal(meal: Meal) {
         viewModelScope.launch {
             deleteMealUseCase(meal)
-            if (meal.imageUri != null) {
-                try { File(meal.imageUri!!).delete() } catch (_: Exception) {}
-            }
+            meal.imageUri?.let { imageRepository.deleteImage(it) }
         }
         editingMealFlow.value = Pair(null, false)
     }
 
     fun onAddPhotoFromCamera(mealType: MealType) {
         viewModelScope.launch {
-            val uri = createImageFileUri()
+            val uri = imageRepository.createCameraFileUri()
             _uiEvents.send(HomeUiEvent.LaunchCamera(uri, mealType))
         }
     }
@@ -240,68 +220,25 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onCameraPermissionResult(granted: Boolean, mealType: MealType) {
-        if (granted) {
-            onAddPhotoFromCamera(mealType)
-        }
+        if (granted) onAddPhotoFromCamera(mealType)
     }
 
     fun onCameraResult(success: Boolean, uri: Uri, mealType: MealType) {
-        if (success) {
-            val bytes = context.contentResolver.openInputStream(uri)?.readBytes()
-            if (bytes != null) {
-                onImageCaptured(bytes, mealType)
+        viewModelScope.launch {
+            if (success) {
+                val bytes = imageRepository.readImageBytes(uri)
+                if (bytes != null) onImageCaptured(bytes, mealType)
             }
+            imageRepository.deleteCameraFile(uri)
         }
-        try {
-            context.contentResolver.delete(uri, null, null)
-            val path = uri.path
-            if (path != null) File(path).delete()
-        } catch (_: Exception) {}
     }
 
     fun onGalleryResult(uri: Uri, mealType: MealType) {
-        val bytes = context.contentResolver.openInputStream(uri)?.readBytes()
-        if (bytes != null) {
-            onImageCaptured(bytes, mealType)
+        viewModelScope.launch {
+            val bytes = imageRepository.readImageBytes(uri)
+            if (bytes != null) onImageCaptured(bytes, mealType)
         }
     }
-
-    fun createImageFileUri(): Uri {
-        val file = File(context.cacheDir, "meal_photo_${System.currentTimeMillis()}.jpg")
-        return FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-    }
-
-    private fun saveImageToFile(bitmap: Bitmap): File? {
-        return try {
-            val imagesDir = File(context.filesDir, "meal_images").also { it.mkdirs() }
-            val file = File(imagesDir, "meal_${System.currentTimeMillis()}.jpg")
-            val scaled = scaleBitmap(bitmap, maxDim = 800)
-            file.outputStream().use { out ->
-                scaled.compress(Bitmap.CompressFormat.JPEG, 75, out)
-            }
-            if (scaled !== bitmap) scaled.recycle()
-            file
-        } catch (_: Exception) {
-            null
-        }
-    }
-
-    private fun encodeImageForAi(bitmap: Bitmap): String {
-        val scaled = scaleBitmap(bitmap, maxDim = 1024)
-        val output = ByteArrayOutputStream()
-        scaled.compress(Bitmap.CompressFormat.JPEG, 80, output)
-        if (scaled !== bitmap) scaled.recycle()
-        return Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP)
-    }
-
-    private fun scaleBitmap(bitmap: Bitmap, maxDim: Int): Bitmap {
-        val w = bitmap.width
-        val h = bitmap.height
-        if (w <= maxDim && h <= maxDim) return bitmap
-        val scale = maxDim.toFloat() / maxOf(w, h)
-        return bitmap.scale((w * scale).toInt(), (h * scale).toInt())
-    }
-
 
     private fun mapToCalendarDays(
         dates: List<Date>,

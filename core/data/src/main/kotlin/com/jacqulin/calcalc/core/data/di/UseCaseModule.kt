@@ -13,6 +13,7 @@ import com.jacqulin.calcalc.core.data.usecase.SetSelectedDateUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.DeleteMealUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.UpdateMealUseCaseImpl
 import com.jacqulin.calcalc.core.domain.repository.AiRepository
+import com.jacqulin.calcalc.core.domain.repository.ImageRepository
 import com.jacqulin.calcalc.core.domain.repository.MealRepository
 import com.jacqulin.calcalc.core.domain.repository.SelectedDateHolder
 import com.jacqulin.calcalc.core.domain.repository.UiPreferencesRepository
@@ -74,8 +75,11 @@ object UseCaseModule {
     }
 
     @Provides
-    fun provideAnalyzeMealFromImageUseCase(aiRepository: AiRepository): AnalyzeMealFromImageUseCase {
-        return AnalyzeMealFromImageUseCaseImpl(aiRepository)
+    fun provideAnalyzeMealFromImageUseCase(
+        aiRepository: AiRepository,
+        imageRepository: ImageRepository
+    ): AnalyzeMealFromImageUseCase {
+        return AnalyzeMealFromImageUseCaseImpl(aiRepository, imageRepository)
     }
 
     @Provides
