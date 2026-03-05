@@ -100,6 +100,10 @@ class MacroDetailViewModel @Inject constructor(
     fun onDeleteMeal(meal: Meal) {
         viewModelScope.launch {
             deleteMealUseCase(meal)
+            val imageUri = meal.imageUri
+            if (imageUri != null) {
+                try { java.io.File(imageUri).delete() } catch (_: Exception) {}
+            }
         }
         uiLocalState.update {
             it.copy(editingMeal = null, isEditingSheetOpen = false)
