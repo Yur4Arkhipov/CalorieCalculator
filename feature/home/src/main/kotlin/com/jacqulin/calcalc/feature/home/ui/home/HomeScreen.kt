@@ -80,6 +80,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.AddMealFloatingActionButton
+import com.jacqulin.calcalc.core.designsystem.theme.MealBreakfastColor
+import com.jacqulin.calcalc.core.designsystem.theme.MealDinnerColor
+import com.jacqulin.calcalc.core.designsystem.theme.MealLunchColor
+import com.jacqulin.calcalc.core.designsystem.theme.MealSnackColor
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.PendingMeal
@@ -243,11 +247,10 @@ fun HomeScreen(
                 }
             },
             containerColor = MaterialTheme.colorScheme.background
-        ) { innerPadding ->
+        ) { _ ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = innerPadding.calculateTopPadding())
             ) {
                 LazyColumn(
                     state = lazyListState,
@@ -280,7 +283,6 @@ fun HomeScreen(
                         )
                     }
                 }
-
 
                 AnimatedVisibility(
                     visible = true,
@@ -663,21 +665,19 @@ private fun PendingMealCard(
 @Composable
 private fun MealCard(meal: Meal) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(96.dp),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Top
         ) {
             if (meal.imageUri != null) {
                 AsyncImage(
@@ -685,7 +685,7 @@ private fun MealCard(meal: Meal) {
                     contentDescription = meal.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(68.dp)
+                        .size(72.dp)
                         .clip(RoundedCornerShape(12.dp))
                 )
             }
@@ -701,7 +701,7 @@ private fun MealCard(meal: Meal) {
                 ) {
                     Text(
                         text = meal.name,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 2,
@@ -718,7 +718,7 @@ private fun MealCard(meal: Meal) {
                 ) {
                     Text(
                         text = "${meal.calories} ккал",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
                     )
@@ -756,9 +756,9 @@ private fun MealTypeChip(type: MealType) {
 @Composable
 private fun mealTypeColor(mealType: MealType): Color {
     return when (mealType) {
-        MealType.BREAKFAST -> Color(0xFFFC8383)
-        MealType.LUNCH     -> Color(0xFF62B6F8)
-        MealType.DINNER    -> Color(0xFF298C29)
-        MealType.SNACK     -> Color(0xFFFAB35D)
+        MealType.BREAKFAST -> MealBreakfastColor
+        MealType.LUNCH -> MealLunchColor
+        MealType.DINNER -> MealDinnerColor
+        MealType.SNACK -> MealSnackColor
     }
 }

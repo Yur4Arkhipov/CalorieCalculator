@@ -25,3 +25,8 @@ val CaloriesLight = Color(0xFFE5E5EA)
 val DateSelected = Color(0xFF000000)
 val DateInactive = Color(0xFFB8BBC3)
 val DateToday = Color(0xFFFFF4E6)
+
+val MealBreakfastColor = Color(0xFFFC8383)
+val MealLunchColor = Color(0xFF62B6F8)
+val MealDinnerColor = Color(0xFF298C29)
+val MealSnackColor = Color(0xFFFAB35D)
