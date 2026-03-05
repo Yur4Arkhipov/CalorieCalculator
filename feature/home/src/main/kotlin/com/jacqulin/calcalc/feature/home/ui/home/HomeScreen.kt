@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animate
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -80,10 +82,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.AddMealFloatingActionButton
-import com.jacqulin.calcalc.core.designsystem.theme.MealBreakfastColor
-import com.jacqulin.calcalc.core.designsystem.theme.MealDinnerColor
-import com.jacqulin.calcalc.core.designsystem.theme.MealLunchColor
-import com.jacqulin.calcalc.core.designsystem.theme.MealSnackColor
+import com.jacqulin.calcalc.core.designsystem.theme.AppColors
+import com.jacqulin.calcalc.core.designsystem.theme.CaloriesDark
+import com.jacqulin.calcalc.core.designsystem.theme.TextSecondary
+import com.jacqulin.calcalc.core.designsystem.theme.TextTertiary
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.PendingMeal
@@ -663,21 +665,25 @@ private fun PendingMealCard(
 }
 
 @Composable
-private fun MealCard(meal: Meal) {
+private fun MealCard(
+    meal: Meal,
+    onClick: () -> Unit = {}
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.CenterVertically
         ) {
             if (meal.imageUri != null) {
                 AsyncImage(
@@ -685,7 +691,7 @@ private fun MealCard(meal: Meal) {
                     contentDescription = meal.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(72.dp)
+                        .size(100.dp)
                         .clip(RoundedCornerShape(12.dp))
                 )
             }
@@ -694,23 +700,15 @@ private fun MealCard(meal: Meal) {
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = meal.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    MealTypeChip(meal.type)
-                }
+                Text(
+                    text = meal.name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -720,13 +718,30 @@ private fun MealCard(meal: Meal) {
                         text = "${meal.calories} ккал",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+                        color = CaloriesDark
                     )
-                    Text(
-                        text = meal.time,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = meal.type.displayName,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary
+                        )
+                        Spacer(Modifier.width(2.dp))
+                        Text(
+                            text = meal.time,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextTertiary
+                        )
+                    }
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    MacroBadge(label = "Б", value = meal.proteins, color = AppColors.proteinMain)
+                    MacroBadge(label = "Ж", value = meal.fats, color = AppColors.fatMain)
+                    MacroBadge(label = "У", value = meal.carbs, color = AppColors.carbsMain)
                 }
             }
         }
@@ -734,31 +749,44 @@ private fun MealCard(meal: Meal) {
 }
 
 @Composable
-private fun MealTypeChip(type: MealType) {
-    val color = mealTypeColor(type)
-    Box(
+private fun MacroBadge(label: String, value: Int, color: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
-            .background(
-                color = color.copy(alpha = 0.12f),
-                shape = RoundedCornerShape(6.dp)
+            .border(
+                width = 1.5.dp,
+                color = color.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(20.dp)
             )
-            .padding(horizontal = 6.dp, vertical = 2.dp)
+            .padding(horizontal = 10.dp, vertical = 5.dp)
     ) {
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .clip(CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = color,
+                shape = CircleShape
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
         Text(
-            text = type.displayName,
-            style = MaterialTheme.typography.labelSmall,
-            color = color,
-            maxLines = 1
+            text = "$value г",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Medium
         )
-    }
-}
-
-@Composable
-private fun mealTypeColor(mealType: MealType): Color {
-    return when (mealType) {
-        MealType.BREAKFAST -> MealBreakfastColor
-        MealType.LUNCH -> MealLunchColor
-        MealType.DINNER -> MealDinnerColor
-        MealType.SNACK -> MealSnackColor
     }
 }
