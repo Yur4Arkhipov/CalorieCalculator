@@ -15,6 +15,9 @@ interface MealDao {
     @Query("SELECT * FROM meal WHERE date = :date ORDER BY time ASC")
     fun observeMealsForDate(date: String): Flow<List<MealEntity>>
 
+    @Query("SELECT * FROM meal WHERE isFavorite = 1 ORDER BY name ASC")
+    fun observeFavoriteMeals(): Flow<List<MealEntity>>
+
     @Query("SELECT * FROM meal WHERE id = :id LIMIT 1")
     suspend fun getMealById(id: Int): MealEntity?
 

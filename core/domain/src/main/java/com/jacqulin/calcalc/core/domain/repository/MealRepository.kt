@@ -7,6 +7,7 @@ import java.util.Date
 
 interface MealRepository {
     fun observeDayData(date: Date): Flow<DayData>
+    fun observeFavoriteMeals(): Flow<List<Meal>>
     suspend fun addMeal(date: Date, meal: Meal)
     suspend fun updateMeal(meal: Meal)
     suspend fun deleteMeal(meal: Meal)

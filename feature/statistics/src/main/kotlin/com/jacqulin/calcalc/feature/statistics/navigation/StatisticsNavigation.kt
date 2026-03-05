@@ -16,10 +16,8 @@ data object StatisticsBaseRoute
 fun NavController.navigateToStatistics(navOptions: NavOptions? = null) =
     navigate(StatisticsRoute, navOptions)
 
-fun NavGraphBuilder.statisticsScreen(
-    onBackClick: () -> Unit
-) {
+fun NavGraphBuilder.statisticsScreen() {
     composable<StatisticsRoute> {
-        StatisticsScreen(onBackClick = onBackClick)
+        StatisticsScreen()
     }
 }

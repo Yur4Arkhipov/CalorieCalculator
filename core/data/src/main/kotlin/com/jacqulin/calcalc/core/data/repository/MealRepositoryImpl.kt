@@ -10,6 +10,7 @@ import com.jacqulin.calcalc.core.domain.repository.MealRepository
 import com.jacqulin.calcalc.core.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -52,6 +53,10 @@ class MealRepositoryImpl @Inject constructor(
                 macros = macros
             )
         }
+    }
+
+    override fun observeFavoriteMeals(): Flow<List<Meal>> {
+        return mealDao.observeFavoriteMeals().map { entities -> entities.map { it.toDomain() } }
     }
 
     override suspend fun addMeal(date: Date, meal: Meal) {
