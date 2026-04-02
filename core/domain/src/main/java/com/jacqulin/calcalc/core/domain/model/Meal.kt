@@ -10,7 +10,17 @@ data class Meal(
     val time: String,
     val type: MealType,
     val imageUri: String? = null,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val components: List<MealComponent> = emptyList()
+)
+
+data class MealComponent(
+    val id: Int = 0,
+    val name: String,
+    val calories: Int,
+    val protein: Int = 0,
+    val fat: Int = 0,
+    val carbs: Int = 0
 )
 
 enum class MealType(val displayName: String) {

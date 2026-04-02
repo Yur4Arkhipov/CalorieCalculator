@@ -11,13 +11,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -51,7 +51,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -489,10 +488,7 @@ fun EditMealBottomSheet(
     onDelete: (Meal) -> Unit = {}
 ) {
     var editedName by remember(meal) { mutableStateOf(meal.name) }
-    var editedCalories by remember(meal) { mutableStateOf(meal.calories.toString()) }
-    var editedProteins by remember(meal) { mutableStateOf(meal.proteins.toString()) }
-    var editedCarbs by remember(meal) { mutableStateOf(meal.carbs.toString()) }
-    var editedFats by remember(meal) { mutableStateOf(meal.fats.toString()) }
+    var editedComponents by remember(meal) { mutableStateOf(meal.components) }
     var isFavorite by remember(meal) { mutableStateOf(meal.isFavorite) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
@@ -537,6 +533,7 @@ fun EditMealBottomSheet(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedTextField(
                 value = editedName,
                 onValueChange = { editedName = it },
@@ -546,61 +543,33 @@ fun EditMealBottomSheet(
                 shape = RoundedCornerShape(12.dp)
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = editedCalories,
-                onValueChange = { editedCalories = it.filter { char -> char.isDigit() } },
-                label = { Text("Калории (ккал)") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
-
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Макронутриенты",
+                text = "Компоненты (${editedComponents.size})",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = 8.dp)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
-            OutlinedTextField(
-                value = editedProteins,
-                onValueChange = { editedProteins = it.filter { char -> char.isDigit() } },
-                label = { Text("Белки (г)") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = editedCarbs,
-                onValueChange = { editedCarbs = it.filter { char -> char.isDigit() } },
-                label = { Text("Углеводы (г)") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = editedFats,
-                onValueChange = { editedFats = it.filter { char -> char.isDigit() } },
-                label = { Text("Жиры (г)") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 200.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(editedComponents.size) { index ->
+                    val component = editedComponents[index]
+                    ComponentEditCard(
+                        component = component,
+                        onRemove = {
+                            editedComponents = editedComponents.filterIndexed { i, _ -> i != index }
+                        }
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -618,23 +587,25 @@ fun EditMealBottomSheet(
 
                 Button(
                     onClick = {
+                        val totalCalories = editedComponents.sumOf { it.calories }
+                        val totalProteins = editedComponents.sumOf { it.protein }
+                        val totalFats = editedComponents.sumOf { it.fat }
+                        val totalCarbs = editedComponents.sumOf { it.carbs }
+
                         val updatedMeal = meal.copy(
                             name = editedName,
-                            calories = editedCalories.toIntOrNull() ?: meal.calories,
-                            proteins = editedProteins.toIntOrNull() ?: meal.proteins,
-                            carbs = editedCarbs.toIntOrNull() ?: meal.carbs,
-                            fats = editedFats.toIntOrNull() ?: meal.fats,
+                            calories = totalCalories,
+                            proteins = totalProteins,
+                            fats = totalFats,
+                            carbs = totalCarbs,
+                            components = editedComponents,
                             isFavorite = isFavorite
                         )
                         onSave(updatedMeal)
                     },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp),
-                    enabled = editedName.isNotBlank() &&
-                             editedCalories.isNotBlank() &&
-                             editedProteins.isNotBlank() &&
-                             editedCarbs.isNotBlank() &&
-                             editedFats.isNotBlank()
+                    enabled = editedName.isNotBlank() && editedComponents.isNotEmpty()
                 ) {
                     Text("Сохранить")
                 }
@@ -663,5 +634,52 @@ fun EditMealBottomSheet(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun ComponentEditCard(
+    component: com.jacqulin.calcalc.core.domain.model.MealComponent,
+    onRemove: () -> Unit = {}
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = component.name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "${component.calories} ккал",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary
+                )
+            }
+            IconButton(onClick = onRemove, modifier = Modifier.size(36.dp)) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Удалить компонент",
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
     }
 }

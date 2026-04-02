@@ -752,7 +752,7 @@ private fun MealCard(
                     }
                 }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     MacroBadge(label = "Б", value = meal.proteins, color = AppColors.proteinMain)
                     MacroBadge(label = "Ж", value = meal.fats, color = AppColors.fatMain)
                     MacroBadge(label = "У", value = meal.carbs, color = AppColors.carbsMain)
@@ -773,11 +773,11 @@ private fun MacroBadge(label: String, value: Int, color: Color) {
                 color = color.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(20.dp)
             )
-            .padding(horizontal = 10.dp, vertical = 5.dp)
+            .padding(horizontal = 8.dp, vertical = 3.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(20.dp)
+                .size(14.dp)
                 .clip(CircleShape),
             contentAlignment = Alignment.Center
         ) {

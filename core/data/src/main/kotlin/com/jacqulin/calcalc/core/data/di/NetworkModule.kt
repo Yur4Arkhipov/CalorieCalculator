@@ -1,5 +1,6 @@
 package com.jacqulin.calcalc.core.data.di
 
+import android.util.Log
 import com.jacqulin.calcalc.core.data.remote.service.YandexAiApi
 import dagger.Module
 import dagger.Provides
@@ -21,7 +22,7 @@ object NetworkModule {
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor =
         HttpLoggingInterceptor { message ->
-            android.util.Log.d("AiApi", message)
+            Log.d("AiApi", message)
         }.apply {
             level = HttpLoggingInterceptor.Level.BODY
         }

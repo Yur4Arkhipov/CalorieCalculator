@@ -99,7 +99,7 @@ fun ManualAddMealScreen(
     }
 
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.padding(top = 16.dp),
         snackbarHost = {
             Box(
                 modifier = Modifier

@@ -1,6 +1,7 @@
 ﻿package com.jacqulin.calcalc.core.data.repository
 
 import com.jacqulin.calcalc.core.data.remote.dto.NutritionDto
+import com.jacqulin.calcalc.core.data.remote.dto.NutritionDtoNew
 import com.jacqulin.calcalc.core.data.remote.dto.toDomain
 import com.jacqulin.calcalc.core.data.remote.dto.yandex.YandexChatRequest
 import com.jacqulin.calcalc.core.data.remote.dto.yandex.YandexContent
@@ -10,6 +11,7 @@ import com.jacqulin.calcalc.core.data.remote.dto.yandex.YandexMessage
 import com.jacqulin.calcalc.core.data.remote.dto.yandex.YandexResponseFormat
 import com.jacqulin.calcalc.core.data.remote.service.YandexAiApi
 import com.jacqulin.calcalc.core.domain.model.Nutrition
+import com.jacqulin.calcalc.core.domain.model.NutritionNew
 import com.jacqulin.calcalc.core.domain.repository.AiRepository
 import com.jacqulin.calcalc.core.util.NotFoodException
 import kotlinx.serialization.json.Json
@@ -21,40 +23,55 @@ class AiRepositoryImpl @Inject constructor(
 
     private val model = "gpt://b1gd0h769ghblmknef7n/gemma-3-27b-it/latest"
 
-     private val systemInstructions = """
+    private val systemInstructions = """
         Ты профессиональный диетолог.
         Правила:
-        - Название блюда должно быть конкретным и понятным (например: "Омлет с сыром", а не "Еда").
-        - Если на изображении несколько продуктов — объединяй их в одно блюдо.
-        - Рассчитывай калорийность и БЖУ для всей порции.
-        - Значения должны быть реалистичными и основанными на средних данных.
-        - Белки, жиры и углеводы указывай в граммах.
-        - Калории указывай в килокалориях.
-        - Не добавляй пояснений.
-        - Если размер порции неясен, предполагается средняя порция (примерно 250-400 г).
-        - Если невозможно точно определить состав — используй наиболее вероятный вариант.
-        - Если продукт промышленный (например, шоколадка), ориентируйся на стандартные данные.
-        - Не придумывай еду там, где её нет.
-        - Если на изображении нет еды, или невозможно определить блюдо, пиши 
+        - Определи блюдо и разбей его на отдельные продукты/ингредиенты.
+        - Для каждого продукта укажи:
+          - название
+          - примерный вес в граммах
+          - калории
+          - белки, жиры, углеводы
+        - Также укажи суммарные значения для всего блюда.
+        - Значения должны быть реалистичными.
+        - Если вес неизвестен — оцени его.
+        
+        Формат ответа строго JSON.
+        
+        Если это не еда:
         {
           "name": "not_food",
-          "calories": 0,
-          "protein": 0,
-          "fat": 0,
-          "carbs": 0
+          "items": []
         }
-        """.trimIndent()
+        """
 
     private val nutritionSchema = mapOf(
         "type" to "object",
         "properties" to mapOf(
             "name" to mapOf("type" to "string"),
-            "calories" to mapOf("type" to "number"),
-            "protein" to mapOf("type" to "number"),
-            "fat" to mapOf("type" to "number"),
-            "carbs" to mapOf("type" to "number")
+
+            "total_calories" to mapOf("type" to "number"),
+            "total_protein" to mapOf("type" to "number"),
+            "total_fat" to mapOf("type" to "number"),
+            "total_carbs" to mapOf("type" to "number"),
+
+            "items" to mapOf(
+                "type" to "array",
+                "items" to mapOf(
+                    "type" to "object",
+                    "properties" to mapOf(
+                        "name" to mapOf("type" to "string"),
+                        "weight" to mapOf("type" to "number"),
+                        "calories" to mapOf("type" to "number"),
+                        "protein" to mapOf("type" to "number"),
+                        "fat" to mapOf("type" to "number"),
+                        "carbs" to mapOf("type" to "number")
+                    ),
+                    "required" to listOf("name","weight","calories","protein","fat","carbs")
+                )
+            )
         ),
-        "required" to listOf("name","calories","protein","fat","carbs")
+        "required" to listOf("name","items")
     )
 
     override suspend fun analyzeMeal(description: String): Nutrition {
@@ -72,7 +89,7 @@ class AiRepositoryImpl @Inject constructor(
         return dto.toDomain()
     }
 
-    override suspend fun analyzeMealFromImage(imageBase64: String): Nutrition {
+    override suspend fun analyzeMealFromImage(imageBase64: String): NutritionNew {
             val request = buildImageRequest(imageBase64)
             val response = aiApi.chat(request)
 
@@ -82,8 +99,11 @@ class AiRepositoryImpl @Inject constructor(
                 ?.content
                 ?: error("AI returned empty response")
 
-            val dto = Json.decodeFromString<NutritionDto>(content)
+            val dto = Json.decodeFromString<NutritionDtoNew>(content)
             if (dto.name?.trim()?.lowercase() == "not_food") throw NotFoodException()
+            if (dto.items.isEmpty() && dto.calories == null && dto.total_calories == null) {
+                throw Exception("Invalid AI response")
+            }
             return dto.toDomain()
     }
 

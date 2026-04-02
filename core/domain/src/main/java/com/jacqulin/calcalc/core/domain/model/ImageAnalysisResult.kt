@@ -1,6 +1,6 @@
 package com.jacqulin.calcalc.core.domain.model
 
 data class ImageAnalysisResult(
-    val nutrition: Nutrition,
+    val nutrition: NutritionNew,
     val savedImagePath: String?
 )

@@ -147,21 +147,38 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val result = analyzeMealFromImageUseCase(imageBytes)
+                val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+
+                // Создаём одно блюдо с компонентами вместо множества отдельных блюд
+                val components = result.nutrition.items.map { item ->
+                    com.jacqulin.calcalc.core.domain.model.MealComponent(
+                        name = item.name,
+                        calories = item.macros.calories.toInt(),
+                        protein = item.macros.protein.toInt(),
+                        fat = item.macros.fat.toInt(),
+                        carbs = item.macros.carbs.toInt()
+                    )
+                }
+
                 val meal = Meal(
-                    name = result.nutrition.name.ifBlank { "Блюдо" },
-                    calories = result.nutrition.calories.toInt(),
-                    proteins = result.nutrition.protein.toInt(),
-                    fats = result.nutrition.fat.toInt(),
-                    carbs = result.nutrition.carbs.toInt(),
-                    time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
+                    name = result.nutrition.name,
+                    calories = components.sumOf { it.calories },
+                    proteins = components.sumOf { it.protein },
+                    fats = components.sumOf { it.fat },
+                    carbs = components.sumOf { it.carbs },
+                    time = currentTime,
                     type = mealType,
-                    imageUri = result.savedImagePath
+                    imageUri = result.savedImagePath,
+                    components = components
                 )
+
                 saveManualAddMealDBUseCase(selectedDate.value, meal)
                 pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
+
             } catch (_: NotFoodException) {
                 pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
                 _uiEvents.send(HomeUiEvent.ShowNotFoodError)
+
             } catch (_: Exception) {
                 pendingMealsFlow.update { list ->
                     list.map {

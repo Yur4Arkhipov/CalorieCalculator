@@ -1,6 +1,7 @@
 package com.jacqulin.calcalc.core.data.repository
 
 import com.jacqulin.calcalc.core.data.local.dao.MealDao
+import com.jacqulin.calcalc.core.data.local.entities.MealComponentEntity
 import com.jacqulin.calcalc.core.data.local.entities.MealEntity
 import com.jacqulin.calcalc.core.data.local.entities.toDomain
 import com.jacqulin.calcalc.core.domain.model.DayData
@@ -31,11 +32,11 @@ class MealRepositoryImpl @Inject constructor(
         val dateKey = getDateKey(date)
 
         return combine(
-            mealDao.observeMealsForDate(dateKey),
+            mealDao.observeMealsWithComponentsForDate(dateKey),
             userPreferencesRepository.observeUserProfile()
-        ) { entities, profile ->
+        ) { mealsWithComponents, profile ->
 
-            val meals = entities.map { it.toDomain() }
+            val meals = mealsWithComponents.map { it.toDomain() }
 
             val macros = MacroNutrients(
                 calories = meals.sumOf { it.calories },
@@ -56,24 +57,39 @@ class MealRepositoryImpl @Inject constructor(
     }
 
     override fun observeFavoriteMeals(): Flow<List<Meal>> {
-        return mealDao.observeFavoriteMeals().map { entities -> entities.map { it.toDomain() } }
+        return mealDao.observeFavoriteMealsWithComponents()
+            .map { mealsWithComponents -> mealsWithComponents.map { it.toDomain() } }
     }
 
     override suspend fun addMeal(date: Date, meal: Meal) {
         val dateKey = getDateKey(date)
-        mealDao.insertMeal(
+        val mealId = mealDao.insertMeal(
             MealEntity(
                 name = meal.name,
-                calories = meal.calories,
-                protein = meal.proteins,
-                fat = meal.fats,
-                carbs = meal.carbs,
+                calories = 0, // will be calculated from components
+                protein = 0,
+                fat = 0,
+                carbs = 0,
                 time = meal.time,
                 type = meal.type,
                 date = dateKey,
                 imageUri = meal.imageUri
             )
-        )
+        ).toInt()
+
+        // Insert components
+        meal.components.forEach { component ->
+            mealDao.insertComponent(
+                MealComponentEntity(
+                    mealId = mealId,
+                    name = component.name,
+                    calories = component.calories,
+                    protein = component.protein,
+                    fat = component.fat,
+                    carbs = component.carbs
+                )
+            )
+        }
     }
 
     override suspend fun updateMeal(meal: Meal) {
@@ -81,18 +97,35 @@ class MealRepositoryImpl @Inject constructor(
         mealDao.updateMeal(
             existing.copy(
                 name = meal.name,
-                calories = meal.calories,
-                protein = meal.proteins,
-                fat = meal.fats,
-                carbs = meal.carbs,
+                calories = 0, // will be calculated from components
+                protein = 0,
+                fat = 0,
+                carbs = 0,
                 imageUri = meal.imageUri,
                 isFavorite = meal.isFavorite
             )
         )
+
+        // Update components
+        mealDao.deleteComponentsByMealId(meal.id)
+        meal.components.forEach { component ->
+            mealDao.insertComponent(
+                MealComponentEntity(
+                    id = component.id.takeIf { it != 0 } ?: 0,
+                    mealId = meal.id,
+                    name = component.name,
+                    calories = component.calories,
+                    protein = component.protein,
+                    fat = component.fat,
+                    carbs = component.carbs
+                )
+            )
+        }
     }
 
     override suspend fun deleteMeal(meal: Meal) {
         val existing = mealDao.getMealById(meal.id) ?: return
         mealDao.deleteMeal(existing)
+        // Components will be deleted via CASCADE in foreign key
     }
 }
