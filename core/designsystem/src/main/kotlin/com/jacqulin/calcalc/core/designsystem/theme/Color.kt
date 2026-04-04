@@ -30,3 +30,5 @@ val MealBreakfastColor = Color(0xFFFC8383)
 val MealLunchColor = Color(0xFF62B6F8)
 val MealDinnerColor = Color(0xFF298C29)
 val MealSnackColor = Color(0xFFFAB35D)
+
+val White = Color(0xFFFFFFFF)

@@ -6,9 +6,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,6 +55,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -68,6 +74,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
@@ -76,6 +83,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -86,6 +94,7 @@ import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 import com.jacqulin.calcalc.core.designsystem.theme.CaloriesDark
 import com.jacqulin.calcalc.core.designsystem.theme.TextSecondary
 import com.jacqulin.calcalc.core.designsystem.theme.TextTertiary
+import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.PendingMeal
@@ -144,7 +153,6 @@ fun HomeScreen(
         pendingGalleryMealType = null
     }
 
-    // All for animated FAB
     val isAtBottom by remember {
         derivedStateOf {
             val layoutInfo = lazyListState.layoutInfo
@@ -289,25 +297,25 @@ fun HomeScreen(
                     }
                 }
 
-                AnimatedVisibility(
-                    visible = true,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 60.dp, end = 12.dp)
-                        .navigationBarsPadding()
-                        .onGloballyPositioned {
-                            fabHeight = it.size.height.toFloat()
-                        }
-                        .graphicsLayer {
-                            translationY = fabOffsetY
-                        }
-                ) {
-                    AddMealFloatingActionButton(
-                        icon = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.home_add_meal),
-                        onClick = { showAddFoodSheet = true },
-                    )
-                }
+//                AnimatedVisibility(
+//                    visible = true,
+//                    modifier = Modifier
+//                        .align(Alignment.BottomEnd)
+//                        .padding(bottom = 60.dp, end = 12.dp)
+//                        .navigationBarsPadding()
+//                        .onGloballyPositioned {
+//                            fabHeight = it.size.height.toFloat()
+//                        }
+//                        .graphicsLayer {
+//                            translationY = fabOffsetY
+//                        }
+//                ) {
+//                    AddMealFloatingActionButton(
+//                        icon = Icons.Default.Add,
+//                        contentDescription = stringResource(R.string.home_add_meal),
+//                        onClick = { showAddFoodSheet = true },
+//                    )
+//                }
 
                 if (showAddFoodSheet) {
                     AddFoodBottomSheet(
@@ -584,7 +592,12 @@ private fun TodayMealsSection(
                         onDismissError = { onDismissError(pending.id) }
                     )
                 }
-                meals.forEach { meal -> MealCard(meal = meal, onClick = { onMealClick(meal) }) }
+                meals.forEach { meal ->
+                    MealCard(
+                        meal = meal,
+                        onClick = { onMealClick(meal) }
+                    )
+                }
             }
         }
     }
@@ -683,14 +696,27 @@ private fun MealCard(
     meal: Meal,
     onClick: () -> Unit = {}
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.97f else 1f,
+        label = "scale"
+    )
+
     Card(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
+        interactionSource = interactionSource,
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = RoundedCornerShape(16.dp)
+        )
     ) {
         Row(
             modifier = Modifier
@@ -766,18 +792,18 @@ private fun MealCard(
 private fun MacroBadge(label: String, value: Int, color: Color) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
         modifier = Modifier
             .border(
                 width = 1.5.dp,
                 color = color.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(20.dp)
             )
-            .padding(horizontal = 10.dp, vertical = 5.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(20.dp)
+                .size(16.dp)
                 .clip(CircleShape),
             contentAlignment = Alignment.Center
         ) {
@@ -791,16 +817,18 @@ private fun MacroBadge(label: String, value: Int, color: Color) {
                         text = label,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = White,
+                        fontSize = 10.sp
                     )
                 }
             }
         }
         Text(
-            text = "$value г",
-            style = MaterialTheme.typography.bodySmall,
+            text = "${value}г",
+            style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Normal,
+            fontSize = 11.sp
         )
     }
 }
