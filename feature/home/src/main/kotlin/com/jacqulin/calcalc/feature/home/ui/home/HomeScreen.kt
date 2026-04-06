@@ -6,14 +6,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,7 +51,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -74,7 +69,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
@@ -98,7 +92,6 @@ import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.PendingMeal
-import com.jacqulin.calcalc.feature.home.ui.macrodetail.EditMealBottomSheet
 import java.io.File
 
 private enum class AddPhotoSource { CAMERA, GALLERY }
@@ -297,25 +290,25 @@ fun HomeScreen(
                     }
                 }
 
-//                AnimatedVisibility(
-//                    visible = true,
-//                    modifier = Modifier
-//                        .align(Alignment.BottomEnd)
-//                        .padding(bottom = 60.dp, end = 12.dp)
-//                        .navigationBarsPadding()
-//                        .onGloballyPositioned {
-//                            fabHeight = it.size.height.toFloat()
-//                        }
-//                        .graphicsLayer {
-//                            translationY = fabOffsetY
-//                        }
-//                ) {
-//                    AddMealFloatingActionButton(
-//                        icon = Icons.Default.Add,
-//                        contentDescription = stringResource(R.string.home_add_meal),
-//                        onClick = { showAddFoodSheet = true },
-//                    )
-//                }
+                AnimatedVisibility(
+                    visible = true,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 60.dp, end = 12.dp)
+                        .navigationBarsPadding()
+                        .onGloballyPositioned {
+                            fabHeight = it.size.height.toFloat()
+                        }
+                        .graphicsLayer {
+                            translationY = fabOffsetY
+                        }
+                ) {
+                    AddMealFloatingActionButton(
+                        icon = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.home_add_meal),
+                        onClick = { showAddFoodSheet = true },
+                    )
+                }
 
                 if (showAddFoodSheet) {
                     AddFoodBottomSheet(
@@ -629,31 +622,7 @@ private fun PendingMealCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            if (pending.imageUri != null) {
-                Box(
-                    modifier = Modifier
-                        .size(68.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AsyncImage(
-                        model = File(pending.imageUri!!),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(68.dp)
-                            .clip(RoundedCornerShape(12.dp)),
-                        alpha = if (pending.isLoading) 0.4f else 1f
-                    )
-                    if (pending.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(28.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-            } else if (pending.isLoading) {
+            if (pending.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(28.dp),
                     strokeWidth = 2.dp,
@@ -697,21 +666,10 @@ private fun MealCard(
     onClick: () -> Unit = {}
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
-        label = "scale"
-    )
 
     Card(
         onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            },
+        modifier = Modifier.fillMaxWidth(),
         interactionSource = interactionSource,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(

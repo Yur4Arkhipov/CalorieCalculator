@@ -1,6 +1,7 @@
 package com.jacqulin.calcalc.feature.home.ui.home
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacqulin.calcalc.core.domain.model.Meal
@@ -194,8 +195,12 @@ class HomeViewModel @Inject constructor(
 
     fun onDeleteMeal(meal: Meal) {
         viewModelScope.launch {
-            deleteMealUseCase(meal)
-            meal.imageUri?.let { imageRepository.deleteImage(it) }
+            try {
+                deleteMealUseCase(meal)
+                meal.imageUri?.let { imageRepository.deleteImage(it) }
+            } catch (e: Exception) {
+                Log.d("DeleteMeal", "Error delete: $e")
+            }
         }
         editingMealFlow.value = Pair(null, false)
     }

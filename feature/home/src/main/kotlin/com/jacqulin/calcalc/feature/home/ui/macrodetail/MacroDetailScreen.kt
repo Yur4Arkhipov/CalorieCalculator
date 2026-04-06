@@ -17,13 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,26 +27,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -62,6 +49,7 @@ import com.jacqulin.calcalc.core.designsystem.theme.CaloriesDark
 import com.jacqulin.calcalc.core.designsystem.theme.TextSecondary
 import com.jacqulin.calcalc.core.designsystem.theme.TextTertiary
 import com.jacqulin.calcalc.core.domain.model.Meal
+import com.jacqulin.calcalc.feature.home.ui.home.EditMealBottomSheet
 import java.io.File
 import kotlin.math.roundToInt
 
@@ -475,193 +463,6 @@ private fun MacroBadge(label: String, value: Int, color: Color) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Medium
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditMealBottomSheet(
-    meal: Meal,
-    sheetState: androidx.compose.material3.SheetState,
-    onDismiss: () -> Unit,
-    onSave: (Meal) -> Unit,
-    onDelete: (Meal) -> Unit = {}
-) {
-    var editedName by remember(meal) { mutableStateOf(meal.name) }
-    var editedCalories by remember(meal) { mutableStateOf(meal.calories.toString()) }
-    var editedProteins by remember(meal) { mutableStateOf(meal.proteins.toString()) }
-    var editedCarbs by remember(meal) { mutableStateOf(meal.carbs.toString()) }
-    var editedFats by remember(meal) { mutableStateOf(meal.fats.toString()) }
-    var isFavorite by remember(meal) { mutableStateOf(meal.isFavorite) }
-    var showDeleteConfirm by remember { mutableStateOf(false) }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Редактировать блюдо",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    IconButton(onClick = { isFavorite = !isFavorite }) {
-                        Icon(
-                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = if (isFavorite) "Убрать из избранного" else "В избранное",
-                            tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Удалить",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                value = editedName,
-                onValueChange = { editedName = it },
-                label = { Text("Название блюда") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = editedCalories,
-                onValueChange = { editedCalories = it.filter { char -> char.isDigit() } },
-                label = { Text("Калории (ккал)") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Макронутриенты",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            OutlinedTextField(
-                value = editedProteins,
-                onValueChange = { editedProteins = it.filter { char -> char.isDigit() } },
-                label = { Text("Белки (г)") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = editedCarbs,
-                onValueChange = { editedCarbs = it.filter { char -> char.isDigit() } },
-                label = { Text("Углеводы (г)") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = editedFats,
-                onValueChange = { editedFats = it.filter { char -> char.isDigit() } },
-                label = { Text("Жиры (г)") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Отмена")
-                }
-
-                Button(
-                    onClick = {
-                        val updatedMeal = meal.copy(
-                            name = editedName,
-                            calories = editedCalories.toIntOrNull() ?: meal.calories,
-                            proteins = editedProteins.toIntOrNull() ?: meal.proteins,
-                            carbs = editedCarbs.toIntOrNull() ?: meal.carbs,
-                            fats = editedFats.toIntOrNull() ?: meal.fats,
-                            isFavorite = isFavorite
-                        )
-                        onSave(updatedMeal)
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    enabled = editedName.isNotBlank() &&
-                             editedCalories.isNotBlank() &&
-                             editedProteins.isNotBlank() &&
-                             editedCarbs.isNotBlank() &&
-                             editedFats.isNotBlank()
-                ) {
-                    Text("Сохранить")
-                }
-            }
-        }
-    }
-
-    if (showDeleteConfirm) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Удалить блюдо?") },
-            text = { Text("«${meal.name}» будет удалено из дневника.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDeleteConfirm = false
-                        onDelete(meal)
-                    }
-                ) {
-                    Text("Удалить", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("Отмена")
-                }
-            }
         )
     }
 }
