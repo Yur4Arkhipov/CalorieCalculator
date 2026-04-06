@@ -1,4 +1,7 @@
 <resources>
+    // Version
+    <string name="app_version">0.1</string>
+
     <string name="app_name">CalorieCalculator</string>
     <string name="home_title">CalorieCalculator</string>
     <string name="statistics_title">Statistics</string>

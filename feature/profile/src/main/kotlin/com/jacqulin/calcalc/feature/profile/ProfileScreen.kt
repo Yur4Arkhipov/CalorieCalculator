@@ -1,5 +1,8 @@
 package com.jacqulin.calcalc.feature.profile
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,16 +11,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -27,6 +31,7 @@ import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.TrackChanges
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -50,13 +55,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.ActivityLevel
 import com.jacqulin.calcalc.core.domain.model.Gender
 import com.jacqulin.calcalc.core.domain.model.Goal
@@ -396,6 +407,8 @@ private fun NutriItem(
 
 @Composable
 private fun SettingsCard() {
+    var showVersionDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -416,29 +429,101 @@ private fun SettingsCard() {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-            SettingsRow(icon = "🔔", title = "Уведомления", subtitle = "Настроить напоминания")
+            SettingsRow(
+                icon = painterResource(R.drawable.ic_bell),
+                title = "Уведомления",
+                subtitle = "Настроить напоминания",
+                onClick = {}
+            )
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
-            SettingsRow(icon = "ℹ️", title = "О приложении", subtitle = "Версия и информация")
+            SettingsRow(
+                icon = painterResource(R.drawable.ic_info_about),
+                title = "О приложении",
+                subtitle = "Версия",
+                onClick = { showVersionDialog = true }
+            )
         }
+    }
+
+    if (showVersionDialog) {
+        AboutAppDialog { showVersionDialog = false }
     }
 }
 
 @Composable
-private fun SettingsRow(icon: String, title: String, subtitle: String) {
+private fun SettingsRow(
+    icon: Painter,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 10.dp),
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(
+                onClick = onClick,
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            )
+            .padding(vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = icon, style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-            Text(text = subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
         }
-        Text(text = "›", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+
+        Spacer(Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+
+        Icon(
+            painter = painterResource(R.drawable.ic_right),
+            contentDescription = "Перейти",
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+            modifier = Modifier.size(24.dp)
+        )
     }
+}
+
+@Composable
+fun AboutAppDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("О приложении") },
+        text = { Text("Версия приложения: ${context.getString(R.string.app_version)}") },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Ок")
+            }
+        },
+        containerColor = White
+    )
 }
 
 @Composable

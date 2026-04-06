@@ -1,7 +1,5 @@
 package com.jacqulin.calcalc.feature.home.ui.macrodetail
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,13 +35,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import coil.compose.AsyncImage
 import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 import com.jacqulin.calcalc.core.designsystem.theme.CaloriesDark
 import com.jacqulin.calcalc.core.designsystem.theme.TextSecondary
@@ -51,7 +46,6 @@ import com.jacqulin.calcalc.core.designsystem.theme.TextTertiary
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.feature.home.ui.home.EditMealBottomSheet
 import com.jacqulin.calcalc.feature.home.ui.home.MealCard
-import java.io.File
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
