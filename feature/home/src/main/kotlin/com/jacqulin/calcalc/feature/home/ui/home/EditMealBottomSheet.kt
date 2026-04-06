@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.theme.Favorite
 import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.Meal
 
@@ -91,7 +92,7 @@ fun EditMealBottomSheet(
                 BasicTextField(
                     value = editedName,
                     onValueChange = { newName ->
-                        if (newName.length <= 30) {
+                        if (newName.length <= 40) {
                             editedName = newName
                         }
                     },
@@ -118,9 +119,9 @@ fun EditMealBottomSheet(
                         )
                     ) {
                         Icon(
-                            painter = if (isFavorite) painterResource(R.drawable.ic_favorite) else painterResource(R.drawable.ic_favorite),
+                            painter = if (isFavorite) painterResource(R.drawable.ic_favorite_filled) else painterResource(R.drawable.ic_favorite),
                             contentDescription = if (isFavorite) "Убрать из избранного" else "В избранное",
-                            tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = if (isFavorite) Favorite else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(22.dp)
                         )
                     }

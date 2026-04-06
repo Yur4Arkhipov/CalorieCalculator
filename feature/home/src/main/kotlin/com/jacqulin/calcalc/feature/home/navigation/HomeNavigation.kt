@@ -58,7 +58,10 @@ fun NavGraphBuilder.homeSection(
         }
 
         composable<ManualAddMealRoute> {
-            ManualAddMealScreen(onSaveClick = onBackClick)
+            ManualAddMealScreen(
+                onSaveClick = onBackClick,
+                onBackClick = onBackClick
+            )
         }
     }
 }
