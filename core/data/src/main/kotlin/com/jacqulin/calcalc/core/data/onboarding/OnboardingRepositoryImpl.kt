@@ -17,7 +17,6 @@ class OnboardingRepositoryImpl @Inject constructor(
 
     companion object {
         private val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
-        private val ONBOARDING_SKIPPED = booleanPreferencesKey("onboarding_skipped")
     }
 
     override val isOnboardingCompleted: Flow<Boolean> =
@@ -25,10 +24,9 @@ class OnboardingRepositoryImpl @Inject constructor(
             prefs[ONBOARDING_COMPLETED] ?: false
         }
 
-    override suspend fun setOnboardingCompleted(skipped: Boolean) {
+    override suspend fun setOnboardingCompleted() {
         dataStore.edit { prefs ->
             prefs[ONBOARDING_COMPLETED] = true
-            prefs[ONBOARDING_SKIPPED] = skipped
         }
     }
 }

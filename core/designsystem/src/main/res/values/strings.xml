@@ -1,3 +1,26 @@
 <resources>
+    // Version
+    <string name="app_version">0.1</string>
+
     <string name="app_name">CalorieCalculator</string>
+    <string name="home_title">CalorieCalculator</string>
+    <string name="statistics_title">Statistics</string>
+    <string name="profile_title">Profile</string>
+    <string name="macro_detail_title">Детальная информация</string>
+    <string name="ai_meal_description_title">Описание блюда ИИ</string>
+    <string name="manual_meal_add_title">Добавление вручную</string>
+    <string name="field_product_name">Название продукта</string>
+    <string name="calories">Калории</string>
+    <string name="proteins">Белки</string>
+    <string name="fats">Жиры</string>
+    <string name="carbs">Углеводы</string>
+    <string name="calories_suffix">ккал</string>
+    <string name="weight_suffix">г</string>
+    <string name="save">Сохранить</string>
+    <string name="save_meal_snackbar">"Блюдо успешно сохранено!"</string>
+
+    // Home
+    <string name="home_dialog_cancel">Отмена</string>
+    <string name="home_select_meal_type">Выберите приём пищи</string>
+    <string name="home_add_meal">Добавить блюдо</string>
 </resources>

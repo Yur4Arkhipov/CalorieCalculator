@@ -2,23 +2,18 @@ package com.jacqulin.calcalc.feature.home.ui.home
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,78 +21,132 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.jacqulin.calcalc.core.domain.model.MacroNutrients
-import kotlin.math.cos
-import kotlin.math.roundToInt
-import kotlin.math.sin
-
-private val ProteinColor = Color(0xFFE91E63)
-private val CarbsColor = Color(0xFF2196F3)
-private val FatsColor = Color(0xFFFF9800)
-private const val SectorAngle = 120f
-private const val StartAngle = -90f
+import androidx.compose.ui.unit.sp
+import com.jacqulin.calcalc.core.designsystem.icon.AppIcons
+import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 
 @Composable
-internal fun CaloriesSection(
-    uiState: HomeUiState,
-    onDetailClick: () -> Unit = {}
+internal fun CaloriesSection(uiState: HomeUiState) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        CaloriesCard(
+            consumed = uiState.consumedCalories,
+            goal = uiState.dailyCaloriesGoal
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            MacroCard(
+                name = "Protein",
+                current = uiState.todayMacros.protein,
+                goal = uiState.todayMacros.proteinsGoal,
+                color = AppColors.proteinMain,
+                modifier = Modifier.weight(1f)
+            )
+            MacroCard(
+                name = "Carbs",
+                current = uiState.todayMacros.carb,
+                goal = uiState.todayMacros.carbsGoal,
+                color = AppColors.carbsMain,
+                modifier = Modifier.weight(1f)
+            )
+            MacroCard(
+                name = "Fat",
+                current = uiState.todayMacros.fat,
+                goal = uiState.todayMacros.fatsGoal,
+                color = AppColors.fatMain,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun CaloriesCard(
+    consumed: Int,
+    goal: Int
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.surface
         ),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Макронутриенты",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceAround
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    MacroRadialChart(
-                        macros = uiState.todayMacros,
-                        modifier = Modifier.size(120.dp)
+                    Text(
+                        text = "Calories",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        fontWeight = FontWeight.Medium
                     )
-                    CaloriesProgress(
-                        consumed = uiState.consumedCalories,
-                        goal = uiState.dailyCaloriesGoal,
-                        modifier = Modifier.size(120.dp)
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontFamily = MaterialTheme.typography.displayMedium.fontFamily,
+                                        fontSize = MaterialTheme.typography.displayMedium.fontSize,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                ) {
+                                    append("$consumed")
+                                }
+                                append(" ")
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontFamily = MaterialTheme.typography.headlineSmall.fontFamily,
+                                        fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                                        fontWeight = FontWeight.Normal,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                    )
+                                ) {
+                                    append("/ $goal")
+                                }
+                            },
+                            softWrap = false
+                        )
+                    }
+                    val remaining = goal - consumed
+                    Text(
+                        text = if (remaining >= 0) "$remaining kcal left" else "${-remaining} kcal over",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                MacroPieChartLegend(uiState.todayMacros)
-            }
 
-            IconButton(
-                onClick = onDetailClick,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = "Подробная информация",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(24.dp)
+                CircularProgressWithIcon(
+                    current = consumed,
+                    goal = goal,
+                    color = AppColors.caloriesDark,
+                    icon = AppIcons.calories(),
+                    size = 100.dp
                 )
             }
         }
@@ -105,216 +154,112 @@ internal fun CaloriesSection(
 }
 
 @Composable
-fun MacroRadialChart(
-    macros: MacroNutrients,
-    modifier: Modifier = Modifier
-) {
-    val proteinProgress by animateFloatAsState(
-        targetValue = macros.proteins / macros.proteinsGoal,
-        label = "protein"
-    )
-    val carbsProgress by animateFloatAsState(
-        targetValue = macros.carbs / macros.carbsGoal,
-        label = "carbs"
-    )
-    val fatsProgress by animateFloatAsState(
-        targetValue = macros.fats / macros.fatsGoal,
-        label = "fats"
-    )
-    fun overflowAlpha(progress: Float) =
-        if (progress > 1f) 0.8f else 1f
-
-    Canvas(modifier = modifier) {
-        val baseRadius = size.minDimension / 2f
-        val maxOverflow = baseRadius * 0.25f
-
-        fun progressToRadius(progress: Float): Float =
-            if (progress <= 1f) {
-                baseRadius * progress
-            } else {
-                baseRadius + (progress - 1f).coerceAtMost(1f) * maxOverflow
-            }
-
-        drawCircle(
-            color = Color.LightGray,
-            radius = baseRadius,
-            style = Stroke(width = 1.dp.toPx())
-        )
-
-        drawRadialSector(
-            startAngle = StartAngle,
-            sweepAngle = SectorAngle,
-            radius = progressToRadius(proteinProgress),
-            color = ProteinColor.copy(alpha = overflowAlpha(proteinProgress))
-        )
-
-        drawRadialSector(
-            startAngle = StartAngle + SectorAngle,
-            sweepAngle = SectorAngle,
-            radius = progressToRadius(carbsProgress),
-            color = CarbsColor.copy(alpha = overflowAlpha(carbsProgress))
-        )
-
-        drawRadialSector(
-            startAngle = StartAngle + 2 * SectorAngle,
-            sweepAngle = SectorAngle,
-            radius = progressToRadius(fatsProgress),
-            color = FatsColor.copy(alpha = overflowAlpha(fatsProgress))
-        )
-    }
-}
-
-private fun DrawScope.drawRadialSector(
-    startAngle: Float,
-    sweepAngle: Float,
-    radius: Float,
-    color: Color
-) {
-    val center = this.center
-    val path = Path()
-
-    path.moveTo(center.x, center.y)
-
-    val steps = 50
-    for (i in 0..steps) {
-        val angle = Math.toRadians(
-            (startAngle + sweepAngle * i / steps).toDouble()
-        )
-
-        val x = center.x + cos(angle).toFloat() * radius
-        val y = center.y + sin(angle).toFloat() * radius
-
-        path.lineTo(x, y)
-    }
-
-    path.close()
-
-    drawPath(
-        path = path,
-        color = color
-    )
-}
-
-@Composable
-private fun MacroPieChartLegend(macros: MacroNutrients) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround
-    ) {
-        MacroLegendItem(
-            color = ProteinColor,
-            name = "Белки",
-            current = macros.proteins.roundToInt(),
-            goal = macros.proteinsGoal.roundToInt()
-        )
-        MacroLegendItem(
-            color = CarbsColor,
-            name = "Углеводы",
-            current = macros.carbs.roundToInt(),
-            goal = macros.carbsGoal.roundToInt()
-        )
-        MacroLegendItem(
-            color = FatsColor,
-            name = "Жиры",
-            current = macros.fats.roundToInt(),
-            goal = macros.fatsGoal.roundToInt()
-        )
-    }
-}
-
-@Composable
-private fun MacroLegendItem(
-    color: Color,
+private fun MacroCard(
     name: String,
     current: Int,
-    goal: Int
+    goal: Int,
+    color: Color,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    val icon = when (name) {
+        "Protein" -> AppIcons.calories()
+        "Carbs" -> AppIcons.calories()
+        "Fat" -> AppIcons.calories()
+        else -> AppIcons.calories()
+    }
+
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .size(12.dp)
-                .background(
-                    color = color,
-                    shape = androidx.compose.foundation.shape.CircleShape
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val remaining = goal - current
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = "$current",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = color
                 )
-        )
-        Column {
+                Text(
+                    text = if (remaining >= 0) "$remaining g left" else "${-remaining} g over",
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+
+            CircularProgressWithIcon(
+                current = current,
+                goal = goal,
+                color = color,
+                icon = icon,
+                size = 70.dp
+            )
+
             Text(
                 text = name,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = "${current}г/${goal}г",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
         }
     }
 }
 
 @Composable
-fun CaloriesProgress(
-    consumed: Int,
+private fun CircularProgressWithIcon(
+    current: Int,
     goal: Int,
-    modifier: Modifier = Modifier
+    color: Color,
+    icon: Painter,
+    size: Dp
 ) {
     val progress by animateFloatAsState(
-        targetValue = (consumed.toFloat() / goal).coerceAtMost(1f),
-        label = "calories_progress"
+        targetValue = if (goal > 0) (current.toFloat() / goal).coerceAtMost(1f) else 0f,
+        label = "progress"
     )
-
-    val trackColor = MaterialTheme.colorScheme.surfaceVariant
-    val progressColor = MaterialTheme.colorScheme.primary
-    val textColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier
+        modifier = Modifier.size(size)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val stroke = 4.dp.toPx()
+            val strokeWidth = 6.dp.toPx()
+            val trackColor = color.copy(alpha = 0.15f)
 
             drawArc(
                 color = trackColor,
-                startAngle = StartAngle,
-                sweepAngle = 3 * SectorAngle,
+                startAngle = -90f,
+                sweepAngle = 360f,
                 useCenter = false,
-                style = Stroke(stroke)
+                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
             )
 
             drawArc(
-                color = progressColor,
-                startAngle = StartAngle,
-                sweepAngle = 3 * SectorAngle * progress,
+                color = color,
+                startAngle = -90f,
+                sweepAngle = 360f * progress,
                 useCenter = false,
-                style = Stroke(
-                    width = stroke,
-                    cap = StrokeCap.Round
-                )
+                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
             )
         }
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "$consumed",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "из $goal",
-                style = MaterialTheme.typography.bodySmall,
-                color = textColor
-            )
-            Text(
-                text = "ккал",
-                style = MaterialTheme.typography.labelSmall,
-                color = textColor
-            )
-        }
+        Icon(
+            painter = icon,
+            contentDescription = null
+        )
     }
 }

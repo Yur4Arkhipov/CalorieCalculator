@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface UserPreferencesRepository {
     val userData: Flow<UserProfile>
     suspend fun saveUserData(profile: UserProfile)
+    fun observeUserProfile(): Flow<UserProfile>
 }

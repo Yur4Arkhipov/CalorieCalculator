@@ -1,19 +1,33 @@
 package com.jacqulin.calcalc.feature.home.ui.home
 
-import com.jacqulin.calcalc.core.domain.model.CalendarDay
+import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import com.jacqulin.calcalc.core.domain.model.MacroNutrients
 import com.jacqulin.calcalc.core.domain.model.Meal
+import com.jacqulin.calcalc.core.domain.model.PendingMeal
 import java.util.Date
 
 data class HomeUiState(
     val selectedDate: Date = Date(),
     val currentDate: String = "",
     val weekDays: List<CalendarDay> = emptyList(),
+    val weeks: Map<Int, List<CalendarDay>> = emptyMap(),
     val currentWeekIndex: Int = 0,
     val consumedCalories: Int = 0,
-    val remainingCalories: Int = 2000,
-    val dailyCaloriesGoal: Int = 2000,
+    val remainingCalories: Int = 0,
+    val dailyCaloriesGoal: Int = 0,
     val mealsToday: List<Meal> = emptyList(),
-    val todayMacros: MacroNutrients = MacroNutrients(0f, 0f, 0f, 150f, 240f, 67f),
-    val isLoading: Boolean = true
+    val pendingMeals: List<PendingMeal> = emptyList(),
+    val todayMacros: MacroNutrients = MacroNutrients(
+        calories = 0,
+        protein = 0,
+        carb = 0,
+        fat = 0,
+        caloriesGoal = 0,
+        proteinsGoal = 0,
+        carbsGoal = 0,
+        fatsGoal = 0
+    ),
+    val isLoading: Boolean = true,
+    val editingMeal: Meal? = null,
+    val isEditingSheetOpen: Boolean = false
 )

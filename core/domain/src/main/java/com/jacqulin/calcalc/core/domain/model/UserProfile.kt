@@ -8,9 +8,26 @@ enum class ActivityLevel {
     VERY_ACTIVE
 }
 
+enum class Gender {
+    MALE,
+    FEMALE
+}
+
+enum class Goal {
+    LOSE_WEIGHT,
+    MAINTAIN,
+    GAIN_WEIGHT
+}
+
 data class UserProfile(
-    val age: Int?,
-    val height: Float?,
-    val weight: Float?,
-    val activityLevel: ActivityLevel?
+    val age: Int,
+    val height: Int,
+    val weight: Int,
+    val gender: Gender,
+    val goal: Goal,
+    val activityLevel: ActivityLevel,
+    val caloriesGoal: Int,
+    val proteinGoal: Int,
+    val carbsGoal: Int,
+    val fatGoal: Int
 )

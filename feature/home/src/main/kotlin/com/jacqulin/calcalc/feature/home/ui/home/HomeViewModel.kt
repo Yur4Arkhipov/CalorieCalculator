@@ -1,96 +1,275 @@
 package com.jacqulin.calcalc.feature.home.ui.home
 
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jacqulin.calcalc.core.domain.model.CalendarDay
+import com.jacqulin.calcalc.core.domain.model.Meal
+import com.jacqulin.calcalc.core.domain.model.MealType
+import com.jacqulin.calcalc.core.domain.model.PendingMeal
+import com.jacqulin.calcalc.core.domain.repository.ImageRepository
+import com.jacqulin.calcalc.core.domain.usecase.AnalyzeMealFromImageUseCase
+import com.jacqulin.calcalc.core.domain.usecase.DeleteMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GenerateWeekDaysUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GetDayDataUseCase
+import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
+import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
+import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SetSelectedDateUseCase
+import com.jacqulin.calcalc.core.domain.usecase.UpdateMealUseCase
+import com.jacqulin.calcalc.core.util.NotFoodException
+import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
+const val MAX_FUTURE_WEEKS = 1
+const val MAX_PAST_WEEKS = 20
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    observeSelectedDateUseCase: ObserveSelectedDateUseCase,
     private val getDayDataUseCase: GetDayDataUseCase,
     private val generateWeekDaysUseCase: GenerateWeekDaysUseCase,
-    private val setSelectedDateUseCase: SetSelectedDateUseCase
+    observeUserProfileUseCase: ObserveUserProfileUseCase,
+    private val setSelectedDateUseCase: SetSelectedDateUseCase,
+    private val analyzeMealFromImageUseCase: AnalyzeMealFromImageUseCase,
+    private val saveManualAddMealDBUseCase: SaveManualAddMealDBUseCase,
+    private val updateMealUseCase: UpdateMealUseCase,
+    private val deleteMealUseCase: DeleteMealUseCase,
+    private val imageRepository: ImageRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUiState())
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    private val currentWeekIndexFlow = MutableStateFlow(0)
+    private val pendingMealsFlow = MutableStateFlow<List<PendingMeal>>(emptyList())
+    private val editingMealFlow = MutableStateFlow<Pair<Meal?, Boolean>>(Pair(null, false))
+    private val selectedDate = observeSelectedDateUseCase()
 
-    init {
-        loadData()
-        onDateSelected(Date())
-    }
+    private val _uiEvents = Channel<HomeUiEvent>(Channel.BUFFERED)
+    val uiEvents = _uiEvents.receiveAsFlow()
 
-    private fun loadData() {
-        viewModelScope.launch {
-            try {
-                val weekDays = generateWeekDaysUseCase(
-                    weekIndex = _uiState.value.currentWeekIndex,
-                    selectedDate = _uiState.value.selectedDate
-                )
-                val selectedDateData = getDayDataUseCase(_uiState.value.selectedDate)
+    private val weeksFlow = flow {
+        val today = Date()
+        val allWeeks = mutableMapOf<Int, List<CalendarDay>>()
 
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    weekDays = weekDays,
-                    consumedCalories = selectedDateData.meals.sumOf { it.calories },
-                    remainingCalories = (_uiState.value.dailyCaloriesGoal - selectedDateData.meals.sumOf { it.calories }).coerceAtLeast(0),
-                    mealsToday = selectedDateData.meals,
-                    todayMacros = selectedDateData.macros
-                )
-            } catch (e: Exception) {
-                // Handle error
-                _uiState.value = _uiState.value.copy(isLoading = false)
-            }
+        for (weekIndex in -MAX_PAST_WEEKS..MAX_FUTURE_WEEKS) {
+            val dates = generateWeekDaysUseCase(weekIndex)
+            allWeeks[weekIndex] = mapToCalendarDays(dates, today)
         }
+
+        emit(allWeeks)
     }
 
-    private suspend fun generateWeekDays(): List<CalendarDay> {
-        return generateWeekDaysUseCase(
-            weekIndex = _uiState.value.currentWeekIndex,
-            selectedDate = _uiState.value.selectedDate
-        )
-    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<HomeUiState> =
+        combine(
+            observeSelectedDateUseCase(),
+            currentWeekIndexFlow,
+            observeUserProfileUseCase()
+        ) { selectedDate, weekIndex, profile ->
+            Triple(selectedDate, weekIndex, profile)
+        }
+            .flatMapLatest { (selectedDate, weekIndex, profile) ->
+                combine(
+                    getDayDataUseCase(selectedDate),
+                    weeksFlow,
+                    pendingMealsFlow,
+                    editingMealFlow
+                ) { dayData, weeks, pendingMeals, editingPair ->
+
+                    val consumedCalories = dayData.meals.sumOf { it.calories }
+
+                    val updatedWeeks = weeks.mapValues { (_, days) ->
+                        days.map {
+                            it.copy(isSelected = isSameDay(it.date, selectedDate))
+                        }
+                    }
+
+                    val macrosWithGoals = dayData.macros.copy(
+                        caloriesGoal = profile.caloriesGoal,
+                        proteinsGoal = profile.proteinGoal,
+                        carbsGoal = profile.carbsGoal,
+                        fatsGoal = profile.fatGoal
+                    )
+
+                    HomeUiState(
+                        selectedDate = selectedDate,
+                        weeks = updatedWeeks,
+                        currentWeekIndex = weekIndex,
+                        weekDays = updatedWeeks[weekIndex] ?: emptyList(),
+                        mealsToday = dayData.meals,
+                        pendingMeals = pendingMeals,
+                        todayMacros = macrosWithGoals,
+                        consumedCalories = consumedCalories,
+                        dailyCaloriesGoal = profile.caloriesGoal,
+                        remainingCalories = (profile.caloriesGoal - consumedCalories)
+                            .coerceAtLeast(0),
+                        editingMeal = editingPair.first,
+                        isEditingSheetOpen = editingPair.second,
+                        isLoading = false
+                    )
+                }
+            }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000),
+                HomeUiState(isLoading = true)
+            )
 
     fun onDateSelected(date: Date) {
         viewModelScope.launch {
-            try {
-                setSelectedDateUseCase(date)
-                val selectedDateData = getDayDataUseCase(date)
-                val dateFormat = SimpleDateFormat("d MMMM", Locale.forLanguageTag("ru"))
-                val weekDays = generateWeekDays()
-
-                _uiState.value = _uiState.value.copy(
-                    selectedDate = date,
-                    currentDate = dateFormat.format(date),
-                    consumedCalories = selectedDateData.meals.sumOf { it.calories },
-                    remainingCalories = (_uiState.value.dailyCaloriesGoal - selectedDateData.meals.sumOf { it.calories }).coerceAtLeast(0),
-                    mealsToday = selectedDateData.meals,
-                    todayMacros = selectedDateData.macros,
-                    weekDays = weekDays
-                )
-            } catch (e: Exception) {
-                // Handle error
-            }
+            setSelectedDateUseCase(date)
         }
     }
 
     fun onWeekChanged(weekIndex: Int) {
+        currentWeekIndexFlow.value = weekIndex
+    }
+
+    fun onImageCaptured(imageBytes: ByteArray, mealType: MealType) {
+        val pending = PendingMeal(type = mealType, isLoading = true, imageUri = null)
+        pendingMealsFlow.update { it + pending }
+
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                currentWeekIndex = weekIndex,
-                weekDays = generateWeekDays()
+            try {
+                val result = analyzeMealFromImageUseCase(imageBytes)
+                val meal = Meal(
+                    name = result.nutrition.name.ifBlank { "Блюдо" },
+                    calories = result.nutrition.calories.toInt(),
+                    proteins = result.nutrition.protein.toInt(),
+                    fats = result.nutrition.fat.toInt(),
+                    carbs = result.nutrition.carbs.toInt(),
+                    time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
+                    type = mealType,
+                    imageUri = result.savedImagePath
+                )
+                saveManualAddMealDBUseCase(selectedDate.value, meal)
+                pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
+            } catch (_: NotFoodException) {
+                pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
+                _uiEvents.send(HomeUiEvent.ShowNotFoodError)
+            } catch (_: Exception) {
+                pendingMealsFlow.update { list ->
+                    list.map {
+                        if (it.id == pending.id) it.copy(isLoading = false, error = "Ошибка анализа")
+                        else it
+                    }
+                }
+            }
+        }
+    }
+
+    fun dismissPendingError(id: String) {
+        pendingMealsFlow.update { list -> list.filter { it.id != id } }
+    }
+
+    fun onEditMeal(meal: Meal) {
+        editingMealFlow.value = Pair(meal, true)
+    }
+
+    fun onDismissEditMeal() {
+        editingMealFlow.value = Pair(null, false)
+    }
+
+    fun onUpdateMeal(updatedMeal: Meal) {
+        viewModelScope.launch {
+            updateMealUseCase(updatedMeal)
+        }
+        editingMealFlow.value = Pair(null, false)
+    }
+
+    fun onDeleteMeal(meal: Meal) {
+        viewModelScope.launch {
+            try {
+                deleteMealUseCase(meal)
+                meal.imageUri?.let { imageRepository.deleteImage(it) }
+            } catch (e: Exception) {
+                Log.d("DeleteMeal", "Error delete: $e")
+            }
+        }
+        editingMealFlow.value = Pair(null, false)
+    }
+
+    fun onAddPhotoFromCamera(mealType: MealType) {
+        viewModelScope.launch {
+            val uri = imageRepository.createCameraFileUri()
+            _uiEvents.send(HomeUiEvent.LaunchCamera(uri, mealType))
+        }
+    }
+
+    fun onAddPhotoFromGallery(mealType: MealType) {
+        viewModelScope.launch {
+            _uiEvents.send(HomeUiEvent.LaunchGallery(mealType))
+        }
+    }
+
+    fun onRequestCameraPermission(mealType: MealType) {
+        viewModelScope.launch {
+            _uiEvents.send(HomeUiEvent.RequestCameraPermission(mealType))
+        }
+    }
+
+    fun onCameraPermissionResult(granted: Boolean, mealType: MealType) {
+        if (granted) onAddPhotoFromCamera(mealType)
+    }
+
+    fun onCameraResult(success: Boolean, uri: Uri, mealType: MealType) {
+        viewModelScope.launch {
+            if (success) {
+                val bytes = imageRepository.readImageBytes(uri)
+                if (bytes != null) onImageCaptured(bytes, mealType)
+            }
+            imageRepository.deleteCameraFile(uri)
+        }
+    }
+
+    fun onGalleryResult(uri: Uri, mealType: MealType) {
+        viewModelScope.launch {
+            val bytes = imageRepository.readImageBytes(uri)
+            if (bytes != null) onImageCaptured(bytes, mealType)
+        }
+    }
+
+    private fun mapToCalendarDays(
+        dates: List<Date>,
+        selectedDate: Date
+    ): List<CalendarDay> {
+        val today = Date()
+        val dayFormat = SimpleDateFormat("EEE", Locale.forLanguageTag("ru"))
+        val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
+
+        return dates.map { date ->
+            CalendarDay(
+                date = date,
+                displayDay = dayFormat.format(date),
+                displayDate = dateFormat.format(date),
+                isToday = isSameDay(date, today),
+                isSelected = isSameDay(date, selectedDate),
+                isFuture = date.after(today)
             )
         }
+    }
+
+    private fun isSameDay(date1: Date, date2: Date): Boolean {
+        val cal1 = Calendar.getInstance().apply { time = date1 }
+        val cal2 = Calendar.getInstance().apply { time = date2 }
+
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
     }
 }

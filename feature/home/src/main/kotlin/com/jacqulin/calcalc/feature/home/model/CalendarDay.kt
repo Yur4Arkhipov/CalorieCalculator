@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.core.domain.model
+package com.jacqulin.calcalc.feature.home.model
 
 import java.util.Date
 
@@ -7,5 +7,6 @@ data class CalendarDay(
     val displayDay: String,
     val displayDate: String,
     val isToday: Boolean = false,
-    val isSelected: Boolean = false
+    val isSelected: Boolean = false,
+    val isFuture: Boolean = false
 )

@@ -9,6 +9,9 @@ import androidx.compose.material.icons.outlined.StackedLineChart
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.StackedLineChart
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.painterResource
+import com.jacqulin.calcalc.core.designsystem.R
 
 object AppIcons {
     val StatisticsSelected = Icons.Rounded.StackedLineChart
@@ -25,4 +28,7 @@ object AppIcons {
 
     val Field2Selected = Icons.Filled.Build
     val Field2Unselected = Icons.Outlined.Build
+
+    @Composable
+    fun calories() = painterResource(R.drawable.outline_local_fire_department_24)
 }

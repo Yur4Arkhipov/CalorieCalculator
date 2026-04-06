@@ -5,7 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.jacqulin.calcalc.feature.home.navigation.HomeBaseRoute
 import com.jacqulin.calcalc.feature.home.navigation.homeSection
+import com.jacqulin.calcalc.feature.home.navigation.navigateToAiMealDescription
 import com.jacqulin.calcalc.feature.home.navigation.navigateToMacroDetail
+import com.jacqulin.calcalc.feature.home.navigation.navigateToManualAddMeal
 import com.jacqulin.calcalc.feature.profile.navigation.profileScreen
 import com.jacqulin.calcalc.feature.statistics.navigation.statisticsScreen
 import com.jacqulin.calcalc.main.AppState
@@ -26,17 +28,17 @@ fun AppNavHost(
             onNavigateToMacroDetail = {
                 navController.navigateToMacroDetail()
             },
-            onBack = {
-                navController.popBackStack()
-            }
-        )
-
-        statisticsScreen(
+            onNavigateToAiMealDescription = {
+                navController.navigateToAiMealDescription()
+            },
+            onNavigateToManualAddMeal = {
+                navController.navigateToManualAddMeal()
+            },
             onBackClick = navController::popBackStack
         )
 
-        profileScreen(
-            onBackClick = navController::popBackStack
-        )
+        statisticsScreen()
+
+        profileScreen()
     }
 }

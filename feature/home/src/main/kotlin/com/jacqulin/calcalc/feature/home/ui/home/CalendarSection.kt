@@ -1,7 +1,9 @@
 package com.jacqulin.calcalc.feature.home.ui.home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,40 +35,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.jacqulin.calcalc.core.domain.model.CalendarDay
+import com.jacqulin.calcalc.core.designsystem.theme.AppColors
+import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-
-private const val MAX_FUTURE_WEEKS = 1
-private const val MAX_PAST_WEEKS = 260
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun CalendarSection(
     currentWeekIndex: Int,
-    selectedDate: Date,
+    weeks: Map<Int, List<CalendarDay>>,
     onDateSelected: (Date) -> Unit,
     onWeekChanged: (Int) -> Unit
 ) {
     val initialPage = MAX_PAST_WEEKS
-    val pageCount = MAX_PAST_WEEKS + MAX_FUTURE_WEEKS + 1
 
     val pagerState = rememberPagerState(
         initialPage = initialPage,
-        pageCount = { pageCount }
+        pageCount = { MAX_PAST_WEEKS + MAX_FUTURE_WEEKS + 1 }
     )
-
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }
-            .collect { page ->
-                val weekOffset = page - initialPage
-                if (weekOffset != currentWeekIndex) {
-                    onWeekChanged(weekOffset)
-                }
-            }
-    }
 
     LaunchedEffect(currentWeekIndex) {
         val targetPage = initialPage + currentWeekIndex
@@ -74,9 +63,23 @@ internal fun CalendarSection(
         }
     }
 
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { page ->
+            onWeekChanged(page - initialPage)
+        }
+    }
+
+    val monthFormat = SimpleDateFormat("LLLL yyyy", Locale("ru"))
+    val weekTitle = weeks[currentWeekIndex]
+        ?.firstOrNull()
+        ?.date
+        ?.let { monthFormat.format(it).replaceFirstChar { c -> c.uppercase() } }
+        ?: ""
+
     Column {
         WeekHeader(
             weekOffset = currentWeekIndex,
+            title = weekTitle,
             onPreviousWeek = {
                 onWeekChanged(currentWeekIndex - 1)
             },
@@ -94,16 +97,10 @@ internal fun CalendarSection(
             modifier = Modifier.fillMaxWidth()
         ) { page ->
             val weekOffset = page - initialPage
+            val days = weeks[weekOffset] ?: emptyList()
             WeekRow(
-                weekDays = generateWeekDaysForOffset(
-                    weekOffset = weekOffset,
-                    selectedDate = selectedDate
-                ),
-                onDateSelected = { date ->
-                    if (!isFutureDate(date)) {
-                        onDateSelected(date)
-                    }
-                }
+                weekDays = days,
+                onDateSelected = onDateSelected
             )
         }
     }
@@ -112,17 +109,10 @@ internal fun CalendarSection(
 @Composable
 private fun WeekHeader(
     weekOffset: Int,
+    title: String,
     onPreviousWeek: () -> Unit,
     onNextWeek: () -> Unit
 ) {
-    val calendar = Calendar.getInstance()
-    calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
-    calendar.add(Calendar.WEEK_OF_YEAR, weekOffset)
-
-    val monthFormat = SimpleDateFormat("LLLL yyyy", Locale("ru"))
-    val title = monthFormat
-        .format(calendar.time)
-        .replaceFirstChar { it.uppercase() }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -172,7 +162,7 @@ private fun WeekRow(
         weekDays.forEach { day ->
             CalendarDayItem(
                 day = day,
-                onClick = { onDateSelected(day.date) },
+                onClick = { if (!day.isFuture) onDateSelected(day.date) },
                 modifier = Modifier.weight(1f)
             )
         }
@@ -185,19 +175,32 @@ private fun CalendarDayItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isFuture = isFutureDate(day.date)
+    val isFuture = day.isFuture
 
     val backgroundColor = when {
-        isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-        day.isSelected -> MaterialTheme.colorScheme.primary
-        day.isToday -> MaterialTheme.colorScheme.primaryContainer
-        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+        isFuture -> MaterialTheme.colorScheme.background
+        day.isToday -> AppColors.dateToday
+        day.isSelected -> MaterialTheme.colorScheme.surface
+        else -> MaterialTheme.colorScheme.surface
+    }
+
+    val borderColor = when {
+        isFuture -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f)
+        day.isToday && day.isSelected -> MaterialTheme.colorScheme.onSurface
+        day.isToday -> AppColors.dateToday.copy(alpha = 0.6f)
+        day.isSelected -> MaterialTheme.colorScheme.onSurface
+        else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+    }
+
+    val borderWidth = when {
+        day.isSelected -> 2.dp
+        else -> 1.dp
     }
 
     val textColor = when {
         isFuture -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-        day.isSelected -> MaterialTheme.colorScheme.onPrimary
-        day.isToday -> MaterialTheme.colorScheme.onPrimaryContainer
+        day.isToday -> MaterialTheme.colorScheme.onSurface
+        day.isSelected -> MaterialTheme.colorScheme.onSurface
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
@@ -206,7 +209,17 @@ private fun CalendarDayItem(
             .padding(horizontal = 3.dp)
             .size(56.dp)
             .clip(RoundedCornerShape(20.dp))
-            .clickable(enabled = !isFuture) { onClick() },
+            .border(
+                width = borderWidth,
+                color = borderColor,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .clickable(
+                enabled = !isFuture,
+                onClick = onClick,
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ),
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor
         ),
@@ -233,50 +246,4 @@ private fun CalendarDayItem(
             )
         }
     }
-}
-
-private fun generateWeekDaysForOffset(
-    weekOffset: Int,
-    selectedDate: Date
-): List<CalendarDay> {
-    val calendar = Calendar.getInstance().apply {
-        set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
-        add(Calendar.WEEK_OF_YEAR, weekOffset)
-    }
-
-    val today = Date()
-    val dayFormat = SimpleDateFormat("EEE", Locale("ru"))
-    val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
-
-    return (0..6).map {
-        val date = calendar.time
-        calendar.add(Calendar.DAY_OF_YEAR, 1)
-
-        CalendarDay(
-            date = date,
-            displayDay = dayFormat.format(date),
-            displayDate = dateFormat.format(date),
-            isToday = isSameDay(date, today),
-            isSelected = isSameDay(date, selectedDate)
-        )
-    }
-}
-
-private fun isSameDay(date1: Date, date2: Date): Boolean {
-    val cal1 = Calendar.getInstance().apply { time = date1 }
-    val cal2 = Calendar.getInstance().apply { time = date2 }
-    return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-           cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
-}
-
-private fun isFutureDate(date: Date): Boolean {
-    val today = Calendar.getInstance()
-    val checkDate = Calendar.getInstance().apply { time = date }
-
-    today.set(Calendar.HOUR_OF_DAY, 23)
-    today.set(Calendar.MINUTE, 59)
-    today.set(Calendar.SECOND, 59)
-    today.set(Calendar.MILLISECOND, 999)
-
-    return checkDate.timeInMillis > today.timeInMillis
 }
