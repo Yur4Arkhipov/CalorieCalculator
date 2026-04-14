@@ -2,20 +2,22 @@ package com.jacqulin.calcalc.core.designsystem.icon
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.StackedLineChart
+import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.StackedLineChart
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import com.jacqulin.calcalc.core.designsystem.R
 
 object AppIcons {
-    val StatisticsSelected = Icons.Rounded.StackedLineChart
-    val StatisticsUnselected = Icons.Outlined.StackedLineChart
+//    val StatisticsSelected = Icons.Rounded.StackedLineChart
+//    val StatisticsUnselected = Icons.Outlined.StackedLineChart
+    val StatisticsSelected = Icons.Rounded.Bookmark
+    val StatisticsUnselected = Icons.Outlined.Bookmark
 
     val HomeSelected = Icons.Rounded.Home
     val HomeUnselected = Icons.Outlined.Home
