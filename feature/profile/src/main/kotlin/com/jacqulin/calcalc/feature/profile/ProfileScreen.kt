@@ -24,13 +24,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.Height
-import androidx.compose.material.icons.filled.MonitorWeight
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -38,8 +31,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -56,10 +51,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.theme.Bulb
 import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.ActivityLevel
 import com.jacqulin.calcalc.core.domain.model.Gender
@@ -145,7 +141,10 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun ProfileStatsCard(profile: UserProfile, onEditClick: () -> Unit) {
+private fun ProfileStatsCard(
+    profile: UserProfile,
+    onEditClick: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -184,19 +183,19 @@ private fun ProfileStatsCard(profile: UserProfile, onEditClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 StatItem(
-                    icon = Icons.Default.Person,
+                    icon = painterResource(R.drawable.ic_person),
                     label = "Возраст",
                     value = "${profile.age} лет",
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    icon = Icons.Default.Height,
+                    icon = painterResource(R.drawable.ic_height),
                     label = "Рост",
                     value = "${profile.height} см",
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    icon = Icons.Default.MonitorWeight,
+                    icon = painterResource(R.drawable.ic_weight),
                     label = "Вес",
                     value = "${profile.weight} кг",
                     modifier = Modifier.weight(1f)
@@ -210,13 +209,13 @@ private fun ProfileStatsCard(profile: UserProfile, onEditClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 StatItem(
-                    icon = Icons.Default.Person,
+                    icon = painterResource(R.drawable.ic_genders),
                     label = "Пол",
                     value = if (profile.gender == Gender.MALE) "Мужской" else "Женский",
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    icon = Icons.Default.TrackChanges,
+                    icon = painterResource(R.drawable.ic_target),
                     label = "Цель",
                     value = when (profile.goal) {
                         Goal.LOSE_WEIGHT -> "Похудение"
@@ -226,7 +225,7 @@ private fun ProfileStatsCard(profile: UserProfile, onEditClick: () -> Unit) {
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    icon = Icons.Default.Bolt,
+                    icon = painterResource(R.drawable.ic_bolt),
                     label = "Активность",
                     value = activityShortName(profile.activityLevel),
                     modifier = Modifier.weight(1f)
@@ -238,7 +237,7 @@ private fun ProfileStatsCard(profile: UserProfile, onEditClick: () -> Unit) {
 
 @Composable
 private fun StatItem(
-    icon: ImageVector,
+    icon: Painter,
     label: String,
     value: String,
     modifier: Modifier = Modifier
@@ -256,7 +255,7 @@ private fun StatItem(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Icon(
-                imageVector = icon,
+                painter = icon,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
                 tint = MaterialTheme.colorScheme.primary
@@ -306,20 +305,11 @@ private fun NutriGoalsCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.FitnessCenter,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "Суточные нормы",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    text = "Суточные нормы",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
                 TextButton(onClick = onEditClick) {
                     Text("Изменить", style = MaterialTheme.typography.labelMedium)
                 }
@@ -342,22 +332,31 @@ private fun NutriGoalsCard(
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
                 ) {
                     Row(
-                        modifier = Modifier.padding(start = 14.dp, top = 10.dp, bottom = 10.dp, end = 4.dp),
+                        modifier = Modifier.padding(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text("💡", style = MaterialTheme.typography.titleMedium)
+                        Icon(
+                            painter = painterResource(R.drawable.ic_bulb),
+                            contentDescription = null,
+                            tint = Bulb,
+                            modifier = Modifier.size(20.dp)
+                        )
                         Text(
                             text = "Нормы пересчитываются при изменении параметров. Вы также можете задать их вручную — нажмите «Изменить»",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.weight(1f)
                         )
-                        TextButton(onClick = onDismissHint) {
-                            Text(
-                                "✕",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
+                        IconButton(
+                            onClick = onDismissHint,
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_cancel),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
@@ -372,7 +371,7 @@ private fun NutriItem(
     label: String,
     value: String,
     unit: String,
-    color: androidx.compose.ui.graphics.Color,
+    color: Color,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -512,11 +511,10 @@ private fun SettingsRow(
 
 @Composable
 fun AboutAppDialog(onDismiss: () -> Unit) {
-    val context = LocalContext.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("О приложении") },
-        text = { Text("Версия приложения: ${context.getString(R.string.app_version)}") },
+        text = { Text("Версия приложения: ${stringResource(R.string.app_version)}") },
         confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text("Ок")
@@ -554,12 +552,11 @@ private fun EditParamsSheet(
     ) {
         item {
             Text(
-                text = "Параметры",
+                text = "Мои параметры",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
         }
-
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -597,27 +594,40 @@ private fun EditParamsSheet(
                 )
             }
         }
-
         item {
             Column {
                 SectionLabel("Пол")
                 Spacer(Modifier.height(4.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Gender.entries.forEach { g ->
+                        val isSelected = gender == g
+
                         FilterChip(
-                            selected = gender == g, onClick = { gender = g },
+                            selected = isSelected,
+                            onClick = { gender = g },
                             label = {
                                 Text(
                                     text = if (g == Gender.MALE) "Мужской" else "Женский",
-                                    modifier = Modifier.padding(vertical = 2.dp)
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
                                 )
-                            }
+                            },
+                            shape = RoundedCornerShape(50),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = isSelected,
+                                borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                selectedBorderColor = MaterialTheme.colorScheme.primary
+                            )
                         )
                     }
                 }
             }
         }
-
         item {
             Column {
                 SectionLabel("Цель")
@@ -635,7 +645,6 @@ private fun EditParamsSheet(
                 }
             }
         }
-
         item {
             Column {
                 SectionLabel("Уровень активности")
@@ -653,7 +662,6 @@ private fun EditParamsSheet(
                 }
             }
         }
-
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
