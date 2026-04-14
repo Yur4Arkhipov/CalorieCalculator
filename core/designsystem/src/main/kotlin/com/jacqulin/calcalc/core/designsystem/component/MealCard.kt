@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.feature.home.ui.home
+package com.jacqulin.calcalc.core.designsystem.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
