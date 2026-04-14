@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,13 +28,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -524,6 +528,7 @@ fun AboutAppDialog(onDismiss: () -> Unit) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditParamsSheet(
     profile: UserProfile,
@@ -536,17 +541,17 @@ private fun EditParamsSheet(
     var gender by remember(profile) { mutableStateOf(profile.gender) }
     var goal by remember(profile) { mutableStateOf(profile.goal) }
     var activityLevel by remember(profile) { mutableStateOf(profile.activityLevel) }
+    var expandedGoal by remember { mutableStateOf(false) }
+    var expandedActivity by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.92f)
             .imePadding(),
         contentPadding = PaddingValues(
             start = 20.dp,
             end = 20.dp,
-            top = 8.dp,
-            bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 24.dp
+            bottom = 30.dp
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -601,7 +606,6 @@ private fun EditParamsSheet(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Gender.entries.forEach { g ->
                         val isSelected = gender == g
-
                         FilterChip(
                             selected = isSelected,
                             onClick = { gender = g },
@@ -632,15 +636,48 @@ private fun EditParamsSheet(
             Column {
                 SectionLabel("Цель")
                 Spacer(Modifier.height(8.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Goal.entries.forEach { g ->
-                        FilterChip(
-                            selected = goal == g, onClick = { goal = g },
-                            label = { Text(goalDisplayName(g), modifier = Modifier.padding(vertical = 6.dp)) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)
-                        )
+                ExposedDropdownMenuBox(
+                    expanded = expandedGoal,
+                    onExpandedChange = { expandedGoal = it }
+                ) {
+                    OutlinedTextField(
+                        value = goalDisplayName(goal),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Цель") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedGoal) },
+                        modifier = Modifier
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedGoal,
+                        onDismissRequest = { expandedGoal = false },
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        tonalElevation = 0.dp,
+                        shadowElevation = 0.dp
+                    ) {
+                        Goal.entries.forEachIndexed { index, g ->
+                            DropdownMenuItem(
+                                text = { Text(goalDisplayName(g)) },
+                                colors = MenuDefaults.itemColors(
+                                    textColor = Color.Black,
+                                    leadingIconColor = Color.Black,
+                                    trailingIconColor = Color.Gray
+                                ),
+                                onClick = {
+                                    goal = g
+                                    expandedGoal = false
+                                }
+                            )
+                            if (index != Goal.entries.lastIndex) {
+                                HorizontalDivider(
+                                    color = Color.Black.copy(alpha = 0.08f)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -649,22 +686,57 @@ private fun EditParamsSheet(
             Column {
                 SectionLabel("Уровень активности")
                 Spacer(Modifier.height(8.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    ActivityLevel.entries.forEach { a ->
-                        FilterChip(
-                            selected = activityLevel == a, onClick = { activityLevel = a },
-                            label = { Text(activityDisplayName(a), modifier = Modifier.padding(vertical = 6.dp)) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)
-                        )
+                ExposedDropdownMenuBox(
+                    expanded = expandedActivity,
+                    onExpandedChange = { expandedActivity = it }
+                ) {
+                    OutlinedTextField(
+                        value = activityDisplayName(activityLevel),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Уровень активности") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedActivity) },
+                        modifier = Modifier
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedActivity,
+                        onDismissRequest = { expandedActivity = false },
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        tonalElevation = 0.dp,
+                        shadowElevation = 0.dp
+                    ) {
+                        ActivityLevel.entries.forEachIndexed { index, a ->
+                            DropdownMenuItem(
+                                text = { Text(activityDisplayName(a)) },
+                                colors = MenuDefaults.itemColors(
+                                    textColor = Color.Black,
+                                    leadingIconColor = Color.Black,
+                                    trailingIconColor = Color.Gray
+                                ),
+                                onClick = {
+                                    activityLevel = a
+                                    expandedActivity = false
+                                }
+                            )
+                            if (index != ActivityLevel.entries.lastIndex) {
+                                HorizontalDivider(
+                                    color = Color.Black.copy(alpha = 0.08f)
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
         item {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
@@ -701,61 +773,66 @@ private fun EditMacrosSheet(
     var carbs by remember(profile) { mutableStateOf(profile.carbsGoal.toString()) }
     var fat by remember(profile) { mutableStateOf(profile.fatGoal.toString()) }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(bottom = WindowInsets
-                .navigationBars
-                .asPaddingValues()
-                .calculateBottomPadding() + 16.dp
-            ),
+            .imePadding(),
+        contentPadding = PaddingValues(
+            start = 20.dp,
+            end = 20.dp,
+            bottom = 30.dp
+        ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = "Суточные нормы",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "Задайте значения вручную под свои цели",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-        )
-
-        NutrientEditField("Калории", calories, "ккал") { calories = it }
-        NutrientEditField("Белки", protein, "г") { protein = it }
-        NutrientEditField("Углеводы", carbs, "г") { carbs = it }
-        NutrientEditField("Жиры", fat, "г") { fat = it }
-
-        Spacer(Modifier.height(4.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            OutlinedButton(
-                onClick = onDismiss,
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Отмена")
+        item {
+            Text(
+                text = "Суточные нормы",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        item {
+            Text(
+                text = "Задайте значения вручную под свои цели",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+        item {
+            Column {
+                NutrientEditField("Калории", calories, "ккал") { calories = it }
+                NutrientEditField("Белки", protein, "г") { protein = it }
+                NutrientEditField("Углеводы", carbs, "г") { carbs = it }
+                NutrientEditField("Жиры", fat, "г") { fat = it }
             }
-            Button(
-                onClick = {
-                    onSave(
-                        calories.toIntOrNull() ?: profile.caloriesGoal,
-                        protein.toIntOrNull() ?: profile.proteinGoal,
-                        carbs.toIntOrNull() ?: profile.carbsGoal,
-                        fat.toIntOrNull() ?: profile.fatGoal
-                    )
-                },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                enabled = calories.isNotBlank() && protein.isNotBlank() && carbs.isNotBlank() && fat.isNotBlank()
+        }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Сохранить")
+                OutlinedButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Отмена")
+                }
+                Button(
+                    onClick = {
+                        onSave(
+                            calories.toIntOrNull() ?: profile.caloriesGoal,
+                            protein.toIntOrNull() ?: profile.proteinGoal,
+                            carbs.toIntOrNull() ?: profile.carbsGoal,
+                            fat.toIntOrNull() ?: profile.fatGoal
+                        )
+                    },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = calories.isNotBlank() && protein.isNotBlank() && carbs.isNotBlank() && fat.isNotBlank()
+                ) {
+                    Text("Сохранить")
+                }
             }
         }
     }
@@ -776,7 +853,7 @@ private fun NutrientEditField(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f)
         )
         OutlinedTextField(
