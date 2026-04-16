@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +25,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
@@ -41,8 +39,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -144,7 +140,6 @@ fun ManualAddMealScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, Color.Red)
                     .padding(top = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -266,7 +261,10 @@ fun ManualAddMealScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { viewModel.onEvent(ManualAddMealEvent.OnSaveClick) },
+                onClick = {
+                    focusManager.clearFocus(force = true)
+                    viewModel.onEvent(ManualAddMealEvent.OnSaveClick)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -295,14 +293,14 @@ private fun AddMealSnackbar(data: SnackbarData) {
 
     when (data.type) {
         SnackbarType.SUCCESS -> {
-            backgroundColor = Color(0xFF2E7D32)
+            backgroundColor = Color(0xFF6CD773)
             icon = Icons.Default.CheckCircle
-            iconTint = Color(0xFFA5D6A7)
+            iconTint = Color(0xFFB6E5B8)
         }
         SnackbarType.ERROR -> {
-            backgroundColor = Color(0xFFC62828)
+            backgroundColor = Color(0xFFD73E3E)
             icon = Icons.Default.Error
-            iconTint = Color(0xFFFFCDD2)
+            iconTint = Color(0xFFFDD1D6)
         }
     }
 

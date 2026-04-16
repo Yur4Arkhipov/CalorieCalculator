@@ -45,7 +45,7 @@ import com.jacqulin.calcalc.core.designsystem.theme.TextSecondary
 import com.jacqulin.calcalc.core.designsystem.theme.TextTertiary
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.feature.home.ui.home.EditMealBottomSheet
-import com.jacqulin.calcalc.feature.home.ui.home.MealCard
+import com.jacqulin.calcalc.core.designsystem.component.MealCard
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)

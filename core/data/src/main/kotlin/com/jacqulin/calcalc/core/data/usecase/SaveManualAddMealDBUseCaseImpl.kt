@@ -14,4 +14,3 @@ class SaveManualAddMealDBUseCaseImpl @Inject constructor(
         mealRepository.addMeal(date, meal)
     }
 }
-

@@ -34,3 +34,4 @@ val MealSnackColor = Color(0xFFFAB35D)
 val White = Color(0xFFFFFFFF)
 
 val Favorite = Color(0xFFFC4242)
+val Bulb = Color(0xFFFAE844)

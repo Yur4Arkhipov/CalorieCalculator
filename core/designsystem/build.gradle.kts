@@ -41,6 +41,9 @@ kotlin {
 }
 
 dependencies {
+
+    implementation(project(":core:domain"))
+
 //    implementation(libs.androidx.core.ktx)
 //    implementation(libs.androidx.lifecycle.runtime.ktx)
 //    implementation(libs.androidx.activity.compose)
@@ -49,7 +52,11 @@ dependencies {
 //    implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.material3)
 
+    // Icons
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
+
+    // Coil
+    implementation(libs.coil)
 }
 

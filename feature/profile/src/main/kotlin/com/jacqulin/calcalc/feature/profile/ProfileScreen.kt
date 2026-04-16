@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,23 +23,23 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.Height
-import androidx.compose.material.icons.filled.MonitorWeight
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -56,10 +55,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.theme.Bulb
 import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.ActivityLevel
 import com.jacqulin.calcalc.core.domain.model.Gender
@@ -145,7 +145,10 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun ProfileStatsCard(profile: UserProfile, onEditClick: () -> Unit) {
+private fun ProfileStatsCard(
+    profile: UserProfile,
+    onEditClick: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -184,19 +187,19 @@ private fun ProfileStatsCard(profile: UserProfile, onEditClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 StatItem(
-                    icon = Icons.Default.Person,
+                    icon = painterResource(R.drawable.ic_person),
                     label = "Возраст",
                     value = "${profile.age} лет",
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    icon = Icons.Default.Height,
+                    icon = painterResource(R.drawable.ic_height),
                     label = "Рост",
                     value = "${profile.height} см",
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    icon = Icons.Default.MonitorWeight,
+                    icon = painterResource(R.drawable.ic_weight),
                     label = "Вес",
                     value = "${profile.weight} кг",
                     modifier = Modifier.weight(1f)
@@ -210,13 +213,13 @@ private fun ProfileStatsCard(profile: UserProfile, onEditClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 StatItem(
-                    icon = Icons.Default.Person,
+                    icon = painterResource(R.drawable.ic_genders),
                     label = "Пол",
                     value = if (profile.gender == Gender.MALE) "Мужской" else "Женский",
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    icon = Icons.Default.TrackChanges,
+                    icon = painterResource(R.drawable.ic_target),
                     label = "Цель",
                     value = when (profile.goal) {
                         Goal.LOSE_WEIGHT -> "Похудение"
@@ -226,7 +229,7 @@ private fun ProfileStatsCard(profile: UserProfile, onEditClick: () -> Unit) {
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    icon = Icons.Default.Bolt,
+                    icon = painterResource(R.drawable.ic_bolt),
                     label = "Активность",
                     value = activityShortName(profile.activityLevel),
                     modifier = Modifier.weight(1f)
@@ -238,7 +241,7 @@ private fun ProfileStatsCard(profile: UserProfile, onEditClick: () -> Unit) {
 
 @Composable
 private fun StatItem(
-    icon: ImageVector,
+    icon: Painter,
     label: String,
     value: String,
     modifier: Modifier = Modifier
@@ -256,7 +259,7 @@ private fun StatItem(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Icon(
-                imageVector = icon,
+                painter = icon,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
                 tint = MaterialTheme.colorScheme.primary
@@ -306,20 +309,11 @@ private fun NutriGoalsCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.FitnessCenter,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "Суточные нормы",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    text = "Суточные нормы",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
                 TextButton(onClick = onEditClick) {
                     Text("Изменить", style = MaterialTheme.typography.labelMedium)
                 }
@@ -342,22 +336,31 @@ private fun NutriGoalsCard(
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
                 ) {
                     Row(
-                        modifier = Modifier.padding(start = 14.dp, top = 10.dp, bottom = 10.dp, end = 4.dp),
+                        modifier = Modifier.padding(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text("💡", style = MaterialTheme.typography.titleMedium)
+                        Icon(
+                            painter = painterResource(R.drawable.ic_bulb),
+                            contentDescription = null,
+                            tint = Bulb,
+                            modifier = Modifier.size(20.dp)
+                        )
                         Text(
                             text = "Нормы пересчитываются при изменении параметров. Вы также можете задать их вручную — нажмите «Изменить»",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.weight(1f)
                         )
-                        TextButton(onClick = onDismissHint) {
-                            Text(
-                                "✕",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
+                        IconButton(
+                            onClick = onDismissHint,
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_cancel),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
@@ -372,7 +375,7 @@ private fun NutriItem(
     label: String,
     value: String,
     unit: String,
-    color: androidx.compose.ui.graphics.Color,
+    color: Color,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -512,11 +515,10 @@ private fun SettingsRow(
 
 @Composable
 fun AboutAppDialog(onDismiss: () -> Unit) {
-    val context = LocalContext.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("О приложении") },
-        text = { Text("Версия приложения: ${context.getString(R.string.app_version)}") },
+        text = { Text("Версия приложения: ${stringResource(R.string.app_version)}") },
         confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text("Ок")
@@ -526,6 +528,7 @@ fun AboutAppDialog(onDismiss: () -> Unit) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditParamsSheet(
     profile: UserProfile,
@@ -538,28 +541,27 @@ private fun EditParamsSheet(
     var gender by remember(profile) { mutableStateOf(profile.gender) }
     var goal by remember(profile) { mutableStateOf(profile.goal) }
     var activityLevel by remember(profile) { mutableStateOf(profile.activityLevel) }
+    var expandedGoal by remember { mutableStateOf(false) }
+    var expandedActivity by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.92f)
             .imePadding(),
         contentPadding = PaddingValues(
             start = 20.dp,
             end = 20.dp,
-            top = 8.dp,
-            bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 24.dp
+            bottom = 30.dp
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
             Text(
-                text = "Параметры",
+                text = "Мои параметры",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
         }
-
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -597,66 +599,144 @@ private fun EditParamsSheet(
                 )
             }
         }
-
         item {
             Column {
                 SectionLabel("Пол")
                 Spacer(Modifier.height(4.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Gender.entries.forEach { g ->
+                        val isSelected = gender == g
                         FilterChip(
-                            selected = gender == g, onClick = { gender = g },
+                            selected = isSelected,
+                            onClick = { gender = g },
                             label = {
                                 Text(
                                     text = if (g == Gender.MALE) "Мужской" else "Женский",
-                                    modifier = Modifier.padding(vertical = 2.dp)
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
                                 )
-                            }
+                            },
+                            shape = RoundedCornerShape(50),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = isSelected,
+                                borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                selectedBorderColor = MaterialTheme.colorScheme.primary
+                            )
                         )
                     }
                 }
             }
         }
-
         item {
             Column {
                 SectionLabel("Цель")
                 Spacer(Modifier.height(8.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Goal.entries.forEach { g ->
-                        FilterChip(
-                            selected = goal == g, onClick = { goal = g },
-                            label = { Text(goalDisplayName(g), modifier = Modifier.padding(vertical = 6.dp)) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)
-                        )
+                ExposedDropdownMenuBox(
+                    expanded = expandedGoal,
+                    onExpandedChange = { expandedGoal = it }
+                ) {
+                    OutlinedTextField(
+                        value = goalDisplayName(goal),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Цель") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedGoal) },
+                        modifier = Modifier
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedGoal,
+                        onDismissRequest = { expandedGoal = false },
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        tonalElevation = 0.dp,
+                        shadowElevation = 0.dp
+                    ) {
+                        Goal.entries.forEachIndexed { index, g ->
+                            DropdownMenuItem(
+                                text = { Text(goalDisplayName(g)) },
+                                colors = MenuDefaults.itemColors(
+                                    textColor = Color.Black,
+                                    leadingIconColor = Color.Black,
+                                    trailingIconColor = Color.Gray
+                                ),
+                                onClick = {
+                                    goal = g
+                                    expandedGoal = false
+                                }
+                            )
+                            if (index != Goal.entries.lastIndex) {
+                                HorizontalDivider(
+                                    color = Color.Black.copy(alpha = 0.08f)
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
-
         item {
             Column {
                 SectionLabel("Уровень активности")
                 Spacer(Modifier.height(8.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    ActivityLevel.entries.forEach { a ->
-                        FilterChip(
-                            selected = activityLevel == a, onClick = { activityLevel = a },
-                            label = { Text(activityDisplayName(a), modifier = Modifier.padding(vertical = 6.dp)) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)
-                        )
+                ExposedDropdownMenuBox(
+                    expanded = expandedActivity,
+                    onExpandedChange = { expandedActivity = it }
+                ) {
+                    OutlinedTextField(
+                        value = activityDisplayName(activityLevel),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Уровень активности") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedActivity) },
+                        modifier = Modifier
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedActivity,
+                        onDismissRequest = { expandedActivity = false },
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        tonalElevation = 0.dp,
+                        shadowElevation = 0.dp
+                    ) {
+                        ActivityLevel.entries.forEachIndexed { index, a ->
+                            DropdownMenuItem(
+                                text = { Text(activityDisplayName(a)) },
+                                colors = MenuDefaults.itemColors(
+                                    textColor = Color.Black,
+                                    leadingIconColor = Color.Black,
+                                    trailingIconColor = Color.Gray
+                                ),
+                                onClick = {
+                                    activityLevel = a
+                                    expandedActivity = false
+                                }
+                            )
+                            if (index != ActivityLevel.entries.lastIndex) {
+                                HorizontalDivider(
+                                    color = Color.Black.copy(alpha = 0.08f)
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
-
         item {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
@@ -693,61 +773,66 @@ private fun EditMacrosSheet(
     var carbs by remember(profile) { mutableStateOf(profile.carbsGoal.toString()) }
     var fat by remember(profile) { mutableStateOf(profile.fatGoal.toString()) }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(bottom = WindowInsets
-                .navigationBars
-                .asPaddingValues()
-                .calculateBottomPadding() + 16.dp
-            ),
+            .imePadding(),
+        contentPadding = PaddingValues(
+            start = 20.dp,
+            end = 20.dp,
+            bottom = 30.dp
+        ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = "Суточные нормы",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "Задайте значения вручную под свои цели",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-        )
-
-        NutrientEditField("Калории", calories, "ккал") { calories = it }
-        NutrientEditField("Белки", protein, "г") { protein = it }
-        NutrientEditField("Углеводы", carbs, "г") { carbs = it }
-        NutrientEditField("Жиры", fat, "г") { fat = it }
-
-        Spacer(Modifier.height(4.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            OutlinedButton(
-                onClick = onDismiss,
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Отмена")
+        item {
+            Text(
+                text = "Суточные нормы",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        item {
+            Text(
+                text = "Задайте значения вручную под свои цели",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+        item {
+            Column {
+                NutrientEditField("Калории", calories, "ккал") { calories = it }
+                NutrientEditField("Белки", protein, "г") { protein = it }
+                NutrientEditField("Углеводы", carbs, "г") { carbs = it }
+                NutrientEditField("Жиры", fat, "г") { fat = it }
             }
-            Button(
-                onClick = {
-                    onSave(
-                        calories.toIntOrNull() ?: profile.caloriesGoal,
-                        protein.toIntOrNull() ?: profile.proteinGoal,
-                        carbs.toIntOrNull() ?: profile.carbsGoal,
-                        fat.toIntOrNull() ?: profile.fatGoal
-                    )
-                },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                enabled = calories.isNotBlank() && protein.isNotBlank() && carbs.isNotBlank() && fat.isNotBlank()
+        }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Сохранить")
+                OutlinedButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Отмена")
+                }
+                Button(
+                    onClick = {
+                        onSave(
+                            calories.toIntOrNull() ?: profile.caloriesGoal,
+                            protein.toIntOrNull() ?: profile.proteinGoal,
+                            carbs.toIntOrNull() ?: profile.carbsGoal,
+                            fat.toIntOrNull() ?: profile.fatGoal
+                        )
+                    },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = calories.isNotBlank() && protein.isNotBlank() && carbs.isNotBlank() && fat.isNotBlank()
+                ) {
+                    Text("Сохранить")
+                }
             }
         }
     }
@@ -768,7 +853,7 @@ private fun NutrientEditField(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f)
         )
         OutlinedTextField(
