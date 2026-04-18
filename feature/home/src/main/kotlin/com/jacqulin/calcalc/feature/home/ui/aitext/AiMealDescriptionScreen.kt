@@ -53,10 +53,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.Nutrition
 import kotlinx.coroutines.delay
@@ -110,7 +112,7 @@ fun AiMealDescriptionScreen(
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
                     snackbarMessage?.let { msg ->
-                        AiSnackbar(message = msg, isError = snackbarIsError)
+                        AiTextSnackbar(message = msg, isError = snackbarIsError)
                     }
                 }
             }
@@ -125,7 +127,7 @@ fun AiMealDescriptionScreen(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "Приём пищи",
+                    text = stringResource(R.string.home_ai_text_meal_entry),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 4.dp)
@@ -147,15 +149,26 @@ fun AiMealDescriptionScreen(
             Box(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     value = uiState.description,
-                    onValueChange = { viewModel.onDescriptionChange(it) },
+                    onValueChange = { text ->
+                        if (text.length <= 120) {
+                            viewModel.onDescriptionChange(text)
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 4.dp)
                         .clip(RoundedCornerShape(16.dp)),
-                    label = { Text("Описание блюда") },
+                    label = { Text(text = stringResource(R.string.home_ai_text_describe_the_dish)) },
                     enabled = !uiState.isProcessing,
                     minLines = 3,
-                    supportingText = { Text("${uiState.description.length} символов") },
+                    supportingText = {
+                        Text(
+                            text = stringResource(
+                                id = R.string.home_ai_text_character_count,
+                                formatArgs = arrayOf(uiState.description.length)
+                            )
+                        )
+                    },
                     shape = RoundedCornerShape(16.dp),
                     textStyle = MaterialTheme.typography.bodyLarge,
                     trailingIcon = {
@@ -163,7 +176,7 @@ fun AiMealDescriptionScreen(
                             IconButton(onClick = { expanded = true }) {
                                 Icon(
                                     imageVector = Icons.Default.Info,
-                                    contentDescription = "Как это работает",
+                                    contentDescription = stringResource(R.string.home_ai_text_how_does_it_work),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -176,12 +189,15 @@ fun AiMealDescriptionScreen(
                                 modifier = Modifier.width(260.dp)
                             ) {
                                 Column(Modifier.padding(16.dp)) {
-                                    Text("Как это работает?", fontWeight = FontWeight.Bold)
+                                    Text(
+                                        text = stringResource(R.string.home_ai_text_how_does_it_work),
+                                        fontWeight = FontWeight.Bold,
+                                    )
                                     Spacer(Modifier.height(8.dp))
-                                    Text("Опишите блюдо — ИИ определит калорийность.")
+                                    Text(text = stringResource(R.string.home_ai_text_how_work_description))
                                     Spacer(Modifier.height(12.dp))
                                     Text(
-                                        "Например: «Куриная грудка 200г, рис 150г…»",
+                                        text = stringResource(R.string.home_ai_text_how_work_example),
                                         fontStyle = FontStyle.Italic
                                     )
                                 }
@@ -210,7 +226,7 @@ fun AiMealDescriptionScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Анализирую...")
+                    Text(text = stringResource(R.string.home_ai_text_analyzing))
                 } else {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
@@ -218,7 +234,7 @@ fun AiMealDescriptionScreen(
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Анализировать")
+                    Text(text = stringResource(R.string.home_ai_text_analyze))
                 }
             }
 
@@ -241,7 +257,7 @@ fun AiMealDescriptionScreen(
                             modifier = Modifier.weight(1f)
                         )
                         TextButton(onClick = { viewModel.clearError() }) {
-                            Text("ОК")
+                            Text(text = stringResource(R.string.home_ai_text_ok))
                         }
                     }
                 }
@@ -264,15 +280,15 @@ fun AiMealDescriptionScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Советы для лучшего распознавания:",
+                        text = stringResource(R.string.home_ai_text_tips),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    TipItem("Указывайте вес или объём продуктов")
-                    TipItem("Перечисляйте ингредиенты")
-                    TipItem("Упоминайте способ приготовления (жареное, варёное и т.д.)")
-                    TipItem("Будьте как можно более конкретны")
+                    TipItem(text = stringResource(R.string.home_ai_text_tip_1))
+                    TipItem(text = stringResource(R.string.home_ai_text_tip_2))
+                    TipItem(text = stringResource(R.string.home_ai_text_tip_3))
+                    TipItem(text = stringResource(R.string.home_ai_text_tip_4))
                 }
             }
         }
@@ -306,7 +322,7 @@ fun NutritionResultCard(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Результат анализа",
+                text = stringResource(R.string.home_ai_text_result),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -318,12 +334,15 @@ fun NutritionResultCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Калории",
+                    text = stringResource(R.string.home_ai_text_calories),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
-                    text = "${nutrition.calories.toInt()} ккал",
+                    text = stringResource(
+                        id = R.string.home_ai_text_calories_suffix,
+                        formatArgs = arrayOf(nutrition.calories.toInt())
+                    ),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -336,9 +355,21 @@ fun NutritionResultCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                MacroItem(label = "Белки", value = nutrition.protein, unit = "г")
-                MacroItem(label = "Жиры", value = nutrition.fat, unit = "г")
-                MacroItem(label = "Углеводы", value = nutrition.carbs, unit = "г")
+                MacroItem(
+                    label = stringResource(R.string.home_ai_text_proteins),
+                    value = nutrition.protein,
+                    unit = stringResource(R.string.home_ai_text_unit)
+                )
+                MacroItem(
+                    label = stringResource(R.string.home_ai_text_fats),
+                    value = nutrition.fat,
+                    unit = stringResource(R.string.home_ai_text_unit)
+                )
+                MacroItem(
+                    label = stringResource(R.string.home_ai_text_carbs),
+                    value = nutrition.carbs,
+                    unit = stringResource(R.string.home_ai_text_unit)
+                )
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f))
@@ -358,7 +389,7 @@ fun NutritionResultCard(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Сохраняю...")
+                    Text(text = stringResource(R.string.home_ai_text_saving))
                 } else {
                     Icon(
                         imageVector = Icons.Default.Save,
@@ -366,7 +397,7 @@ fun NutritionResultCard(
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Сохранить в дневник")
+                    Text(text = stringResource(R.string.home_ai_text_diary))
                 }
             }
         }
@@ -374,7 +405,11 @@ fun NutritionResultCard(
 }
 
 @Composable
-private fun MacroItem(label: String, value: Double, unit: String) {
+private fun MacroItem(
+    label: String,
+    value: Double,
+    unit: String
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -394,7 +429,7 @@ private fun MacroItem(label: String, value: Double, unit: String) {
 }
 
 @Composable
-private fun AiSnackbar(message: String, isError: Boolean) {
+private fun AiTextSnackbar(message: String, isError: Boolean) {
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(

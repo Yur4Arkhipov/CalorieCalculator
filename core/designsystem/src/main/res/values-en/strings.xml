@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CalorieCalculator</string>
+
+
+
+
+
+    // Home -> ai meal description
+    <string name="home_ai_text_meal_entry">Meal entry</string>
+    <string name="home_ai_text_describe_the_dish">Describe the dish</string>
+    <string name="home_ai_text_character_count">%d characters</string>
+    <string name="home_ai_text_how_does_it_work">How does it work?</string>
+    <string name="home_ai_text_how_work_description">Describe your dish — AI will estimate the calories.</string>
+    <string name="home_ai_text_how_work_example">""For example: «200g chicken breast, 150g rice…»"</string>
+    <string name="home_ai_text_analyzing">Analyzing…</string>
+    <string name="home_ai_text_analyze">Analyze</string>
+    <string name="home_ai_text_ok">OK</string>
+    <string name="home_ai_text_tips">"Tips for better recognition:"</string>
+    <string name="home_ai_text_tip_1">Specify the weight or volume of ingredients</string>
+    <string name="home_ai_text_tip_2">List all ingredients</string>
+    <string name="home_ai_text_tip_3">Mention the cooking method (fried, boiled, etc.)</string>
+    <string name="home_ai_text_tip_4">Be as specific as possible</string>
+    <string name="home_ai_text_result">Analysis result</string>
+    <string name="home_ai_text_calories">Calories</string>
+    <string name="home_ai_text_calories_suffix">%d kcal</string>
+    <string name="home_ai_text_proteins">Proteins</string>
+    <string name="home_ai_text_fats">Fats</string>
+    <string name="home_ai_text_carbs">Carbs</string>
+    <string name="home_ai_text_unit">g</string>
+    <string name="home_ai_text_saving">Saving…</string>
+    <string name="home_ai_text_diary">Save to diary</string>
+
+
+</resources>

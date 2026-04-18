@@ -23,4 +23,32 @@
     <string name="home_dialog_cancel">Отмена</string>
     <string name="home_select_meal_type">Выберите приём пищи</string>
     <string name="home_add_meal">Добавить блюдо</string>
+
+    // Home -> ai meal description
+    <string name="home_ai_text_meal_entry">Прием пищи</string>
+    <string name="home_ai_text_describe_the_dish">Описание блюда</string>
+    <string name="home_ai_text_character_count">%d символов</string>
+    <string name="home_ai_text_how_does_it_work">Как это работает?</string>
+    <string name="home_ai_text_how_work_description">Опишите блюдо — ИИ определит калорийность.</string>
+    <string name="home_ai_text_how_work_example">"Например: «Куриная грудка 200г, рис 150г…»"</string>
+    <string name="home_ai_text_analyzing">Анализирую…</string>
+    <string name="home_ai_text_analyze">Анализировать</string>
+    <string name="home_ai_text_ok">ОК</string>
+    <string name="home_ai_text_tips">Советы для лучшего распознавания:</string>
+    <string name="home_ai_text_tip_1">Указывайте вес или объём продуктов</string>
+    <string name="home_ai_text_tip_2">Перечисляйте ингредиенты</string>
+    <string name="home_ai_text_tip_3">Упоминайте способ приготовления (жареное, варёное и т.д.)</string>
+    <string name="home_ai_text_tip_4">Будьте как можно более конкретны</string>
+    <string name="home_ai_text_result">Результат анализа</string>
+    <string name="home_ai_text_calories">Калории</string>
+    <string name="home_ai_text_calories_suffix">%d ккал</string>
+    <string name="home_ai_text_proteins">Белки</string>
+    <string name="home_ai_text_fats">Жиры</string>
+    <string name="home_ai_text_carbs">Углеводы</string>
+    <string name="home_ai_text_unit">г</string>
+    <string name="home_ai_text_saving">Сохраняю…</string>
+    <string name="home_ai_text_diary">Сохранить в дневник</string>
+
+
+
 </resources>
