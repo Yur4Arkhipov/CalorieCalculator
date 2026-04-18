@@ -96,16 +96,39 @@ class ManualAddMealScreenViewModel @Inject constructor(
         val state = _uiState.value
         viewModelScope.launch {
             try {
+                val calories = state.calories.toIntOrNull()
+                val proteins = state.proteins.toIntOrNull()
+                val fats = state.fats.toIntOrNull()
+                val carbs = state.carbs.toIntOrNull()
+
+                if (
+                    state.mealName.isBlank() ||
+                    calories == null ||
+                    proteins == null ||
+                    fats == null ||
+                    carbs == null
+                ) {
+                    _effect.send(
+                        UiEffect.ShowSnackbar(
+                            messageCode = SnackbarMessageCode.MEAL_SAVE_ERROR,
+                            isError = true
+                        )
+                    )
+                    return@launch
+                }
+
                 val meal = Meal(
                     name = state.mealName,
-                    calories = state.calories.toIntOrNull() ?: 0,
-                    proteins = state.proteins.toIntOrNull() ?: 0,
-                    fats = state.fats.toIntOrNull() ?: 0,
-                    carbs = state.carbs.toIntOrNull() ?: 0,
+                    calories = calories,
+                    proteins = proteins,
+                    fats = fats,
+                    carbs = carbs,
                     time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
                     type = state.selectedMealType
                 )
+
                 saveManualAddMealDBUseCase(selectedDate.value, meal)
+
                 _effect.send(
                     element = UiEffect.ShowSnackbar(
                         messageCode = SnackbarMessageCode.MEAL_SAVED,
