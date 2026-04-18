@@ -1,6 +1,5 @@
 package com.jacqulin.calcalc.navigation
 
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.icon.AppIcons
 import com.jacqulin.calcalc.feature.home.navigation.HomeBaseRoute
@@ -12,28 +11,28 @@ import com.jacqulin.calcalc.feature.statistics.navigation.StatisticsRoute
 import kotlin.reflect.KClass
 
 enum class TopLevelDestination(
-    val icon: ImageVector,
+    val iconRes: Int,
     val iconTextId: String,
     val titleTextId: Int,
     val route: KClass<*>,
     val baseRoute: KClass<*> = route
 ) {
     STATISTICS(
-        icon = AppIcons.StatisticsSelected,
+        iconRes = AppIcons.Statistics,
         iconTextId = "Statistics",
         titleTextId = R.string.statistics_title,
         route = StatisticsRoute::class,
         baseRoute = StatisticsBaseRoute::class
     ),
     HOME(
-        icon = AppIcons.HomeSelected,
+        iconRes = AppIcons.Home,
         iconTextId = "Home",
         titleTextId = R.string.home_title,
         route = HomeRoute::class,
         baseRoute = HomeBaseRoute::class
     ),
     PROFILE(
-        icon = AppIcons.ProfileSelected,
+        iconRes = AppIcons.Profile,
         iconTextId = "Profile",
         titleTextId = R.string.profile_title,
         route = ProfileRoute::class,

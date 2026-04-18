@@ -6,22 +6,14 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination.Companion.hasRoute
-import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.BottomBarItem
 import com.jacqulin.calcalc.core.designsystem.component.FloatingBottomBar
-import com.jacqulin.calcalc.core.designsystem.component.TopAppBar
-import com.jacqulin.calcalc.feature.home.navigation.AiMealDescriptionRoute
-import com.jacqulin.calcalc.feature.home.navigation.MacroDetailRoute
-import com.jacqulin.calcalc.feature.home.navigation.ManualAddMealRoute
 import com.jacqulin.calcalc.navigation.AppNavHost
 
 @Composable
@@ -31,7 +23,7 @@ fun App(appState: AppState) {
     val currentTopLevel = appState.currentTopLevelDestination
     val bottomBarItems = appState.topLevelDestinations.map { destination ->
         BottomBarItem(
-            icon = destination.icon,
+            iconRes = destination.iconRes,
             contentDescription = destination.iconTextId,
             selected = destination == appState.currentTopLevelDestination,
             onClick = { appState.navigateToTopLevelDestination(destination) }

@@ -10,11 +10,11 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
 data class BottomBarItem(
-    val icon: ImageVector,
+    val iconRes: Int,
     val contentDescription: String,
     val selected: Boolean,
     val onClick: () -> Unit
@@ -38,7 +38,10 @@ fun FloatingBottomBar(
                 selected = item.selected,
                 onClick = item.onClick,
                 icon = {
-                    Icon(item.icon, contentDescription = item.contentDescription)
+                    Icon(
+                        painter = painterResource(item.iconRes),
+                        contentDescription = item.contentDescription
+                    )
                 }
             )
         }
