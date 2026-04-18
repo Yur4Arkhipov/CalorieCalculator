@@ -49,8 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +60,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.domain.model.MealType
+import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
+import com.jacqulin.calcalc.core.util.effects.UiEffect
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,33 +69,36 @@ import kotlinx.coroutines.delay
 fun ManualAddMealScreen(
     modifier: Modifier = Modifier,
     viewModel: ManualAddMealScreenViewModel = hiltViewModel(),
-    onSaveClick: () -> Unit = { },
     onBackClick: () -> Unit = { },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val focusManager = LocalFocusManager.current
 
+    val focusManager = LocalFocusManager.current
     val nameFocus = remember { FocusRequester() }
     val caloriesFocus = remember { FocusRequester() }
     val proteinsFocus = remember { FocusRequester() }
     val fatsFocus = remember { FocusRequester() }
     val carbsFocus = remember { FocusRequester() }
 
-    var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
+    var snackbarIsError by remember { mutableStateOf(false) }
     var snackbarVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                ManualAddMealEffect.CloseScreen -> {
-                    snackbarVisible = false
-                    onSaveClick()
+                UiEffect.CloseScreen -> {
+                    onBackClick()
                 }
-                is ManualAddMealEffect.ShowSnackbar -> {
-                    snackbarData = SnackbarData(effect.message, effect.type)
+                is UiEffect.ShowSnackbar -> {
                     snackbarVisible = true
-                    if (effect.type == SnackbarType.ERROR) {
-                        delay(3000)
+                    snackbarMessage = when (effect.messageCode) {
+                        SnackbarMessageCode.MEAL_SAVED -> "Блюдо сохранено!"
+                        SnackbarMessageCode.MEAL_SAVE_ERROR -> "Ошибка сохранения"
+                    }
+                    snackbarIsError = effect.isError
+                    if (effect.isError) {
+                        delay(2000)
                         snackbarVisible = false
                     }
                 }
@@ -117,8 +120,11 @@ fun ManualAddMealScreen(
                     enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
-                    snackbarData?.let { data ->
-                        AddMealSnackbar(data = data)
+                    snackbarMessage?.let { msg ->
+                        AddManualMealSnackbar(
+                            message = msg,
+                            isError = snackbarIsError
+                        )
                     }
                 }
             }
@@ -138,9 +144,7 @@ fun ManualAddMealScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = { onBackClick() }) {
@@ -286,45 +290,34 @@ fun ManualAddMealScreen(
 }
 
 @Composable
-private fun AddMealSnackbar(data: SnackbarData) {
-    val backgroundColor: Color
-    val icon: ImageVector
-    val iconTint: Color
-
-    when (data.type) {
-        SnackbarType.SUCCESS -> {
-            backgroundColor = Color(0xFF6CD773)
-            icon = Icons.Default.CheckCircle
-            iconTint = Color(0xFFB6E5B8)
-        }
-        SnackbarType.ERROR -> {
-            backgroundColor = Color(0xFFD73E3E)
-            icon = Icons.Default.Error
-            iconTint = Color(0xFFFDD1D6)
-        }
-    }
-
+private fun AddManualMealSnackbar(
+    message: String,
+    isError: Boolean
+) {
     Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isError) MaterialTheme.colorScheme.errorContainer
+            else MaterialTheme.colorScheme.primaryContainer
+        )
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Icon(
-                imageVector = icon,
+                imageVector = if (isError) Icons.Default.Error else Icons.Default.CheckCircle,
                 contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(22.dp)
+                tint = if (isError) MaterialTheme.colorScheme.error
+                else MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
             )
-            Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = data.message,
+                text = message,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = Color.White
+                color = if (isError) MaterialTheme.colorScheme.onErrorContainer
+                else MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }

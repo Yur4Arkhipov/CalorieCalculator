@@ -54,14 +54,11 @@ fun NavGraphBuilder.homeSection(
         }
 
         composable<AiMealDescriptionRoute> {
-            AiMealDescriptionScreen(onClose = onBackClick)
+            AiMealDescriptionScreen(onBackClick = onBackClick)
         }
 
         composable<ManualAddMealRoute> {
-            ManualAddMealScreen(
-                onSaveClick = onBackClick,
-                onBackClick = onBackClick
-            )
+            ManualAddMealScreen(onBackClick = onBackClick)
         }
     }
 }

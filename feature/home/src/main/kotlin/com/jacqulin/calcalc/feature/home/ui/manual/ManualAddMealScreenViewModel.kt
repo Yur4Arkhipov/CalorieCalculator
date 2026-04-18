@@ -6,6 +6,8 @@ import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
+import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
+import com.jacqulin.calcalc.core.util.effects.UiEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -39,18 +41,6 @@ sealed class ManualAddMealEvent {
     object OnSaveClick : ManualAddMealEvent()
 }
 
-sealed interface ManualAddMealEffect {
-    data object CloseScreen : ManualAddMealEffect
-    data class ShowSnackbar(val message: String, val type: SnackbarType) : ManualAddMealEffect
-}
-
-enum class SnackbarType { SUCCESS, ERROR }
-
-data class SnackbarData(
-    val message: String,
-    val type: SnackbarType
-)
-
 @HiltViewModel
 class ManualAddMealScreenViewModel @Inject constructor(
     private val saveManualAddMealDBUseCase: SaveManualAddMealDBUseCase,
@@ -62,7 +52,7 @@ class ManualAddMealScreenViewModel @Inject constructor(
 
     private val selectedDate = observeSelectedDate()
 
-    private val _effect = Channel<ManualAddMealEffect>()
+    private val _effect = Channel<UiEffect>()
     val effect = _effect.receiveAsFlow()
 
     fun onEvent(event: ManualAddMealEvent) {
@@ -119,11 +109,21 @@ class ManualAddMealScreenViewModel @Inject constructor(
                     type = state.selectedMealType
                 )
                 saveManualAddMealDBUseCase(selectedDate.value, meal)
-                _effect.send(ManualAddMealEffect.ShowSnackbar("Блюдо успешно сохранено!", SnackbarType.SUCCESS))
-                delay(1500)
-                _effect.send(ManualAddMealEffect.CloseScreen)
+                _effect.send(
+                    element = UiEffect.ShowSnackbar(
+                        messageCode = SnackbarMessageCode.MEAL_SAVED,
+                        isError = false
+                    )
+                )
+                delay(2000)
+                _effect.send(element = UiEffect.CloseScreen)
             } catch (_: Exception) {
-                _effect.send(ManualAddMealEffect.ShowSnackbar("Ошибка сохранения", SnackbarType.ERROR))
+                _effect.send(
+                    element = UiEffect.ShowSnackbar(
+                        messageCode = SnackbarMessageCode.MEAL_SAVE_ERROR,
+                        isError = true
+                    )
+                )
             }
         }
     }
