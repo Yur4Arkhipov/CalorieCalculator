@@ -1,10 +1,12 @@
 package com.jacqulin.calcalc.feature.home.ui.manual
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +27,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Error
@@ -49,7 +50,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -64,6 +67,7 @@ import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
 import com.jacqulin.calcalc.core.util.effects.UiEffect
 import kotlinx.coroutines.delay
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManualAddMealScreen(
@@ -134,12 +138,14 @@ fun ManualAddMealScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(vertical = 20.dp)
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 ) {
                     focusManager.clearFocus(force = true)
                 }
+                .border(1.dp, Color.Red)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -147,15 +153,18 @@ fun ManualAddMealScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { onBackClick() }) {
+                IconButton(
+                    modifier = Modifier.size(20.dp),
+                    onClick = { onBackClick() }
+                ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Назад",
+                        painter = painterResource(R.drawable.ic_arrow_back),
+                        contentDescription = stringResource(R.string.home_manual_back),
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = "Добавить еду",
+                    text = stringResource(R.string.home_manual_add_meal),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -186,7 +195,7 @@ fun ManualAddMealScreen(
             OutlinedTextField(
                 value = uiState.mealName,
                 onValueChange = { viewModel.onEvent(ManualAddMealEvent.MealNameChanged(it)) },
-                label = { Text(text = stringResource(R.string.field_product_name)) } ,
+                label = { Text(text = stringResource(R.string.home_manual_field_product_name)) } ,
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(nameFocus),
@@ -205,7 +214,7 @@ fun ManualAddMealScreen(
             )
 
             Text(
-                text = "Питательная ценность",
+                text = stringResource(R.string.home_manual_nutrition_value),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium
             )

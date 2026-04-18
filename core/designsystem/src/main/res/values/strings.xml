@@ -8,8 +8,6 @@
     <string name="profile_title">Profile</string>
     <string name="macro_detail_title">Детальная информация</string>
     <string name="ai_meal_description_title">Описание блюда ИИ</string>
-    <string name="manual_meal_add_title">Добавление вручную</string>
-    <string name="field_product_name">Название продукта</string>
     <string name="calories">Калории</string>
     <string name="proteins">Белки</string>
     <string name="fats">Жиры</string>
@@ -17,7 +15,6 @@
     <string name="calories_suffix">ккал</string>
     <string name="weight_suffix">г</string>
     <string name="save">Сохранить</string>
-    <string name="save_meal_snackbar">"Блюдо успешно сохранено!"</string>
 
     // Home
     <string name="home_dialog_cancel">Отмена</string>
@@ -40,15 +37,19 @@
     <string name="home_ai_text_tip_3">Упоминайте способ приготовления (жареное, варёное и т.д.)</string>
     <string name="home_ai_text_tip_4">Будьте как можно более конкретны</string>
     <string name="home_ai_text_result">Результат анализа</string>
-    <string name="home_ai_text_calories">Калории</string>
     <string name="home_ai_text_calories_suffix">%d ккал</string>
-    <string name="home_ai_text_proteins">Белки</string>
-    <string name="home_ai_text_fats">Жиры</string>
-    <string name="home_ai_text_carbs">Углеводы</string>
-    <string name="home_ai_text_unit">г</string>
     <string name="home_ai_text_saving">Сохраняю…</string>
     <string name="home_ai_text_diary">Сохранить в дневник</string>
 
+    // Home -> Manual add meal
+    <string name="home_manual_back">Вернуться назад</string>
+    <string name="home_manual_add_meal">Добавить блюдо</string>
+    <string name="home_manual_field_product_name">Название блюда</string>
+    <string name="home_manual_nutrition_value">Питательная ценность</string>
+
+    // Effects
+    <string name="effect_meal_saved">"Блюдо успешно сохранено"</string>
+    <string name="effect_meal_save_error">"Ошибка сохранения блюда"</string>
 
 
 </resources>
