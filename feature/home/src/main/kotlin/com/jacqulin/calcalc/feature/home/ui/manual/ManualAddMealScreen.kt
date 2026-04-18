@@ -27,9 +27,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -62,10 +60,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.component.AddMealSnackbar
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
 import com.jacqulin.calcalc.core.util.effects.UiEffect
+import com.jacqulin.calcalc.core.util.funtions.filterNumericInput
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,23 +89,31 @@ fun ManualAddMealScreen(
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
     var snackbarIsError by remember { mutableStateOf(false) }
     var snackbarVisible by remember { mutableStateOf(false) }
+    var snackbarJob by remember { mutableStateOf<Job?>(null) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                UiEffect.CloseScreen -> {
-                    onBackClick()
-                }
+                is UiEffect.CloseScreen -> onBackClick()
                 is UiEffect.ShowSnackbar -> {
-                    snackbarVisible = true
+                    snackbarJob?.cancel()
+
                     snackbarMessage = when (effect.messageCode) {
-                        SnackbarMessageCode.MEAL_SAVED -> "Блюдо сохранено!"
+                        SnackbarMessageCode.MEAL_SAVED -> "Блюдо успешно сохранено!"
                         SnackbarMessageCode.MEAL_SAVE_ERROR -> "Ошибка сохранения"
                     }
                     snackbarIsError = effect.isError
-                    if (effect.isError) {
-                        delay(2000)
-                        snackbarVisible = false
+                    snackbarVisible = true
+
+                    snackbarJob = launch {
+                        if (effect.isError) {
+                            delay(3000)
+                            snackbarVisible = false
+                        } else {
+                            delay(2000)
+                            snackbarVisible = false
+                            onBackClick()
+                        }
                     }
                 }
             }
@@ -125,9 +135,10 @@ fun ManualAddMealScreen(
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
                     snackbarMessage?.let { msg ->
-                        AddManualMealSnackbar(
+                        AddMealSnackbar(
                             message = msg,
-                            isError = snackbarIsError
+                            type = if (snackbarIsError) SnackbarMessageCode.MEAL_SAVE_ERROR
+                                    else SnackbarMessageCode.MEAL_SAVED
                         )
                     }
                 }
@@ -138,7 +149,7 @@ fun ManualAddMealScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(vertical = 20.dp)
+                .padding(bottom = 20.dp)
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
@@ -150,7 +161,9 @@ fun ManualAddMealScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
@@ -226,7 +239,14 @@ fun ManualAddMealScreen(
                 NutrientField(
                     label = stringResource(R.string.calories),
                     value = uiState.calories,
-                    onValueChange = { viewModel.onEvent(ManualAddMealEvent.CaloriesChanged(it)) },
+                    onValueChange = { input ->
+                        val filtered = filterNumericInput(
+                            input = input,
+                            maxLength = 4,
+                            maxValue = 2500
+                        )
+                        viewModel.onEvent(ManualAddMealEvent.CaloriesChanged(filtered))
+                    },
                     suffix = stringResource(R.string.calories_suffix),
                     focusRequester = caloriesFocus,
                     imeAction = ImeAction.Next,
@@ -236,7 +256,14 @@ fun ManualAddMealScreen(
                 NutrientField(
                     label = stringResource(R.string.proteins),
                     value = uiState.proteins,
-                    onValueChange = { viewModel.onEvent(ManualAddMealEvent.ProteinsChanged(it)) },
+                    onValueChange = { input ->
+                        val filtered = filterNumericInput(
+                            input = input,
+                            maxLength = 3,
+                            maxValue = 150,
+                        )
+                        viewModel.onEvent(ManualAddMealEvent.ProteinsChanged(filtered))
+                    },
                     suffix = stringResource(R.string.weight_suffix),
                     focusRequester = proteinsFocus,
                     imeAction = ImeAction.Next,
@@ -252,7 +279,14 @@ fun ManualAddMealScreen(
                 NutrientField(
                     label = stringResource(R.string.fats),
                     value = uiState.fats,
-                    onValueChange = { viewModel.onEvent(ManualAddMealEvent.FatsChanged(it)) },
+                    onValueChange = { input ->
+                        val filtered = filterNumericInput(
+                            input = input,
+                            maxLength = 3,
+                            maxValue = 150,
+                        )
+                        viewModel.onEvent(ManualAddMealEvent.FatsChanged(filtered))
+                    },
                     suffix = stringResource(R.string.weight_suffix),
                     focusRequester = fatsFocus,
                     imeAction = ImeAction.Next,
@@ -262,7 +296,14 @@ fun ManualAddMealScreen(
                 NutrientField(
                     label = stringResource(R.string.carbs),
                     value = uiState.carbs,
-                    onValueChange = { viewModel.onEvent(ManualAddMealEvent.CarbsChanged(it)) },
+                    onValueChange = { input ->
+                        val filtered = filterNumericInput(
+                            input = input,
+                            maxLength = 3,
+                            maxValue = 300,
+                        )
+                        viewModel.onEvent(ManualAddMealEvent.CarbsChanged(filtered))
+                    },
                     suffix = stringResource(R.string.weight_suffix),
                     focusRequester = carbsFocus,
                     imeAction = ImeAction.Done,
@@ -294,40 +335,6 @@ fun ManualAddMealScreen(
                     fontWeight = FontWeight.Bold
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun AddManualMealSnackbar(
-    message: String,
-    isError: Boolean
-) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isError) MaterialTheme.colorScheme.errorContainer
-            else MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = if (isError) Icons.Default.Error else Icons.Default.CheckCircle,
-                contentDescription = null,
-                tint = if (isError) MaterialTheme.colorScheme.error
-                else MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (isError) MaterialTheme.colorScheme.onErrorContainer
-                else MaterialTheme.colorScheme.onPrimaryContainer
-            )
         }
     }
 }

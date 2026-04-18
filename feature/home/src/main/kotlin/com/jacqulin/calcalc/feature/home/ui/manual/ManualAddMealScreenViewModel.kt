@@ -10,7 +10,6 @@ import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
 import com.jacqulin.calcalc.core.util.effects.UiEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -52,7 +51,7 @@ class ManualAddMealScreenViewModel @Inject constructor(
 
     private val selectedDate = observeSelectedDate()
 
-    private val _effect = Channel<UiEffect>()
+    private val _effect = Channel<UiEffect>(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
 
     fun onEvent(event: ManualAddMealEvent) {
@@ -68,10 +67,8 @@ class ManualAddMealScreenViewModel @Inject constructor(
                 }
             }
             is ManualAddMealEvent.CaloriesChanged -> {
-                if (event.calories.isEmpty() || event.calories.toIntOrNull() != null) {
-                    _uiState.update {
-                        it.copy(calories = event.calories)
-                    }
+                _uiState.update {
+                    it.copy(calories = event.calories)
                 }
             }
             is ManualAddMealEvent.ProteinsChanged -> {
@@ -115,8 +112,6 @@ class ManualAddMealScreenViewModel @Inject constructor(
                         isError = false
                     )
                 )
-                delay(2000)
-                _effect.send(element = UiEffect.CloseScreen)
             } catch (_: Exception) {
                 _effect.send(
                     element = UiEffect.ShowSnackbar(
