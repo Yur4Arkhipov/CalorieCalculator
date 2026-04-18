@@ -30,7 +30,6 @@ fun FloatingBottomBar(
             .clip(RoundedCornerShape(28.dp))
             .height(48.dp)
             .widthIn(max = 300.dp),
-//        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
         tonalElevation = 8.dp
     ) {

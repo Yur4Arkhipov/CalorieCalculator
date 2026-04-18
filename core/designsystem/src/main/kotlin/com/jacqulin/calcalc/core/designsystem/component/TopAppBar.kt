@@ -1,7 +1,6 @@
 package com.jacqulin.calcalc.core.designsystem.component
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.expandIn
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -16,6 +15,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 
+@Suppress("unused") // TODO: возможно будет использоваться
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBar(
