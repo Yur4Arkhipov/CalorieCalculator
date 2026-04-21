@@ -8,9 +8,10 @@ import com.jacqulin.calcalc.core.domain.model.Nutrition
 import com.jacqulin.calcalc.core.domain.usecase.AnalyzeMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
+import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
+import com.jacqulin.calcalc.core.util.effects.UiEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,16 +31,11 @@ data class AiMealDescriptionUiState(
     val result: Nutrition? = null
 )
 
-sealed interface AiMealEffect {
-    data class ShowSnackbar(val message: String, val isError: Boolean = false) : AiMealEffect
-    data object CloseScreen : AiMealEffect
-}
-
 @HiltViewModel
 class AiMealDescriptionViewModel @Inject constructor(
     private val analyzeMealUseCase: AnalyzeMealUseCase,
     private val saveManualAddMealDBUseCase: SaveManualAddMealDBUseCase,
-    observeSelectedDate: ObserveSelectedDateUseCase
+    observeSelectedDate: ObserveSelectedDateUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AiMealDescriptionUiState())
@@ -47,7 +43,7 @@ class AiMealDescriptionViewModel @Inject constructor(
 
     private val selectedDate = observeSelectedDate()
 
-    private val _effect = Channel<AiMealEffect>()
+    private val _effect = Channel<UiEffect>()
     val effect = _effect.receiveAsFlow()
 
 
@@ -68,7 +64,7 @@ class AiMealDescriptionViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isProcessing = false,
-                    error = "Ошибка анализа: ${e.localizedMessage}"
+                    error = e.localizedMessage
                 )
             }
         }
@@ -80,22 +76,37 @@ class AiMealDescriptionViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = state.copy(isSaving = true)
             try {
+                val calories = state.result.calories.toInt()
+                val proteins = state.result.protein.toInt()
+                val fats = state.result.fat.toInt()
+                val carbs = state.result.carbs.toInt()
+
                 val meal = Meal(
-                    name = nutrition.name.ifBlank { "Блюдо" },
-                    calories = nutrition.calories.toInt(),
-                    proteins = nutrition.protein.toInt(),
-                    fats = nutrition.fat.toInt(),
-                    carbs = nutrition.carbs.toInt(),
+                    name = nutrition.name,
+                    calories = calories,
+                    proteins = proteins,
+                    fats = fats,
+                    carbs = carbs,
                     time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
                     type = state.selectedMealType
                 )
+
                 saveManualAddMealDBUseCase(selectedDate.value, meal)
-                _effect.send(AiMealEffect.ShowSnackbar("Блюдо сохранено!"))
-                delay(1000)
-                _effect.send(AiMealEffect.CloseScreen)
-            } catch (e: Exception) {
+
+                _effect.send(
+                    element = UiEffect.ShowSnackbar(
+                        messageCode = SnackbarMessageCode.MEAL_SAVED,
+                        isError = false
+                    )
+                )
+            } catch (_: Exception) {
                 _uiState.value = _uiState.value.copy(isSaving = false)
-                _effect.send(AiMealEffect.ShowSnackbar("Ошибка сохранения", isError = true))
+                _effect.send(
+                    element = UiEffect.ShowSnackbar(
+                        messageCode = SnackbarMessageCode.MEAL_SAVE_ERROR,
+                        isError = true
+                    )
+                )
             }
         }
     }

@@ -40,6 +40,8 @@
     <string name="home_ai_text_calories_suffix">%d ккал</string>
     <string name="home_ai_text_saving">Сохраняю…</string>
     <string name="home_ai_text_diary">Сохранить в дневник</string>
+    <string name="home_ai_add_meal">Добавить блюдо c ИИ</string>
+    <string name="home_ai_text_analyze_error">Ошибка анализа</string>
 
     // Home -> Manual add meal
     <string name="home_manual_back">Вернуться назад</string>

@@ -30,6 +30,8 @@
     <string name="home_ai_text_calories_suffix">%d kcal</string>
     <string name="home_ai_text_saving">Saving…</string>
     <string name="home_ai_text_diary">Save to diary</string>
+    <string name="home_ai_add_meal">Add meal AI</string>
+    <string name="home_ai_text_analyze_error">Analyze error</string>
 
     // Home -> Manual add meal
     <string name="home_manual_back">Go back</string>
