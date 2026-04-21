@@ -1,6 +1,7 @@
 package com.jacqulin.calcalc.feature.home.ui.home
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,12 +28,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -60,7 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -83,6 +78,7 @@ import com.jacqulin.calcalc.core.domain.model.PendingMeal
 
 private enum class AddPhotoSource { CAMERA, GALLERY }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -291,7 +287,7 @@ fun HomeScreen(
                         }
                 ) {
                     AddMealFloatingActionButton(
-                        icon = Icons.Default.Add,
+                        icon = painterResource(R.drawable.ic_add),
                         contentDescription = stringResource(R.string.home_add_meal),
                         onClick = { showAddFoodSheet = true },
                     )
@@ -432,28 +428,28 @@ fun AddFoodBottomSheet(
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 AddFoodOptionCard(
-                    icon = Icons.Default.Edit,
+                    icon = painterResource(R.drawable.ic_edit),
                     text = "Ввести вручную",
                     subtitle = "Указать калории и БЖУ",
                     onClick = onManual
                 )
 
                 AddFoodOptionCard(
-                    icon = Icons.Default.AutoAwesome,
+                    icon = painterResource(R.drawable.ic_auto_awesome),
                     text = "Описать для ИИ",
                     subtitle = "ИИ рассчитает КБЖУ по описанию",
                     onClick = onAiDescription
                 )
 
                 AddFoodOptionCard(
-                    icon = Icons.Default.CameraAlt,
+                    icon = painterResource(R.drawable.ic_camera_alt),
                     text = "Сделать фото",
                     subtitle = "Для фотографии в любой момент",
                     onClick = onCamera
                 )
 
                 AddFoodOptionCard(
-                    icon = Icons.Default.Photo,
+                    icon = painterResource(R.drawable.ic_photo),
                     text = "Выбрать из галереи",
                     subtitle = "Для готовых снимков",
                     onClick = onGallery
@@ -467,7 +463,7 @@ fun AddFoodBottomSheet(
 
 @Composable
 private fun AddFoodOptionCard(
-    icon: ImageVector,
+    icon: Painter,
     text: String,
     subtitle: String,
     onClick: () -> Unit
@@ -492,7 +488,7 @@ private fun AddFoodOptionCard(
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
             ) {
                 Icon(
-                    imageVector = icon,
+                    painter = icon,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(12.dp)
