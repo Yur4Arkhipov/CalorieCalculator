@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -121,7 +122,7 @@ private fun WeekHeader(
         IconButton(onClick = onPreviousWeek) {
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_back),
-                contentDescription = "Предыдущая неделя"
+                contentDescription = stringResource(R.string.home_calendar_section_prev_week)
             )
         }
 
@@ -139,7 +140,7 @@ private fun WeekHeader(
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_forward),
-                contentDescription = "Следующая неделя",
+                contentDescription = stringResource(R.string.home_calendar_section_next_week),
                 tint = if (weekOffset < MAX_FUTURE_WEEKS)
                     MaterialTheme.colorScheme.onBackground
                 else

@@ -48,6 +48,10 @@
     <string name="home_manual_add_meal">Добавить блюдо</string>
     <string name="home_manual_field_product_name">Название блюда</string>
     <string name="home_manual_nutrition_value">Питательная ценность</string>
+    
+    // Home -> Calendar section
+    <string name="home_calendar_section_next_week">Следующая неделя</string>
+    <string name="home_calendar_section_prev_week">Предыдущая неделя</string>
 
     // Effects
     <string name="effect_meal_saved">"Блюдо успешно сохранено"</string>

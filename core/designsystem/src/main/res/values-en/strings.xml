@@ -39,6 +39,10 @@
     <string name="home_manual_field_product_name">Meal name</string>
     <string name="home_manual_nutrition_value">Nutritional value</string>
 
+    // Home -> Calendar section
+    <string name="home_calendar_section_next_week">Next week</string>
+    <string name="home_calendar_section_prev_week">Previous week</string>
+
     // Effects
     <string name="effect_meal_saved">"The dish is saved!"</string>
     <string name="effect_meal_save_error">"Error saving the meal"</string>
