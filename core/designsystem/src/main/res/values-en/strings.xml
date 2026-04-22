@@ -43,6 +43,12 @@
     <string name="home_calendar_section_next_week">Next week</string>
     <string name="home_calendar_section_prev_week">Previous week</string>
 
+    // Home -> calories section
+    <string name="kcal_left">%1$d kcal left</string>
+    <string name="kcal_over">%1$d kcal over</string>
+    <string name="g_left">%1$d g left</string>
+    <string name="g_over">%1$d g over</string>
+
     // Effects
     <string name="effect_meal_saved">"The dish is saved!"</string>
     <string name="effect_meal_save_error">"Error saving the meal"</string>

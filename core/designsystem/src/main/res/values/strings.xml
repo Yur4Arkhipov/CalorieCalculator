@@ -53,6 +53,12 @@
     <string name="home_calendar_section_next_week">Следующая неделя</string>
     <string name="home_calendar_section_prev_week">Предыдущая неделя</string>
 
+    // Home -> calories section
+    <string name="kcal_left">Осталось %1$d ккал</string>
+    <string name="kcal_over">Превышено на %1$d ккал</string>
+    <string name="g_left">Осталось %1$d г</string>
+    <string name="g_over">Превышено на %1$d г</string>
+
     // Effects
     <string name="effect_meal_saved">"Блюдо успешно сохранено"</string>
     <string name="effect_meal_save_error">"Ошибка сохранения блюда"</string>
