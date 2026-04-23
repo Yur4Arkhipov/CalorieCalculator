@@ -12,29 +12,25 @@ import kotlin.reflect.KClass
 
 enum class TopLevelDestination(
     val iconRes: Int,
-    val iconTextId: String,
-    val titleTextId: Int,
+    val iconTextId: Int,
     val route: KClass<*>,
     val baseRoute: KClass<*> = route
 ) {
     STATISTICS(
         iconRes = AppIcons.Statistics,
-        iconTextId = "Statistics",
-        titleTextId = R.string.statistics_title,
+        iconTextId = R.string.statistics_title,
         route = StatisticsRoute::class,
         baseRoute = StatisticsBaseRoute::class
     ),
     HOME(
         iconRes = AppIcons.Home,
-        iconTextId = "Home",
-        titleTextId = R.string.home_title,
+        iconTextId = R.string.home_title,
         route = HomeRoute::class,
         baseRoute = HomeBaseRoute::class
     ),
     PROFILE(
         iconRes = AppIcons.Profile,
-        iconTextId = "Profile",
-        titleTextId = R.string.profile_title,
+        iconTextId = R.string.profile_title,
         route = ProfileRoute::class,
         baseRoute = ProfileBaseRoute::class
     )

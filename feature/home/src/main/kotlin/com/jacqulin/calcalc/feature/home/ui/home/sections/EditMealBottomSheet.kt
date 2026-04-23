@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.feature.home.ui.home
+package com.jacqulin.calcalc.feature.home.ui.home.sections
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -54,7 +55,7 @@ import com.jacqulin.calcalc.core.util.funtions.filterNumericInput
 @Composable
 fun EditMealBottomSheet(
     meal: Meal,
-    sheetState: androidx.compose.material3.SheetState,
+    sheetState: SheetState,
     onDismiss: () -> Unit,
     onSave: (Meal) -> Unit,
     onDelete: (Meal) -> Unit = {}

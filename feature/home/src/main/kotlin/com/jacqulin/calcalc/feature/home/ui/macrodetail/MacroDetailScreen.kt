@@ -44,7 +44,7 @@ import com.jacqulin.calcalc.core.designsystem.theme.CaloriesDark
 import com.jacqulin.calcalc.core.designsystem.theme.TextSecondary
 import com.jacqulin.calcalc.core.designsystem.theme.TextTertiary
 import com.jacqulin.calcalc.core.domain.model.Meal
-import com.jacqulin.calcalc.feature.home.ui.home.EditMealBottomSheet
+import com.jacqulin.calcalc.feature.home.ui.home.sections.EditMealBottomSheet
 import com.jacqulin.calcalc.core.designsystem.component.MealCard
 import kotlin.math.roundToInt
 

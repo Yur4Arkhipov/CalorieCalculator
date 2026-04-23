@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_version">0.1</string>
+    <string name="home_title">Home</string>
+    <string name="statistics_title">Statistics</string>
+    <string name="profile_title">Profile</string>
     <string name="app_name">CalorieCalculator</string>
-
     <string name="calories">Calories</string>
     <string name="proteins">Proteins</string>
     <string name="fats">Fats</string>
@@ -10,6 +13,25 @@
     <string name="calories_suffix">kcal</string>
     <string name="save">Save</string>
 
+    // Home
+    <string name="home_dialog_cancel">Cancel</string>
+    <string name="home_select_meal_type">Select meal type</string>
+    <string name="home_add_meal">Add meal</string>
+    <string name="home_add_meal_manual_title">Add manually</string>
+    <string name="home_add_meal_manual_subtitle">Specify calories and macros</string>
+    <string name="home_add_meal_ai_title">Describe to AI</string>
+    <string name="home_add_meal_ai_subtitle">AI will calculate macros from description</string>
+    <string name="home_add_meal_camera_title">Take a photo</string>
+    <string name="home_add_meal_camera_subtitle">Snap a picture anytime</string>
+    <string name="home_add_meal_gallery_title">Choose from gallery</string>
+    <string name="home_add_meal_gallery_subtitle">Select an existing photo</string>
+    <string name="home_add_meal_no_food_at_photo">No food was found in the photo</string>
+    <string name="home_meals">Meals</string>
+    <string name="home_more_details">More details</string>
+    <string name="home_no_meals_add">There are no food entries yet</string>
+    <string name="home_analyze_error">Analyze error</string>
+    <string name="home_analyzing">Analyzing…</string>
+    <string name="home_remove">Remove</string>
 
     // Home -> ai meal description
     <string name="home_ai_text_meal_entry">Meal entry</string>

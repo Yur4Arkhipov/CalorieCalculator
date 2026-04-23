@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.feature.home.ui.home
+package com.jacqulin.calcalc.feature.home.ui.home.sections
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.icon.AppIcons
 import com.jacqulin.calcalc.core.designsystem.theme.AppColors
+import com.jacqulin.calcalc.feature.home.ui.home.HomeUiState
 
 @Composable
 internal fun CaloriesSection(uiState: HomeUiState) {

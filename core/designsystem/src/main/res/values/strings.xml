@@ -3,11 +3,9 @@
     <string name="app_version">0.1</string>
 
     <string name="app_name">CalorieCalculator</string>
-    <string name="home_title">CalorieCalculator</string>
-    <string name="statistics_title">Statistics</string>
-    <string name="profile_title">Profile</string>
-    <string name="macro_detail_title">Детальная информация</string>
-    <string name="ai_meal_description_title">Описание блюда ИИ</string>
+    <string name="home_title">Главное</string>
+    <string name="statistics_title">Статистика</string>
+    <string name="profile_title">Профиль</string>
     <string name="calories">Калории</string>
     <string name="proteins">Белки</string>
     <string name="fats">Жиры</string>
@@ -20,6 +18,21 @@
     <string name="home_dialog_cancel">Отмена</string>
     <string name="home_select_meal_type">Выберите приём пищи</string>
     <string name="home_add_meal">Добавить блюдо</string>
+    <string name="home_add_meal_manual_title">Ввести вручную</string>
+    <string name="home_add_meal_manual_subtitle">Указать калории и БЖУ</string>
+    <string name="home_add_meal_ai_title">Описать для ИИ</string>
+    <string name="home_add_meal_ai_subtitle">ИИ рассчитает КБЖУ по описанию</string>
+    <string name="home_add_meal_camera_title">Сделать фото</string>
+    <string name="home_add_meal_camera_subtitle">Для фотографии в любой момент</string>
+    <string name="home_add_meal_gallery_title">Выбрать из галереи</string>
+    <string name="home_add_meal_gallery_subtitle">Для готовых снимков</string>
+    <string name="home_add_meal_no_food_at_photo">На фото не обнаружена еда</string>
+    <string name="home_meals">Приемы пищи</string>
+    <string name="home_more_details">Подробнее</string>
+    <string name="home_no_meals_add">Еще нет записей о еде</string>
+    <string name="home_analyze_error">Ошибка анализа</string>
+    <string name="home_analyzing">Анализирую…</string>
+    <string name="home_remove">Убрать</string>
 
     // Home -> ai meal description
     <string name="home_ai_text_meal_entry">Прием пищи</string>
@@ -71,10 +84,8 @@
     <string name="edit_meal_bottom_sheet_cancel">Отменить</string>
     <string name="edit_meal_bottom_sheet_save">Сохранить</string>
 
-
     // Effects
     <string name="effect_meal_saved">"Блюдо успешно сохранено"</string>
     <string name="effect_meal_save_error">"Ошибка сохранения блюда"</string>
-
 
 </resources>

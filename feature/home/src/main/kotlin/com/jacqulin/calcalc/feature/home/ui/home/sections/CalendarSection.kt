@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.feature.home.ui.home
+package com.jacqulin.calcalc.feature.home.ui.home.sections
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 import com.jacqulin.calcalc.feature.home.model.CalendarDay
+import com.jacqulin.calcalc.feature.home.ui.home.MAX_FUTURE_WEEKS
+import com.jacqulin.calcalc.feature.home.ui.home.MAX_PAST_WEEKS
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
