@@ -59,6 +59,19 @@
     <string name="g_left">Осталось %1$d г</string>
     <string name="g_over">Превышено на %1$d г</string>
 
+    // Home -> edit meal bottom sheet
+    <string name="edit_meal_bottom_sheet_remove">Убрать из избранного</string>
+    <string name="edit_meal_bottom_sheet_add">В избранное</string>
+    <string name="edit_meal_bottom_sheet_remove_simple">Удалить</string>
+    <string name="edit_meal_bottom_sheet_calories">Калории (ккал)</string>
+    <string name="edit_meal_bottom_sheet_macronutrients">Макронутриенты</string>
+    <string name="edit_meal_bottom_sheet_proteins">Белки (г)</string>
+    <string name="edit_meal_bottom_sheet_carbs">Углеводы (г)</string>
+    <string name="edit_meal_bottom_sheet_fats">Жиры (г)</string>
+    <string name="edit_meal_bottom_sheet_cancel">Отменить</string>
+    <string name="edit_meal_bottom_sheet_save">Сохранить</string>
+
+
     // Effects
     <string name="effect_meal_saved">"Блюдо успешно сохранено"</string>
     <string name="effect_meal_save_error">"Ошибка сохранения блюда"</string>

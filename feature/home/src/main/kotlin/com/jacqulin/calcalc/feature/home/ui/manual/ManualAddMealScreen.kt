@@ -201,7 +201,7 @@ fun ManualAddMealScreen(
             OutlinedTextField(
                 value = uiState.mealName,
                 onValueChange = { input ->
-                    if (input.length <= 40) {
+                    if (input.length <= 36) {
                         viewModel.onEvent(ManualAddMealEvent.MealNameChanged(input))
                     }
                 },

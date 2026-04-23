@@ -49,6 +49,18 @@
     <string name="g_left">%1$d g left</string>
     <string name="g_over">%1$d g over</string>
 
+    // Home -> edit meal bottom sheet
+    <string name="edit_meal_bottom_sheet_remove">Remove from favorites</string>
+    <string name="edit_meal_bottom_sheet_add">Add to favorites</string>
+    <string name="edit_meal_bottom_sheet_remove_simple">Remove</string>
+    <string name="edit_meal_bottom_sheet_calories">Calories (kcal)</string>
+    <string name="edit_meal_bottom_sheet_macronutrients">Macronutrients</string>
+    <string name="edit_meal_bottom_sheet_proteins">Proteins (g)</string>
+    <string name="edit_meal_bottom_sheet_carbs">Carbs (g)</string>
+    <string name="edit_meal_bottom_sheet_fats">Fats (g)</string>
+    <string name="edit_meal_bottom_sheet_cancel">Cancel</string>
+    <string name="edit_meal_bottom_sheet_save">Save</string>
+
     // Effects
     <string name="effect_meal_saved">"The dish is saved!"</string>
     <string name="effect_meal_save_error">"Error saving the meal"</string>

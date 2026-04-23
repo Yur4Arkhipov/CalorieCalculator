@@ -26,11 +26,7 @@ fun NutrientField(
 ) {
     OutlinedTextField(
         value = value,
-        onValueChange = { newVal ->
-            if (newVal.isEmpty() || newVal.all { it.isDigit() }) {
-                onValueChange(newVal)
-            }
-        },
+        onValueChange = { onValueChange(it) },
         label = { Text(label) },
         modifier = modifier.focusRequester(focusRequester),
         singleLine = true,
