@@ -1,5 +1,6 @@
 package com.jacqulin.calcalc.core.designsystem.component
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +33,8 @@ fun FloatingBottomBar(
             .height(48.dp)
             .widthIn(max = 300.dp),
         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-        tonalElevation = 8.dp
+        tonalElevation = 8.dp,
+        windowInsets = WindowInsets(0.dp)
     ) {
         items.forEach { item ->
             NavigationBarItem(
