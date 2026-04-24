@@ -180,7 +180,7 @@
 
     <string name="onboarding_analyzing_title">Setting things up…</string>
     <string name="onboarding_analyzing_step_1">Analyzing your profile…</string>
-    <string name="onboarding_analyzing_step_2">Calculating basal metabolic rate...</string>
+    <string name="onboarding_analyzing_step_2">Calculating basal metabolic rate…</string>
     <string name="onboarding_analyzing_step_3">Adjusting calorie intake…</string>
     <string name="onboarding_analyzing_step_4">Calculating macro balance…</string>
     <string name="onboarding_analyzing_step_5">Preparing recommendations…</string>

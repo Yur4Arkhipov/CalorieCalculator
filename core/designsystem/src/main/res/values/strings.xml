@@ -180,11 +180,11 @@
     <string name="onboarding_activity_very_active_desc">Ежедневные тяжёлые тренировки или физическая работа</string>
 
     <string name="onboarding_analyzing_title">Настраиваем под вас</string>
-    <string name="onboarding_analyzing_step_1">Анализируем ваш профиль...</string>
-    <string name="onboarding_analyzing_step_2">Вычисляем базовый обмен веществ...</string>
-    <string name="onboarding_analyzing_step_3">Подбираем калорийность...</string>
-    <string name="onboarding_analyzing_step_4">Рассчитываем баланс БЖУ...</string>
-    <string name="onboarding_analyzing_step_5">Готовим рекомендации...</string>
+    <string name="onboarding_analyzing_step_1">Анализируем ваш профиль…</string>
+    <string name="onboarding_analyzing_step_2">Вычисляем базовый обмен веществ…</string>
+    <string name="onboarding_analyzing_step_3">Подбираем калорийность…</string>
+    <string name="onboarding_analyzing_step_4">Рассчитываем баланс БЖУ…</string>
+    <string name="onboarding_analyzing_step_5">Готовим рекомендации…</string>
 
     <string name="onboarding_result_title">Ваша норма</string>
     <string name="onboarding_result_subtitle">Можете скорректировать значения под себя</string>
