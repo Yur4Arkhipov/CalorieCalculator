@@ -222,7 +222,7 @@ fun EditMealBottomSheet(
                         maxLength = 3,
                         maxValue = 150
                     )
-                    editedProteins = filtered
+                    editedFats = filtered
                 },
                 label = { Text(stringResource(R.string.edit_meal_bottom_sheet_fats)) },
                 modifier = Modifier.fillMaxWidth(),

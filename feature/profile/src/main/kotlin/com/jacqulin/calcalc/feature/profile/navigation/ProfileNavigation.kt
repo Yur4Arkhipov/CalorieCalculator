@@ -4,7 +4,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import com.jacqulin.calcalc.feature.profile.ProfileScreen
 import kotlinx.serialization.Serializable
 

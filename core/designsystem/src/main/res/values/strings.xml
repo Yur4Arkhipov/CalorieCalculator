@@ -88,4 +88,57 @@
     <string name="effect_meal_saved">"Блюдо успешно сохранено"</string>
     <string name="effect_meal_save_error">"Ошибка сохранения блюда"</string>
 
+    // Profile
+    <string name="profile_my_parameters">Мои параметры</string>
+    <string name="profile_edit">Изменить</string>"
+    <string name="profile_go_to">Перейти</string>
+    <string name="profile_ok">ОК</string>
+    <string name="profile_edit_macros_subtitle">Задайте значения вручную под свои цели</string>
+    <string name="profile_edit_daily_norms">Суточные нормы</string>
+
+    <string name="profile_age">Возраст</string>
+    <string name="profile_age_suffix">%1$d лет</string>
+    <string name="profile_age_suffix_simple">лет</string>
+    <string name="profile_height">Рост</string>
+    <string name="profile_height_suffix">%1$d см</string>
+    <string name="profile_height_suffix_simple">см</string>
+    <string name="profile_weight">Вес</string>
+    <string name="profile_weight_suffix">%1$d кг</string>
+    <string name="profile_weight_suffix_simple">кг</string>
+
+    <string name="profile_gender">Пол</string>
+    <string name="profile_gender_male">Мужской</string>
+    <string name="profile_gender_female">Женский</string>
+
+    <string name="profile_goal">Цель</string>
+    <string name="profile_goal_lose">Похудение</string>
+    <string name="profile_goal_maintain">Поддержание веса</string>
+    <string name="profile_goal_gain">Набор массы</string>
+
+    <string name="profile_activity">Активность</string>
+    <string name="profile_activity_level">Уровень активности</string>
+
+    <string name="profile_activity_short_sedentary">Минимум</string>
+    <string name="profile_activity_short_light">Лёгкая</string>
+    <string name="profile_activity_short_moderate">Средняя</string>
+    <string name="profile_activity_short_active">Высокая</string>
+    <string name="profile_activity_short_max">Максимальная</string>
+
+    <string name="profile_activity_sedentary">Сидячий образ жизни</string>
+    <string name="profile_activity_light">Лёгкая активность (1–3 раза в неделю)</string>
+    <string name="profile_activity_moderate">Умеренная активность (3–5 раз)</string>
+    <string name="profile_activity_active">Высокая активность (6–7 раз)</string>
+    <string name="profile_activity_max">Очень высокая (спортсмен)</string>
+
+    <string name="profile_daily_norms">Суточные нормы</string>
+    <string name="profile_daily_norms_hint">Нормы пересчитываются при изменении параметров. Вы также можете задать их вручную — нажмите «Изменить»</string>
+    <string name="profile_daily_norms_manual">Задайте значения вручную под свои цели</string>
+
+    <string name="profile_settings">Настройки</string>
+    <string name="profile_notifications">Уведомления</string>
+    <string name="profile_notifications_desc">Настроить напоминания</string>
+    <string name="profile_about">О приложении</string>
+    <string name="profile_about_version">Версия</string>
+    <string name="profile_about_dialog_text">Версия приложения: %1$s</string>
+
 </resources>
