@@ -208,4 +208,10 @@
     <string name="detail_macro_progress_format">%1$d / %2$d g</string>
     <string name="detail_macro_percentage_format">%1$d%% of daily goal</string>
 
+    // Meal card
+    <string name="macro_protein_short">P</string>
+    <string name="macro_fat_short">F</string>
+    <string name="macro_carbs_short">C</string>
+    <string name="macro_weight_format">%1$dg</string>
+
 </resources>

@@ -209,4 +209,11 @@
     <string name="detail_macro_progress_format">%1$d / %2$d г</string>
     <string name="detail_macro_percentage_format">%1$d%% от дневной нормы</string>
 
+    // Meal card
+    <string name="macro_protein_short">Б</string>
+    <string name="macro_fat_short">Ж</string>
+    <string name="macro_carbs_short">У</string>
+    <string name="macro_weight_format">%1$dг</string>
+
+
 </resources>

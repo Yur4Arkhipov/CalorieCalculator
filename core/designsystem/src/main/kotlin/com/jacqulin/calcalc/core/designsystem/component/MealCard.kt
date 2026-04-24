@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -105,7 +106,7 @@ fun MealCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${meal.calories} ккал",
+                        text = "${meal.calories} ${stringResource(R.string.calories_suffix)}",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = CaloriesDark
@@ -129,9 +130,21 @@ fun MealCard(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    MacroBadge(label = "Б", value = meal.proteins, color = AppColors.proteinMain)
-                    MacroBadge(label = "Ж", value = meal.fats, color = AppColors.fatMain)
-                    MacroBadge(label = "У", value = meal.carbs, color = AppColors.carbsMain)
+                    MacroBadge(
+                        label = stringResource(R.string.macro_protein_short),
+                        value = meal.proteins,
+                        color = AppColors.proteinMain
+                    )
+                    MacroBadge(
+                        label = stringResource(R.string.macro_fat_short),
+                        value = meal.fats,
+                        color = AppColors.fatMain
+                    )
+                    MacroBadge(
+                        label = stringResource(R.string.macro_carbs_short),
+                        value = meal.carbs,
+                        color = AppColors.carbsMain
+                    )
                 }
             }
         }
@@ -174,7 +187,7 @@ private fun MacroBadge(label: String, value: Int, color: Color) {
             }
         }
         Text(
-            text = "${value}г",
+            text = stringResource(R.string.macro_weight_format, value),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Normal,

@@ -7,20 +7,20 @@ import androidx.compose.ui.graphics.Color
 
 private val LightColorScheme = lightColorScheme(
     // Основные цвета
-    primary = ProteinMain,              // Основной акцентный цвет - синий (для кнопок, выделений)
-    onPrimary = SurfaceWhite,           // Текст на primary
-    primaryContainer = ProteinLight,     // Светлый фон для выделенных элементов
-    onPrimaryContainer = TextPrimary,    // Текст на primaryContainer
+    primary = AppPrimary,
+    onPrimary = AppOnPrimary,
+    primaryContainer = AppPrimaryContainer,
+    onPrimaryContainer = AppOnPrimaryContainer,
 
     // Вторичные цвета
-    secondary = CarbsMain,               // Вторичный акцент - жёлтый
-    onSecondary = TextPrimary,
-    secondaryContainer = CarbsLight,
+    secondary = AppSecondary,
+    onSecondary = SurfaceWhite,
+    secondaryContainer = AppSecondaryContainer,
     onSecondaryContainer = TextPrimary,
 
     // Третичные цвета
-    tertiary = FatMain,                  // Третичный цвет - зелёный
-    onTertiary = TextPrimary,
+    tertiary = FatMain,
+    onTertiary = SurfaceWhite,
     tertiaryContainer = FatLight,
     onTertiaryContainer = TextPrimary,
 
@@ -37,7 +37,7 @@ private val LightColorScheme = lightColorScheme(
     outline = DateInactive,              // Границы элементов
     outlineVariant = CaloriesLight,      // Светлые границы
 
-    // Ошибки (оставляем стандартные)
+    // Ошибки
     error = Color(0xFFBA1A1A),
     onError = Color(0xFFFFFFFF),
     errorContainer = Color(0xFFFFDAD6),

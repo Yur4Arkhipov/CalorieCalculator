@@ -10,14 +10,14 @@ val TextPrimary = Color(0xFF111111)
 val TextSecondary = Color(0xFF6E6E73)
 val TextTertiary = Color(0xFFA0A3AA)
 
-val ProteinMain = Color(0xFF5183E8)
-val ProteinLight = Color(0xFF94B9F5)
+val ProteinMain = Color(0xFF2FA0FA)
+val ProteinLight = Color(0xFF7AC3FC)
 
-val CarbsMain = Color(0xFFD9A857)
-val CarbsLight = Color(0xFFF6D78F)
+val CarbsMain = Color(0xFF87D52B)
+val CarbsLight = Color(0xFFBEFA99)
 
-val FatMain = Color(0xFFA3E39B)
-val FatLight = Color(0xFFBEF3B4)
+val FatMain = Color(0xFFFCC41D)
+val FatLight = Color(0xFFF5F383)
 
 val CaloriesDark = Color(0xFF2C2C2E)
 val CaloriesLight = Color(0xFFE5E5EA)
@@ -35,3 +35,10 @@ val White = Color(0xFFFFFFFF)
 
 val Favorite = Color(0xFFFC4242)
 val Bulb = Color(0xFFFAE844)
+
+val AppPrimary = Color(0xFF1882FF)
+val AppOnPrimary = Color(0xFFFFFFFF)
+val AppPrimaryContainer = Color(0xFFA9D1FF)
+val AppOnPrimaryContainer = Color(0xFF003875)
+val AppSecondary = Color(0xFF6CBDC7)
+val AppSecondaryContainer = Color(0xFF73A9D7)
