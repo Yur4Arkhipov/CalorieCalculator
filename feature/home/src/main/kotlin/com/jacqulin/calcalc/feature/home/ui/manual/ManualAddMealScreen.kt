@@ -160,8 +160,8 @@ fun ManualAddMealScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    modifier = Modifier.size(20.dp),
-                    onClick = { onBackClick() }
+                    modifier = Modifier.size(26.dp),
+                    onClick = onBackClick
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_arrow_back),

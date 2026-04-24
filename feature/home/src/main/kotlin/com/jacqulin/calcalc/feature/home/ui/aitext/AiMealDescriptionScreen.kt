@@ -162,7 +162,7 @@ fun AiMealDescriptionScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(26.dp),
                     onClick = { onBackClick() }
                 ) {
                     Icon(

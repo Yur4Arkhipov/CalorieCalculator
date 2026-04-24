@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import com.jacqulin.calcalc.feature.home.navigation.HomeBaseRoute
 import com.jacqulin.calcalc.feature.home.navigation.homeSection
 import com.jacqulin.calcalc.feature.home.navigation.navigateToAiMealDescription
+import com.jacqulin.calcalc.feature.home.navigation.navigateToFavoriteChoose
 import com.jacqulin.calcalc.feature.home.navigation.navigateToMacroDetail
 import com.jacqulin.calcalc.feature.home.navigation.navigateToManualAddMeal
 import com.jacqulin.calcalc.feature.profile.navigation.profileScreen
@@ -25,6 +26,9 @@ fun AppNavHost(
         modifier = modifier
     ) {
         homeSection(
+            onNavigateToFavoriteChoose = {
+                navController.navigateToFavoriteChoose()
+            },
             onNavigateToMacroDetail = {
                 navController.navigateToMacroDetail()
             },

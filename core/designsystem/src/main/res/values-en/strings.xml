@@ -33,6 +33,9 @@
     <string name="home_analyzing">Analyzing…</string>
     <string name="home_remove">Remove</string>
 
+    <string name="home_add_meal_from_favorite_title">Add from favorite</string>
+    <string name="home_add_meal_from_favorite_subtitle">Choose favorite meal</string>
+
     // Home -> ai meal description
     <string name="home_ai_text_meal_entry">Meal entry</string>
     <string name="home_ai_text_describe_the_dish">Describe the dish</string>

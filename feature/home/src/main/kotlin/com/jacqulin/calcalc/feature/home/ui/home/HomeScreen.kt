@@ -84,6 +84,7 @@ fun HomeScreen(
     onNavigateToMacroDetail: () -> Unit = {},
     onNavigateToAiMealDescription: () -> Unit = {},
     onNavigateToManualAddMeal: () -> Unit = {},
+    onNavigateToAddFavoriteMeal: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddFoodSheet by remember { mutableStateOf(false) }
@@ -293,6 +294,10 @@ fun HomeScreen(
 
                 if (showAddFoodSheet) {
                     AddMealBottomSheet(
+                        onFavorite = {
+                            showAddFoodSheet = false
+                            onNavigateToAddFavoriteMeal()
+                        },
                         onManual = {
                             showAddFoodSheet = false
                             onNavigateToManualAddMeal()
