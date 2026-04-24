@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_version">0.1</string>
+    <string name="home_title">Home</string>
+    <string name="statistics_title">Statistics</string>
+    <string name="profile_title">Profile</string>
+    <string name="app_name">CalorieCalculator</string>
+    <string name="calories">Calories</string>
+    <string name="proteins">Proteins</string>
+    <string name="fats">Fats</string>
+    <string name="carbs">Carbs</string>
+    <string name="weight_suffix">g</string>
+    <string name="calories_suffix">kcal</string>
+    <string name="save">Save</string>
+
+    // Home
+    <string name="home_dialog_cancel">Cancel</string>
+    <string name="home_select_meal_type">Select meal type</string>
+    <string name="home_add_meal">Add meal</string>
+    <string name="home_add_meal_manual_title">Add manually</string>
+    <string name="home_add_meal_manual_subtitle">Specify calories and macros</string>
+    <string name="home_add_meal_ai_title">Describe to AI</string>
+    <string name="home_add_meal_ai_subtitle">AI will calculate macros from description</string>
+    <string name="home_add_meal_camera_title">Take a photo</string>
+    <string name="home_add_meal_camera_subtitle">Snap a picture anytime</string>
+    <string name="home_add_meal_gallery_title">Choose from gallery</string>
+    <string name="home_add_meal_gallery_subtitle">Select an existing photo</string>
+    <string name="home_add_meal_no_food_at_photo">No food was found in the photo</string>
+    <string name="home_meals">Meals</string>
+    <string name="home_more_details">More details</string>
+    <string name="home_no_meals_add">There are no food entries yet</string>
+    <string name="home_analyze_error">Analyze error</string>
+    <string name="home_analyzing">Analyzing…</string>
+    <string name="home_remove">Remove</string>
+
+    // Home -> ai meal description
+    <string name="home_ai_text_meal_entry">Meal entry</string>
+    <string name="home_ai_text_describe_the_dish">Describe the dish</string>
+    <string name="home_ai_text_character_count">%d characters</string>
+    <string name="home_ai_text_how_does_it_work">How does it work?</string>
+    <string name="home_ai_text_how_work_description">Describe your dish — AI will estimate the calories.</string>
+    <string name="home_ai_text_how_work_example">""For example: «200g chicken breast, 150g rice…»"</string>
+    <string name="home_ai_text_analyzing">Analyzing…</string>
+    <string name="home_ai_text_analyze">Analyze</string>
+    <string name="home_ai_text_ok">OK</string>
+    <string name="home_ai_text_tips">"Tips for better recognition:"</string>
+    <string name="home_ai_text_tip_1">Specify the weight or volume of ingredients</string>
+    <string name="home_ai_text_tip_2">List all ingredients</string>
+    <string name="home_ai_text_tip_3">Mention the cooking method (fried, boiled, etc.)</string>
+    <string name="home_ai_text_tip_4">Be as specific as possible</string>
+    <string name="home_ai_text_result">Analysis result</string>
+    <string name="home_ai_text_calories_suffix">%d kcal</string>
+    <string name="home_ai_text_saving">Saving…</string>
+    <string name="home_ai_text_diary">Save to diary</string>
+    <string name="home_ai_add_meal">Add meal AI</string>
+    <string name="home_ai_text_analyze_error">Analyze error</string>
+
+    // Home -> Manual add meal
+    <string name="home_manual_back">Go back</string>
+    <string name="home_manual_add_meal">Add meal</string>
+    <string name="home_manual_field_product_name">Meal name</string>
+    <string name="home_manual_nutrition_value">Nutritional value</string>
+
+    // Home -> Calendar section
+    <string name="home_calendar_section_next_week">Next week</string>
+    <string name="home_calendar_section_prev_week">Previous week</string>
+
+    // Home -> calories section
+    <string name="kcal_left">%1$d kcal left</string>
+    <string name="kcal_over">%1$d kcal over</string>
+    <string name="g_left">%1$d g left</string>
+    <string name="g_over">%1$d g over</string>
+
+    // Home -> edit meal bottom sheet
+    <string name="edit_meal_bottom_sheet_remove">Remove from favorites</string>
+    <string name="edit_meal_bottom_sheet_add">Add to favorites</string>
+    <string name="edit_meal_bottom_sheet_remove_simple">Remove</string>
+    <string name="edit_meal_bottom_sheet_calories">Calories (kcal)</string>
+    <string name="edit_meal_bottom_sheet_macronutrients">Macronutrients</string>
+    <string name="edit_meal_bottom_sheet_proteins">Proteins (g)</string>
+    <string name="edit_meal_bottom_sheet_carbs">Carbs (g)</string>
+    <string name="edit_meal_bottom_sheet_fats">Fats (g)</string>
+    <string name="edit_meal_bottom_sheet_cancel">Cancel</string>
+    <string name="edit_meal_bottom_sheet_save">Save</string>
+
+    // Effects
+    <string name="effect_meal_saved">"The dish is saved!"</string>
+    <string name="effect_meal_save_error">"Error saving the meal"</string>
+
+    // Profile
+    <string name="profile_my_parameters">My parameters</string>
+    <string name="profile_edit">Edit</string>
+    <string name="profile_go_to">Go to</string>
+    <string name="profile_ok">OK</string>
+    <string name="profile_edit_macros_subtitle">Set the values manually to suit your purposes</string>
+    <string name="profile_edit_daily_norms">Daily norms</string>
+
+    <string name="profile_age">Age</string>
+    <string name="profile_age_suffix">%1$d yo</string>
+    <string name="profile_age_suffix_simple">yo</string>
+    <string name="profile_height">Height</string>
+    <string name="profile_height_suffix">%1$d cm</string>
+    <string name="profile_height_suffix_simple">cm</string>
+    <string name="profile_weight">Weight</string>
+    <string name="profile_weight_suffix">%1$d kg</string>
+    <string name="profile_weight_suffix_simple">kg</string>
+
+    <string name="profile_gender">Gender</string>
+    <string name="profile_gender_male">Male</string>
+    <string name="profile_gender_female">Female</string>
+
+    <string name="profile_goal">Goal</string>
+    <string name="profile_goal_lose">Lose weight</string>
+    <string name="profile_goal_maintain">Maintain weight</string>
+    <string name="profile_goal_gain">Gain weight</string>
+
+    <string name="profile_activity">Activity</string>
+    <string name="profile_activity_level">Activity level</string>
+
+    <string name="profile_activity_short_sedentary">Min</string>
+    <string name="profile_activity_short_light">Light</string>
+    <string name="profile_activity_short_moderate">Moderate</string>
+    <string name="profile_activity_short_active">Active</string>
+    <string name="profile_activity_short_max">Max</string>
+
+    <string name="profile_activity_sedentary">Sedentary lifestyle</string>
+    <string name="profile_activity_light">Light activity (1–3 per week)</string>
+    <string name="profile_activity_moderate">Moderate activity (3–5 per week)</string>
+    <string name="profile_activity_active">High activity (6–7 per week)</string>
+    <string name="profile_activity_max">Very high (athlete)</string>
+
+    <string name="profile_daily_norms">Daily norms</string>
+    <string name="profile_daily_norms_hint">Norms recalculate upon param change. You can also set them manually by tapping "Edit"</string>
+    <string name="profile_daily_norms_manual">Set parameters manually for your goals</string>
+
+    <string name="profile_settings">Settings</string>
+    <string name="profile_notifications">Notifications</string>
+    <string name="profile_notifications_desc">Configure reminders</string>
+    <string name="profile_about">About app</string>
+    <string name="profile_about_version">Version</string>
+    <string name="profile_about_dialog_text">App version: %1$s</string>
+
+    // Onboarding
+    <string name="onboarding_back">Go back</string>
+    <string name="onboarding_start">Start</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_your_gender">Your gender</string>
+    <string name="onboarding_gender_male">Male</string>
+    <string name="onboarding_gender_female">Female</string>
+    <string name="onboarding_welcome_title">Welcome!</string>
+    <string name="onboarding_welcome_subtitle">Let\'s set up the app for you</string>
+
+    <string name="onboarding_age_title">How old are you?</string>
+    <string name="onboarding_height_title">Your height</string>
+    <string name="onboarding_height_format">%1$d cm</string>
+    <string name="onboarding_weight_title">Your weight</string>
+    <string name="onboarding_weight_format">%1$d kg</string>
+
+    <string name="onboarding_goal_title">Your goal</string>
+    <string name="onboarding_goal_lose_weight">Lose weight</string>
+    <string name="onboarding_goal_maintain">Maintain weight</string>
+    <string name="onboarding_goal_gain_weight">Gain muscle</string>
+
+    <string name="onboarding_activity_title">Activity level</string>
+
+    <string name="onboarding_activity_sedentary_title">Sedentary</string>
+    <string name="onboarding_activity_sedentary_desc">Minimal movement, desk job</string>
+
+    <string name="onboarding_activity_light_title">Light activity</string>
+    <string name="onboarding_activity_light_desc">Sports 1–3 times a week</string>
+
+    <string name="onboarding_activity_moderate_title">Moderate activity</string>
+    <string name="onboarding_activity_moderate_desc">Workouts 3–5 times a week</string>
+
+    <string name="onboarding_activity_active_title">High activity</string>
+    <string name="onboarding_activity_active_desc">Intense workouts 6–7 times a week</string>
+
+    <string name="onboarding_activity_very_active_title">Extreme activity</string>
+    <string name="onboarding_activity_very_active_desc">Daily hard workouts or physical labor</string>
+
+    <string name="onboarding_analyzing_title">Setting things up…</string>
+    <string name="onboarding_analyzing_step_1">Analyzing your profile…</string>
+    <string name="onboarding_analyzing_step_2">Calculating basal metabolic rate…</string>
+    <string name="onboarding_analyzing_step_3">Adjusting calorie intake…</string>
+    <string name="onboarding_analyzing_step_4">Calculating macro balance…</string>
+    <string name="onboarding_analyzing_step_5">Preparing recommendations…</string>
+
+    <string name="onboarding_result_title">Your target</string>
+    <string name="onboarding_result_subtitle">You can adjust these values for yourself</string>
+
+
+</resources>

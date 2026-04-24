@@ -1,19 +1,18 @@
 package com.jacqulin.calcalc.feature.home.ui.home
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animate
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,28 +22,18 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -60,7 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -71,7 +59,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.R
@@ -80,9 +67,15 @@ import com.jacqulin.calcalc.core.designsystem.component.MealCard
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.PendingMeal
+import com.jacqulin.calcalc.feature.home.ui.home.sections.AddMealBottomSheet
+import com.jacqulin.calcalc.feature.home.ui.home.sections.CalendarSection
+import com.jacqulin.calcalc.feature.home.ui.home.sections.CaloriesSection
+import com.jacqulin.calcalc.feature.home.ui.home.sections.EditMealBottomSheet
+import com.jacqulin.calcalc.feature.home.ui.home.sections.MealTypePickerDialog
 
 private enum class AddPhotoSource { CAMERA, GALLERY }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -291,14 +284,14 @@ fun HomeScreen(
                         }
                 ) {
                     AddMealFloatingActionButton(
-                        icon = Icons.Default.Add,
+                        icon = painterResource(R.drawable.ic_add),
                         contentDescription = stringResource(R.string.home_add_meal),
                         onClick = { showAddFoodSheet = true },
                     )
                 }
 
                 if (showAddFoodSheet) {
-                    AddFoodBottomSheet(
+                    AddMealBottomSheet(
                         onManual = {
                             showAddFoodSheet = false
                             onNavigateToManualAddMeal()
@@ -334,190 +327,6 @@ fun HomeScreen(
 }
 
 @Composable
-fun MealTypePickerDialog(
-    onSelect: (MealType) -> Unit,
-    onDismiss: () -> Unit
-) {
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = stringResource(R.string.home_select_meal_type),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    MealType.entries.forEach { type ->
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onSelect(type) }
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.outline_local_fire_department_24),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    text = type.displayName,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                TextButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text(
-                        text = stringResource(R.string.home_dialog_cancel),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddFoodBottomSheet(
-    onManual: () -> Unit,
-    onAiDescription: () -> Unit,
-    onCamera: () -> Unit,
-    onGallery: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-            Text(
-                text = stringResource(R.string.home_add_meal),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                AddFoodOptionCard(
-                    icon = Icons.Default.Edit,
-                    text = "Ввести вручную",
-                    subtitle = "Указать калории и БЖУ",
-                    onClick = onManual
-                )
-
-                AddFoodOptionCard(
-                    icon = Icons.Default.AutoAwesome,
-                    text = "Описать для ИИ",
-                    subtitle = "ИИ рассчитает КБЖУ по описанию",
-                    onClick = onAiDescription
-                )
-
-                AddFoodOptionCard(
-                    icon = Icons.Default.CameraAlt,
-                    text = "Сделать фото",
-                    subtitle = "Для фотографии в любой момент",
-                    onClick = onCamera
-                )
-
-                AddFoodOptionCard(
-                    icon = Icons.Default.Photo,
-                    text = "Выбрать из галереи",
-                    subtitle = "Для готовых снимков",
-                    onClick = onGallery
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
-
-@Composable
-private fun AddFoodOptionCard(
-    icon: ImageVector,
-    text: String,
-    subtitle: String,
-    onClick: () -> Unit
-) {
-    Card(
-        onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(12.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column {
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun TodayMealsSection(
     meals: List<Meal>,
     pendingMeals: List<PendingMeal> = emptyList(),
@@ -532,7 +341,7 @@ private fun TodayMealsSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Приемы пищи",
+                text = stringResource(R.string.home_meals),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -541,7 +350,7 @@ private fun TodayMealsSection(
             TextButton(
                 onClick = onDetailClick
             ) {
-                Text("Подробнее")
+                Text(stringResource(R.string.home_more_details))
             }
         }
 
@@ -558,7 +367,7 @@ private fun TodayMealsSection(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Еще нет записей о еде",
+                        text = stringResource(R.string.home_no_meals_add),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
@@ -622,7 +431,10 @@ private fun PendingMealCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = if (isError) "Ошибка анализа" else "Анализируем...",
+                    text = if (isError)
+                        stringResource(R.string.home_analyze_error)
+                    else
+                        stringResource(R.string.home_analyzing),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
@@ -640,7 +452,10 @@ private fun PendingMealCard(
             }
             if (isError) {
                 TextButton(onClick = onDismissError) {
-                    Text("Убрать", color = MaterialTheme.colorScheme.error)
+                    Text(
+                        text = stringResource(R.string.home_remove),
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }

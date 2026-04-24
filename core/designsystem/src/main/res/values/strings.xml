@@ -3,13 +3,9 @@
     <string name="app_version">0.1</string>
 
     <string name="app_name">CalorieCalculator</string>
-    <string name="home_title">CalorieCalculator</string>
-    <string name="statistics_title">Statistics</string>
-    <string name="profile_title">Profile</string>
-    <string name="macro_detail_title">Детальная информация</string>
-    <string name="ai_meal_description_title">Описание блюда ИИ</string>
-    <string name="manual_meal_add_title">Добавление вручную</string>
-    <string name="field_product_name">Название продукта</string>
+    <string name="home_title">Главное</string>
+    <string name="statistics_title">Статистика</string>
+    <string name="profile_title">Профиль</string>
     <string name="calories">Калории</string>
     <string name="proteins">Белки</string>
     <string name="fats">Жиры</string>
@@ -17,10 +13,180 @@
     <string name="calories_suffix">ккал</string>
     <string name="weight_suffix">г</string>
     <string name="save">Сохранить</string>
-    <string name="save_meal_snackbar">"Блюдо успешно сохранено!"</string>
 
     // Home
     <string name="home_dialog_cancel">Отмена</string>
     <string name="home_select_meal_type">Выберите приём пищи</string>
     <string name="home_add_meal">Добавить блюдо</string>
+    <string name="home_add_meal_manual_title">Ввести вручную</string>
+    <string name="home_add_meal_manual_subtitle">Указать калории и БЖУ</string>
+    <string name="home_add_meal_ai_title">Описать для ИИ</string>
+    <string name="home_add_meal_ai_subtitle">ИИ рассчитает КБЖУ по описанию</string>
+    <string name="home_add_meal_camera_title">Сделать фото</string>
+    <string name="home_add_meal_camera_subtitle">Для фотографии в любой момент</string>
+    <string name="home_add_meal_gallery_title">Выбрать из галереи</string>
+    <string name="home_add_meal_gallery_subtitle">Для готовых снимков</string>
+    <string name="home_add_meal_no_food_at_photo">На фото не обнаружена еда</string>
+    <string name="home_meals">Приемы пищи</string>
+    <string name="home_more_details">Подробнее</string>
+    <string name="home_no_meals_add">Еще нет записей о еде</string>
+    <string name="home_analyze_error">Ошибка анализа</string>
+    <string name="home_analyzing">Анализирую…</string>
+    <string name="home_remove">Убрать</string>
+
+    // Home -> ai meal description
+    <string name="home_ai_text_meal_entry">Прием пищи</string>
+    <string name="home_ai_text_describe_the_dish">Описание блюда</string>
+    <string name="home_ai_text_character_count">%d символов</string>
+    <string name="home_ai_text_how_does_it_work">Как это работает?</string>
+    <string name="home_ai_text_how_work_description">Опишите блюдо — ИИ определит калорийность.</string>
+    <string name="home_ai_text_how_work_example">"Например: «Куриная грудка 200г, рис 150г…»"</string>
+    <string name="home_ai_text_analyzing">Анализирую…</string>
+    <string name="home_ai_text_analyze">Анализировать</string>
+    <string name="home_ai_text_ok">ОК</string>
+    <string name="home_ai_text_tips">Советы для лучшего распознавания:</string>
+    <string name="home_ai_text_tip_1">Указывайте вес или объём продуктов</string>
+    <string name="home_ai_text_tip_2">Перечисляйте ингредиенты</string>
+    <string name="home_ai_text_tip_3">Упоминайте способ приготовления (жареное, варёное и т.д.)</string>
+    <string name="home_ai_text_tip_4">Будьте как можно более конкретны</string>
+    <string name="home_ai_text_result">Результат анализа</string>
+    <string name="home_ai_text_calories_suffix">%d ккал</string>
+    <string name="home_ai_text_saving">Сохраняю…</string>
+    <string name="home_ai_text_diary">Сохранить в дневник</string>
+    <string name="home_ai_add_meal">Добавить блюдо c ИИ</string>
+    <string name="home_ai_text_analyze_error">Ошибка анализа</string>
+
+    // Home -> Manual add meal
+    <string name="home_manual_back">Вернуться назад</string>
+    <string name="home_manual_add_meal">Добавить блюдо</string>
+    <string name="home_manual_field_product_name">Название блюда</string>
+    <string name="home_manual_nutrition_value">Питательная ценность</string>
+    
+    // Home -> Calendar section
+    <string name="home_calendar_section_next_week">Следующая неделя</string>
+    <string name="home_calendar_section_prev_week">Предыдущая неделя</string>
+
+    // Home -> calories section
+    <string name="kcal_left">Осталось %1$d ккал</string>
+    <string name="kcal_over">Превышено на %1$d ккал</string>
+    <string name="g_left">Осталось %1$d г</string>
+    <string name="g_over">Превышено на %1$d г</string>
+
+    // Home -> edit meal bottom sheet
+    <string name="edit_meal_bottom_sheet_remove">Убрать из избранного</string>
+    <string name="edit_meal_bottom_sheet_add">В избранное</string>
+    <string name="edit_meal_bottom_sheet_remove_simple">Удалить</string>
+    <string name="edit_meal_bottom_sheet_calories">Калории (ккал)</string>
+    <string name="edit_meal_bottom_sheet_macronutrients">Макронутриенты</string>
+    <string name="edit_meal_bottom_sheet_proteins">Белки (г)</string>
+    <string name="edit_meal_bottom_sheet_carbs">Углеводы (г)</string>
+    <string name="edit_meal_bottom_sheet_fats">Жиры (г)</string>
+    <string name="edit_meal_bottom_sheet_cancel">Отменить</string>
+    <string name="edit_meal_bottom_sheet_save">Сохранить</string>
+
+    // Effects
+    <string name="effect_meal_saved">"Блюдо успешно сохранено"</string>
+    <string name="effect_meal_save_error">"Ошибка сохранения блюда"</string>
+
+    // Profile
+    <string name="profile_my_parameters">Мои параметры</string>
+    <string name="profile_edit">Изменить</string>"
+    <string name="profile_go_to">Перейти</string>
+    <string name="profile_ok">ОК</string>
+    <string name="profile_edit_macros_subtitle">Задайте значения вручную под свои цели</string>
+    <string name="profile_edit_daily_norms">Суточные нормы</string>
+
+    <string name="profile_age">Возраст</string>
+    <string name="profile_age_suffix">%1$d лет</string>
+    <string name="profile_age_suffix_simple">лет</string>
+    <string name="profile_height">Рост</string>
+    <string name="profile_height_suffix">%1$d см</string>
+    <string name="profile_height_suffix_simple">см</string>
+    <string name="profile_weight">Вес</string>
+    <string name="profile_weight_suffix">%1$d кг</string>
+    <string name="profile_weight_suffix_simple">кг</string>
+
+    <string name="profile_gender">Пол</string>
+    <string name="profile_gender_male">Мужской</string>
+    <string name="profile_gender_female">Женский</string>
+
+    <string name="profile_goal">Цель</string>
+    <string name="profile_goal_lose">Похудение</string>
+    <string name="profile_goal_maintain">Поддержание веса</string>
+    <string name="profile_goal_gain">Набор массы</string>
+
+    <string name="profile_activity">Активность</string>
+    <string name="profile_activity_level">Уровень активности</string>
+
+    <string name="profile_activity_short_sedentary">Минимум</string>
+    <string name="profile_activity_short_light">Лёгкая</string>
+    <string name="profile_activity_short_moderate">Средняя</string>
+    <string name="profile_activity_short_active">Высокая</string>
+    <string name="profile_activity_short_max">Максимальная</string>
+
+    <string name="profile_activity_sedentary">Сидячий образ жизни</string>
+    <string name="profile_activity_light">Лёгкая активность (1–3 раза в неделю)</string>
+    <string name="profile_activity_moderate">Умеренная активность (3–5 раз)</string>
+    <string name="profile_activity_active">Высокая активность (6–7 раз)</string>
+    <string name="profile_activity_max">Очень высокая (спортсмен)</string>
+
+    <string name="profile_daily_norms">Суточные нормы</string>
+    <string name="profile_daily_norms_hint">Нормы пересчитываются при изменении параметров. Вы также можете задать их вручную — нажмите «Изменить»</string>
+    <string name="profile_daily_norms_manual">Задайте значения вручную под свои цели</string>
+
+    <string name="profile_settings">Настройки</string>
+    <string name="profile_notifications">Уведомления</string>
+    <string name="profile_notifications_desc">Настроить напоминания</string>
+    <string name="profile_about">О приложении</string>
+    <string name="profile_about_version">Версия</string>
+    <string name="profile_about_dialog_text">Версия приложения: %1$s</string>
+
+    // Onboarding
+    <string name="onboarding_back">Назад</string>
+    <string name="onboarding_start">Начать</string>
+    <string name="onboarding_next">Далее</string>
+    <string name="onboarding_your_gender">Ваш пол</string>
+    <string name="onboarding_gender_male">Мужчина</string>
+    <string name="onboarding_gender_female">Женщина</string>
+    <string name="onboarding_welcome_title">Добро пожаловать!</string>
+    <string name="onboarding_welcome_subtitle">Давайте настроим приложение под вас</string>
+
+    <string name="onboarding_age_title">Сколько вам лет?</string>
+    <string name="onboarding_height_title">Ваш рост</string>
+    <string name="onboarding_height_format">%1$d см</string>
+    <string name="onboarding_weight_title">Ваш вес</string>
+    <string name="onboarding_weight_format">%1$d кг</string>
+
+    <string name="onboarding_goal_title">Ваша цель</string>
+    <string name="onboarding_goal_lose_weight">Похудеть</string>
+    <string name="onboarding_goal_maintain">Поддержать вес</string>
+    <string name="onboarding_goal_gain_weight">Набрать массу</string>
+
+    <string name="onboarding_activity_title">Уровень активности</string>
+
+    <string name="onboarding_activity_sedentary_title">Сидячий образ жизни</string>
+    <string name="onboarding_activity_sedentary_desc">Минимум движений, офисная работа</string>
+
+    <string name="onboarding_activity_light_title">Лёгкая активность</string>
+    <string name="onboarding_activity_light_desc">Спорт 1–3 раза в неделю</string>
+
+    <string name="onboarding_activity_moderate_title">Средняя активность</string>
+    <string name="onboarding_activity_moderate_desc">Тренировки 3–5 раз в неделю</string>
+
+    <string name="onboarding_activity_active_title">Высокая активность</string>
+    <string name="onboarding_activity_active_desc">Интенсивные тренировки 6–7 раз в неделю</string>
+
+    <string name="onboarding_activity_very_active_title">Экстремальная активность</string>
+    <string name="onboarding_activity_very_active_desc">Ежедневные тяжёлые тренировки или физическая работа</string>
+
+    <string name="onboarding_analyzing_title">Настраиваем под вас</string>
+    <string name="onboarding_analyzing_step_1">Анализируем ваш профиль…</string>
+    <string name="onboarding_analyzing_step_2">Вычисляем базовый обмен веществ…</string>
+    <string name="onboarding_analyzing_step_3">Подбираем калорийность…</string>
+    <string name="onboarding_analyzing_step_4">Рассчитываем баланс БЖУ…</string>
+    <string name="onboarding_analyzing_step_5">Готовим рекомендации…</string>
+
+    <string name="onboarding_result_title">Ваша норма</string>
+    <string name="onboarding_result_subtitle">Можете скорректировать значения под себя</string>
+
 </resources>

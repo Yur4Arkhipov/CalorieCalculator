@@ -10,12 +10,13 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 data class BottomBarItem(
-    val icon: ImageVector,
-    val contentDescription: String,
+    val iconRes: Int,
+    val contentDescription: Int,
     val selected: Boolean,
     val onClick: () -> Unit
 )
@@ -30,7 +31,6 @@ fun FloatingBottomBar(
             .clip(RoundedCornerShape(28.dp))
             .height(48.dp)
             .widthIn(max = 300.dp),
-//        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
         tonalElevation = 8.dp
     ) {
@@ -39,7 +39,10 @@ fun FloatingBottomBar(
                 selected = item.selected,
                 onClick = item.onClick,
                 icon = {
-                    Icon(item.icon, contentDescription = item.contentDescription)
+                    Icon(
+                        painter = painterResource(item.iconRes),
+                        contentDescription = stringResource(item.contentDescription)
+                    )
                 }
             )
         }

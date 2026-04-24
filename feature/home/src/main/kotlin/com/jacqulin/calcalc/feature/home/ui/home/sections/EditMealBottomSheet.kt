@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.feature.home.ui.home
+package com.jacqulin.calcalc.feature.home.ui.home.sections
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -47,12 +49,13 @@ import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.theme.Favorite
 import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.Meal
+import com.jacqulin.calcalc.core.util.funtions.filterNumericInput
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditMealBottomSheet(
     meal: Meal,
-    sheetState: androidx.compose.material3.SheetState,
+    sheetState: SheetState,
     onDismiss: () -> Unit,
     onSave: (Meal) -> Unit,
     onDelete: (Meal) -> Unit = {}
@@ -120,7 +123,10 @@ fun EditMealBottomSheet(
                     ) {
                         Icon(
                             painter = if (isFavorite) painterResource(R.drawable.ic_favorite_filled) else painterResource(R.drawable.ic_favorite),
-                            contentDescription = if (isFavorite) "Убрать из избранного" else "В избранное",
+                            contentDescription = if (isFavorite)
+                                stringResource(R.string.edit_meal_bottom_sheet_remove)
+                            else
+                                stringResource(R.string.edit_meal_bottom_sheet_add),
                             tint = if (isFavorite) Favorite else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(22.dp)
                         )
@@ -133,7 +139,7 @@ fun EditMealBottomSheet(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_remove),
-                            contentDescription = "Удалить",
+                            contentDescription = stringResource(R.string.edit_meal_bottom_sheet_remove_simple),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(22.dp)
                         )
@@ -145,8 +151,15 @@ fun EditMealBottomSheet(
 
             OutlinedTextField(
                 value = editedCalories,
-                onValueChange = { editedCalories = it.filter { char -> char.isDigit() } },
-                label = { Text("Калории (ккал)") },
+                onValueChange = { input ->
+                    val filtered = filterNumericInput(
+                        input = input,
+                        maxLength = 4,
+                        maxValue = 2500
+                    )
+                    editedCalories = filtered
+                },
+                label = { Text(stringResource(R.string.edit_meal_bottom_sheet_calories)) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
@@ -156,7 +169,7 @@ fun EditMealBottomSheet(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Макронутриенты",
+                text = stringResource(R.string.edit_meal_bottom_sheet_macronutrients),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -165,8 +178,15 @@ fun EditMealBottomSheet(
 
             OutlinedTextField(
                 value = editedProteins,
-                onValueChange = { editedProteins = it.filter { char -> char.isDigit() } },
-                label = { Text("Белки (г)") },
+                onValueChange = { input ->
+                    val filtered = filterNumericInput(
+                        input = input,
+                        maxLength = 3,
+                        maxValue = 150
+                    )
+                    editedProteins = filtered
+                },
+                label = { Text(stringResource(R.string.edit_meal_bottom_sheet_proteins)) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
@@ -177,8 +197,15 @@ fun EditMealBottomSheet(
 
             OutlinedTextField(
                 value = editedCarbs,
-                onValueChange = { editedCarbs = it.filter { char -> char.isDigit() } },
-                label = { Text("Углеводы (г)") },
+                onValueChange = { input ->
+                    val filtered = filterNumericInput(
+                        input = input,
+                        maxLength = 3,
+                        maxValue = 300
+                    )
+                    editedCarbs = filtered
+                },
+                label = { Text(stringResource(R.string.edit_meal_bottom_sheet_carbs)) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
@@ -189,8 +216,15 @@ fun EditMealBottomSheet(
 
             OutlinedTextField(
                 value = editedFats,
-                onValueChange = { editedFats = it.filter { char -> char.isDigit() } },
-                label = { Text("Жиры (г)") },
+                onValueChange = { input ->
+                    val filtered = filterNumericInput(
+                        input = input,
+                        maxLength = 3,
+                        maxValue = 150
+                    )
+                    editedFats = filtered
+                },
+                label = { Text(stringResource(R.string.edit_meal_bottom_sheet_fats)) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
@@ -208,7 +242,7 @@ fun EditMealBottomSheet(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Отмена")
+                    Text(stringResource(R.string.edit_meal_bottom_sheet_cancel))
                 }
 
                 Button(
@@ -231,7 +265,7 @@ fun EditMealBottomSheet(
                             editedCarbs.isNotBlank() &&
                             editedFats.isNotBlank()
                 ) {
-                    Text("Сохранить")
+                    Text(stringResource(R.string.edit_meal_bottom_sheet_save))
                 }
             }
         }

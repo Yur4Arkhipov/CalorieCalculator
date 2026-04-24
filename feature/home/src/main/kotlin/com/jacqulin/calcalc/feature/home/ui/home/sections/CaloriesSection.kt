@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.feature.home.ui.home
+package com.jacqulin.calcalc.feature.home.ui.home.sections
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -31,8 +32,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.icon.AppIcons
 import com.jacqulin.calcalc.core.designsystem.theme.AppColors
+import com.jacqulin.calcalc.feature.home.ui.home.HomeUiState
 
 @Composable
 internal fun CaloriesSection(uiState: HomeUiState) {
@@ -50,21 +53,21 @@ internal fun CaloriesSection(uiState: HomeUiState) {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             MacroCard(
-                name = "Protein",
+                name = stringResource(R.string.proteins),
                 current = uiState.todayMacros.protein,
                 goal = uiState.todayMacros.proteinsGoal,
                 color = AppColors.proteinMain,
                 modifier = Modifier.weight(1f)
             )
             MacroCard(
-                name = "Carbs",
+                name = stringResource(R.string.carbs),
                 current = uiState.todayMacros.carb,
                 goal = uiState.todayMacros.carbsGoal,
                 color = AppColors.carbsMain,
                 modifier = Modifier.weight(1f)
             )
             MacroCard(
-                name = "Fat",
+                name = stringResource(R.string.fats),
                 current = uiState.todayMacros.fat,
                 goal = uiState.todayMacros.fatsGoal,
                 color = AppColors.fatMain,
@@ -98,7 +101,7 @@ private fun CaloriesCard(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = "Calories",
+                        text = stringResource(R.string.calories),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         fontWeight = FontWeight.Medium
@@ -135,7 +138,11 @@ private fun CaloriesCard(
                     }
                     val remaining = goal - consumed
                     Text(
-                        text = if (remaining >= 0) "$remaining kcal left" else "${-remaining} kcal over",
+                        text = if (remaining >= 0) {
+                            stringResource(id = R.string.kcal_left, remaining)
+                        } else {
+                            stringResource(id = R.string.kcal_over, -remaining)
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
@@ -195,7 +202,11 @@ private fun MacroCard(
                     color = color
                 )
                 Text(
-                    text = if (remaining >= 0) "$remaining g left" else "${-remaining} g over",
+                    text = if (remaining >= 0) {
+                        stringResource(id = R.string.g_left, remaining)
+                    } else {
+                        stringResource(id = R.string.g_over, -remaining)
+                    },
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )

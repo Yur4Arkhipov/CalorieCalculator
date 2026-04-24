@@ -1,10 +1,14 @@
 package com.jacqulin.calcalc.feature.home.ui.aitext
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,15 +20,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -32,7 +32,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,49 +52,72 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.component.AddMealSnackbar
+import com.jacqulin.calcalc.core.designsystem.component.MealTypeCard
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.Nutrition
+import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
+import com.jacqulin.calcalc.core.util.effects.UiEffect
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiMealDescriptionScreen(
+    modifier: Modifier = Modifier,
     viewModel: AiMealDescriptionViewModel = hiltViewModel(),
-    onClose: () -> Unit = {}
+    onBackClick: () -> Unit = { },
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var expanded by remember { mutableStateOf(false) }
+
     val focusManager = LocalFocusManager.current
+
+    var expanded by remember { mutableStateOf(false) }
 
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
     var snackbarIsError by remember { mutableStateOf(false) }
     var snackbarVisible by remember { mutableStateOf(false) }
+    var snackbarJob by remember { mutableStateOf<Job?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is AiMealEffect.ShowSnackbar -> {
-                    snackbarMessage = effect.message
+                UiEffect.CloseScreen -> onBackClick()
+                is UiEffect.ShowSnackbar -> {
+                    snackbarJob?.cancel()
+                    snackbarMessage = when (effect.messageCode) {
+                        SnackbarMessageCode.MEAL_SAVED -> "Блюдо успешно сохранено!"
+                        SnackbarMessageCode.MEAL_SAVE_ERROR -> "Ошибка сохранения"
+                    }
                     snackbarIsError = effect.isError
                     snackbarVisible = true
-                    if (effect.isError) {
-                        delay(3000)
-                        snackbarVisible = false
+
+                    snackbarJob = launch {
+                        if (effect.isError) {
+                            delay(3000)
+                            snackbarVisible = false
+                        } else {
+                            delay(2000)
+                            snackbarVisible = false
+                            onBackClick()
+                        }
                     }
-                }
-                AiMealEffect.CloseScreen -> {
-                    snackbarVisible = false
-                    onClose()
                 }
             }
         }
     }
 
     Scaffold(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = {
             Box(
@@ -110,7 +132,11 @@ fun AiMealDescriptionScreen(
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
                     snackbarMessage?.let { msg ->
-                        AiSnackbar(message = msg, isError = snackbarIsError)
+                        AddMealSnackbar(
+                            message = msg,
+                            type = if (snackbarIsError) SnackbarMessageCode.MEAL_SAVE_ERROR
+                            else SnackbarMessageCode.MEAL_SAVED
+                        )
                     }
                 }
             }
@@ -120,25 +146,55 @@ fun AiMealDescriptionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(bottom = 20.dp)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    focusManager.clearFocus(force = true)
+                },
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    modifier = Modifier.size(20.dp),
+                    onClick = { onBackClick() }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_arrow_back),
+                        contentDescription = stringResource(R.string.home_manual_back),
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = "Приём пищи",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    text = stringResource(R.string.home_ai_add_meal),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
                 )
+            }
+
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.widthIn(max = 360.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    MealType.entries.forEach { type ->
-                        FilterChip(
-                            selected = uiState.selectedMealType == type,
-                            onClick = { viewModel.onMealTypeSelected(type) },
-                            label = { Text(type.displayName, style = MaterialTheme.typography.bodySmall) }
+                    MealType.entries.forEach { mealType ->
+                        MealTypeCard(
+                            mealType = mealType,
+                            isSelected = uiState.selectedMealType == mealType,
+                            onClick = {
+                                focusManager.clearFocus(force = true)
+                                viewModel.onMealTypeSelected(mealType)
+                            },
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -147,24 +203,42 @@ fun AiMealDescriptionScreen(
             Box(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     value = uiState.description,
-                    onValueChange = { viewModel.onDescriptionChange(it) },
+                    onValueChange = { text ->
+                        if (text.length <= 120) {
+                            viewModel.onDescriptionChange(text)
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 4.dp)
                         .clip(RoundedCornerShape(16.dp)),
-                    label = { Text("Описание блюда") },
+                    label = { Text(text = stringResource(R.string.home_ai_text_describe_the_dish)) },
                     enabled = !uiState.isProcessing,
                     minLines = 3,
-                    supportingText = { Text("${uiState.description.length} символов") },
+                    supportingText = {
+                        Text(
+                            text = stringResource(
+                                id = R.string.home_ai_text_character_count,
+                                formatArgs = arrayOf(uiState.description.length)
+                            )
+                        )
+                    },
                     shape = RoundedCornerShape(16.dp),
                     textStyle = MaterialTheme.typography.bodyLarge,
                     trailingIcon = {
                         Box {
                             IconButton(onClick = { expanded = true }) {
                                 Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = "Как это работает",
-                                    tint = MaterialTheme.colorScheme.primary
+                                    painter = painterResource(R.drawable.ic_info),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .background(
+                                            color = MaterialTheme.colorScheme.primary,
+                                            shape = CircleShape
+                                        )
+                                        .padding(3.dp)
                                 )
                             }
                             DropdownMenu(
@@ -173,17 +247,72 @@ fun AiMealDescriptionScreen(
                                     expanded = false
                                     focusManager.clearFocus()
                                 },
-                                modifier = Modifier.width(260.dp)
+                                modifier = Modifier
+                                    .width(280.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = RoundedCornerShape(16.dp)
+                                    ),
+                                shape = RoundedCornerShape(16.dp),
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                tonalElevation = 8.dp
                             ) {
-                                Column(Modifier.padding(16.dp)) {
-                                    Text("Как это работает?", fontWeight = FontWeight.Bold)
-                                    Spacer(Modifier.height(8.dp))
-                                    Text("Опишите блюдо — ИИ определит калорийность.")
-                                    Spacer(Modifier.height(12.dp))
-                                    Text(
-                                        "Например: «Куриная грудка 200г, рис 150г…»",
-                                        fontStyle = FontStyle.Italic
+                                Column(
+                                    modifier = Modifier.padding(
+                                        horizontal = 16.dp,
+                                        vertical = 12.dp
                                     )
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_info),
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onPrimary,
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .background(
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    shape = CircleShape
+                                                )
+                                                .padding(3.dp)
+                                        )
+
+                                        Spacer(Modifier.width(6.dp))
+
+                                        Text(
+                                            text = stringResource(R.string.home_ai_text_how_does_it_work),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    Spacer(Modifier.height(12.dp))
+
+                                    Text(
+                                        text = stringResource(R.string.home_ai_text_how_work_description),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+
+                                    Spacer(Modifier.height(12.dp))
+
+                                    Card(
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.surface
+                                        ),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.home_ai_text_how_work_example),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontStyle = FontStyle.Italic,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.padding(12.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -210,19 +339,19 @@ fun AiMealDescriptionScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Анализирую...")
+                    Text(text = stringResource(R.string.home_ai_text_analyzing))
                 } else {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Send,
+                        painter = painterResource(R.drawable.ic_send),
                         contentDescription = null,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Анализировать")
+                    Text(text = stringResource(R.string.home_ai_text_analyze))
                 }
             }
 
-            uiState.error?.let { error ->
+            uiState.error?.let { _ ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
@@ -235,13 +364,13 @@ fun AiMealDescriptionScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = error,
+                            text = stringResource(R.string.home_ai_text_analyze_error),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.weight(1f)
                         )
                         TextButton(onClick = { viewModel.clearError() }) {
-                            Text("ОК")
+                            Text(text = stringResource(R.string.home_ai_text_ok))
                         }
                     }
                 }
@@ -264,15 +393,15 @@ fun AiMealDescriptionScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Советы для лучшего распознавания:",
+                        text = stringResource(R.string.home_ai_text_tips),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    TipItem("Указывайте вес или объём продуктов")
-                    TipItem("Перечисляйте ингредиенты")
-                    TipItem("Упоминайте способ приготовления (жареное, варёное и т.д.)")
-                    TipItem("Будьте как можно более конкретны")
+                    TipItem(text = stringResource(R.string.home_ai_text_tip_1))
+                    TipItem(text = stringResource(R.string.home_ai_text_tip_2))
+                    TipItem(text = stringResource(R.string.home_ai_text_tip_3))
+                    TipItem(text = stringResource(R.string.home_ai_text_tip_4))
                 }
             }
         }
@@ -306,7 +435,7 @@ fun NutritionResultCard(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Результат анализа",
+                text = stringResource(R.string.home_ai_text_result),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -318,12 +447,15 @@ fun NutritionResultCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Калории",
+                    text = stringResource(R.string.calories),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
-                    text = "${nutrition.calories.toInt()} ккал",
+                    text = stringResource(
+                        id = R.string.home_ai_text_calories_suffix,
+                        formatArgs = arrayOf(nutrition.calories.toInt())
+                    ),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -336,9 +468,21 @@ fun NutritionResultCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                MacroItem(label = "Белки", value = nutrition.protein, unit = "г")
-                MacroItem(label = "Жиры", value = nutrition.fat, unit = "г")
-                MacroItem(label = "Углеводы", value = nutrition.carbs, unit = "г")
+                MacroItem(
+                    label = stringResource(R.string.proteins),
+                    value = nutrition.protein,
+                    unit = stringResource(R.string.weight_suffix)
+                )
+                MacroItem(
+                    label = stringResource(R.string.fats),
+                    value = nutrition.fat,
+                    unit = stringResource(R.string.weight_suffix)
+                )
+                MacroItem(
+                    label = stringResource(R.string.carbs),
+                    value = nutrition.carbs,
+                    unit = stringResource(R.string.weight_suffix)
+                )
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f))
@@ -358,15 +502,9 @@ fun NutritionResultCard(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Сохраняю...")
+                    Text(text = stringResource(R.string.home_ai_text_saving))
                 } else {
-                    Icon(
-                        imageVector = Icons.Default.Save,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Сохранить в дневник")
+                    Text(text = stringResource(R.string.home_ai_text_diary))
                 }
             }
         }
@@ -374,7 +512,11 @@ fun NutritionResultCard(
 }
 
 @Composable
-private fun MacroItem(label: String, value: Double, unit: String) {
+private fun MacroItem(
+    label: String,
+    value: Double,
+    unit: String
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -390,36 +532,5 @@ private fun MacroItem(label: String, value: Double, unit: String) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
         )
-    }
-}
-
-@Composable
-private fun AiSnackbar(message: String, isError: Boolean) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isError) MaterialTheme.colorScheme.errorContainer
-            else MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = if (isError) Icons.Default.Error else Icons.Default.CheckCircle,
-                contentDescription = null,
-                tint = if (isError) MaterialTheme.colorScheme.error
-                else MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (isError) MaterialTheme.colorScheme.onErrorContainer
-                else MaterialTheme.colorScheme.onPrimaryContainer
-            )
-        }
     }
 }

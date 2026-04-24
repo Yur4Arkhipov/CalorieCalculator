@@ -6,22 +6,14 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination.Companion.hasRoute
-import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.BottomBarItem
 import com.jacqulin.calcalc.core.designsystem.component.FloatingBottomBar
-import com.jacqulin.calcalc.core.designsystem.component.TopAppBar
-import com.jacqulin.calcalc.feature.home.navigation.AiMealDescriptionRoute
-import com.jacqulin.calcalc.feature.home.navigation.MacroDetailRoute
-import com.jacqulin.calcalc.feature.home.navigation.ManualAddMealRoute
 import com.jacqulin.calcalc.navigation.AppNavHost
 
 @Composable
@@ -31,52 +23,14 @@ fun App(appState: AppState) {
     val currentTopLevel = appState.currentTopLevelDestination
     val bottomBarItems = appState.topLevelDestinations.map { destination ->
         BottomBarItem(
-            icon = destination.icon,
+            iconRes = destination.iconRes,
             contentDescription = destination.iconTextId,
             selected = destination == appState.currentTopLevelDestination,
             onClick = { appState.navigateToTopLevelDestination(destination) }
         )
     }
 
-    Scaffold(
-        topBar = {
-            when {
-//                currentTopLevel != null -> {
-//                    TopAppBar(
-//                        titleRes = currentTopLevel.titleTextId,
-//                        navigationIcon = null,
-//                        onNavigationClick = null
-//                    )
-//                }
-//
-//                currentDestination?.hasRoute(MacroDetailRoute::class) == true -> {
-//                    TopAppBar(
-//                        titleRes = R.string.macro_detail_title,
-//                        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
-//                        onNavigationClick = { appState.navController.popBackStack() }
-//                    )
-//                }
-//
-//                currentDestination?.hasRoute(AiMealDescriptionRoute::class) == true -> {
-//                    TopAppBar(
-//                        titleRes = R.string.ai_meal_description_title,
-//                        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
-//                        onNavigationClick = { appState.navController.popBackStack() }
-//                    )
-//                }
-//
-//                currentDestination?.hasRoute(ManualAddMealRoute::class) == true  -> {
-//                    TopAppBar(
-//                        titleRes = R.string.manual_meal_add_title,
-//                        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
-//                        onNavigationClick = { appState.navController.popBackStack() }
-//                    )
-//                }
-//
-                else -> Unit
-            }
-        }
-    ) { paddingValues ->
+    Scaffold { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()

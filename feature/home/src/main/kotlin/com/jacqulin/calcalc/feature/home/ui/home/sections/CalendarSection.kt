@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.feature.home.ui.home
+package com.jacqulin.calcalc.feature.home.ui.home.sections
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
@@ -16,9 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -32,11 +29,16 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 import com.jacqulin.calcalc.feature.home.model.CalendarDay
+import com.jacqulin.calcalc.feature.home.ui.home.MAX_FUTURE_WEEKS
+import com.jacqulin.calcalc.feature.home.ui.home.MAX_PAST_WEEKS
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -121,8 +123,8 @@ private fun WeekHeader(
     ) {
         IconButton(onClick = onPreviousWeek) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = "Предыдущая неделя"
+                painter = painterResource(R.drawable.ic_arrow_back),
+                contentDescription = stringResource(R.string.home_calendar_section_prev_week)
             )
         }
 
@@ -139,8 +141,8 @@ private fun WeekHeader(
             enabled = weekOffset < MAX_FUTURE_WEEKS
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Следующая неделя",
+                painter = painterResource(R.drawable.ic_arrow_forward),
+                contentDescription = stringResource(R.string.home_calendar_section_next_week),
                 tint = if (weekOffset < MAX_FUTURE_WEEKS)
                     MaterialTheme.colorScheme.onBackground
                 else

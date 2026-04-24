@@ -1,5 +1,6 @@
 package com.jacqulin.calcalc.feature.home.ui.manual
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -24,14 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,54 +43,71 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.component.AddMealSnackbar
+import com.jacqulin.calcalc.core.designsystem.component.MealTypeCard
+import com.jacqulin.calcalc.core.designsystem.component.NutrientField
 import com.jacqulin.calcalc.core.domain.model.MealType
+import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
+import com.jacqulin.calcalc.core.util.effects.UiEffect
+import com.jacqulin.calcalc.core.util.funtions.filterNumericInput
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManualAddMealScreen(
     modifier: Modifier = Modifier,
     viewModel: ManualAddMealScreenViewModel = hiltViewModel(),
-    onSaveClick: () -> Unit = { },
     onBackClick: () -> Unit = { },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val focusManager = LocalFocusManager.current
 
+    val focusManager = LocalFocusManager.current
     val nameFocus = remember { FocusRequester() }
     val caloriesFocus = remember { FocusRequester() }
     val proteinsFocus = remember { FocusRequester() }
     val fatsFocus = remember { FocusRequester() }
     val carbsFocus = remember { FocusRequester() }
 
-    var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
+    var snackbarIsError by remember { mutableStateOf(false) }
     var snackbarVisible by remember { mutableStateOf(false) }
+    var snackbarJob by remember { mutableStateOf<Job?>(null) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                ManualAddMealEffect.CloseScreen -> {
-                    snackbarVisible = false
-                    onSaveClick()
-                }
-                is ManualAddMealEffect.ShowSnackbar -> {
-                    snackbarData = SnackbarData(effect.message, effect.type)
+                is UiEffect.CloseScreen -> onBackClick()
+                is UiEffect.ShowSnackbar -> {
+                    snackbarJob?.cancel()
+
+                    snackbarMessage = when (effect.messageCode) {
+                        SnackbarMessageCode.MEAL_SAVED -> "Блюдо успешно сохранено!"
+                        SnackbarMessageCode.MEAL_SAVE_ERROR -> "Ошибка сохранения"
+                    }
+                    snackbarIsError = effect.isError
                     snackbarVisible = true
-                    if (effect.type == SnackbarType.ERROR) {
-                        delay(3000)
-                        snackbarVisible = false
+
+                    snackbarJob = launch {
+                        if (effect.isError) {
+                            delay(3000)
+                            snackbarVisible = false
+                        } else {
+                            delay(2000)
+                            snackbarVisible = false
+                            onBackClick()
+                        }
                     }
                 }
             }
@@ -117,8 +128,12 @@ fun ManualAddMealScreen(
                     enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
-                    snackbarData?.let { data ->
-                        AddMealSnackbar(data = data)
+                    snackbarMessage?.let { msg ->
+                        AddMealSnackbar(
+                            message = msg,
+                            type = if (snackbarIsError) SnackbarMessageCode.MEAL_SAVE_ERROR
+                                    else SnackbarMessageCode.MEAL_SAVED
+                        )
                     }
                 }
             }
@@ -128,6 +143,7 @@ fun ManualAddMealScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(bottom = 20.dp)
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
@@ -140,18 +156,21 @@ fun ManualAddMealScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 12.dp),
+                    .padding(vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { onBackClick() }) {
+                IconButton(
+                    modifier = Modifier.size(20.dp),
+                    onClick = { onBackClick() }
+                ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Назад",
+                        painter = painterResource(R.drawable.ic_arrow_back),
+                        contentDescription = stringResource(R.string.home_manual_back),
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = "Добавить еду",
+                    text = stringResource(R.string.home_manual_add_meal),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -181,8 +200,12 @@ fun ManualAddMealScreen(
 
             OutlinedTextField(
                 value = uiState.mealName,
-                onValueChange = { viewModel.onEvent(ManualAddMealEvent.MealNameChanged(it)) },
-                label = { Text(text = stringResource(R.string.field_product_name)) } ,
+                onValueChange = { input ->
+                    if (input.length <= 36) {
+                        viewModel.onEvent(ManualAddMealEvent.MealNameChanged(input))
+                    }
+                },
+                label = { Text(text = stringResource(R.string.home_manual_field_product_name)) } ,
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(nameFocus),
@@ -190,7 +213,7 @@ fun ManualAddMealScreen(
                 shape = RoundedCornerShape(12.dp),
                 trailingIcon = {
                     Icon(
-                        imageVector = Icons.Default.Edit,
+                        painter = painterResource(R.drawable.ic_edit),
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -201,7 +224,7 @@ fun ManualAddMealScreen(
             )
 
             Text(
-                text = "Питательная ценность",
+                text = stringResource(R.string.home_manual_nutrition_value),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium
             )
@@ -213,7 +236,14 @@ fun ManualAddMealScreen(
                 NutrientField(
                     label = stringResource(R.string.calories),
                     value = uiState.calories,
-                    onValueChange = { viewModel.onEvent(ManualAddMealEvent.CaloriesChanged(it)) },
+                    onValueChange = { input ->
+                        val filtered = filterNumericInput(
+                            input = input,
+                            maxLength = 4,
+                            maxValue = 2500
+                        )
+                        viewModel.onEvent(ManualAddMealEvent.CaloriesChanged(filtered))
+                    },
                     suffix = stringResource(R.string.calories_suffix),
                     focusRequester = caloriesFocus,
                     imeAction = ImeAction.Next,
@@ -223,7 +253,14 @@ fun ManualAddMealScreen(
                 NutrientField(
                     label = stringResource(R.string.proteins),
                     value = uiState.proteins,
-                    onValueChange = { viewModel.onEvent(ManualAddMealEvent.ProteinsChanged(it)) },
+                    onValueChange = { input ->
+                        val filtered = filterNumericInput(
+                            input = input,
+                            maxLength = 3,
+                            maxValue = 150,
+                        )
+                        viewModel.onEvent(ManualAddMealEvent.ProteinsChanged(filtered))
+                    },
                     suffix = stringResource(R.string.weight_suffix),
                     focusRequester = proteinsFocus,
                     imeAction = ImeAction.Next,
@@ -239,7 +276,14 @@ fun ManualAddMealScreen(
                 NutrientField(
                     label = stringResource(R.string.fats),
                     value = uiState.fats,
-                    onValueChange = { viewModel.onEvent(ManualAddMealEvent.FatsChanged(it)) },
+                    onValueChange = { input ->
+                        val filtered = filterNumericInput(
+                            input = input,
+                            maxLength = 3,
+                            maxValue = 150,
+                        )
+                        viewModel.onEvent(ManualAddMealEvent.FatsChanged(filtered))
+                    },
                     suffix = stringResource(R.string.weight_suffix),
                     focusRequester = fatsFocus,
                     imeAction = ImeAction.Next,
@@ -249,7 +293,14 @@ fun ManualAddMealScreen(
                 NutrientField(
                     label = stringResource(R.string.carbs),
                     value = uiState.carbs,
-                    onValueChange = { viewModel.onEvent(ManualAddMealEvent.CarbsChanged(it)) },
+                    onValueChange = { input ->
+                        val filtered = filterNumericInput(
+                            input = input,
+                            maxLength = 3,
+                            maxValue = 300,
+                        )
+                        viewModel.onEvent(ManualAddMealEvent.CarbsChanged(filtered))
+                    },
                     suffix = stringResource(R.string.weight_suffix),
                     focusRequester = carbsFocus,
                     imeAction = ImeAction.Done,
@@ -281,125 +332,6 @@ fun ManualAddMealScreen(
                     fontWeight = FontWeight.Bold
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun AddMealSnackbar(data: SnackbarData) {
-    val backgroundColor: Color
-    val icon: ImageVector
-    val iconTint: Color
-
-    when (data.type) {
-        SnackbarType.SUCCESS -> {
-            backgroundColor = Color(0xFF6CD773)
-            icon = Icons.Default.CheckCircle
-            iconTint = Color(0xFFB6E5B8)
-        }
-        SnackbarType.ERROR -> {
-            backgroundColor = Color(0xFFD73E3E)
-            icon = Icons.Default.Error
-            iconTint = Color(0xFFFDD1D6)
-        }
-    }
-
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(22.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = data.message,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = Color.White
-            )
-        }
-    }
-}
-
-@Composable
-private fun NutrientField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    suffix: String,
-    focusRequester: FocusRequester,
-    imeAction: ImeAction,
-    onImeAction: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = { newVal ->
-            if (newVal.isEmpty() || newVal.all { it.isDigit() }) {
-                onValueChange(newVal)
-            }
-        },
-        label = { Text(label) },
-        modifier = modifier.focusRequester(focusRequester),
-        singleLine = true,
-        shape = RoundedCornerShape(12.dp),
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-            imeAction = imeAction
-        ),
-        keyboardActions = KeyboardActions(
-            onNext = { onImeAction() },
-            onDone = { onImeAction() }
-        ),
-        suffix = { Text(suffix) }
-    )
-}
-
-@Composable
-private fun MealTypeCard(
-    mealType: MealType,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        onClick = onClick,
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            }
-        ),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 4.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = mealType.displayName,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = if (isSelected) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                textAlign = TextAlign.Center
-            )
         }
     }
 }
