@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.extensions.displayName
 import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 import com.jacqulin.calcalc.core.designsystem.theme.CaloriesDark
 import com.jacqulin.calcalc.core.designsystem.theme.TextSecondary
@@ -114,7 +115,7 @@ fun MealCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = meal.type.displayName,
+                            text = meal.type.displayName(),
                             style = MaterialTheme.typography.bodySmall,
                             color = TextSecondary
                         )

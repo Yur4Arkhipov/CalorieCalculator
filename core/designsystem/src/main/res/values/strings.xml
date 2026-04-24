@@ -189,4 +189,9 @@
     <string name="onboarding_result_title">Ваша норма</string>
     <string name="onboarding_result_subtitle">Можете скорректировать значения под себя</string>
 
+    <string name="meal_type_breakfast">Завтрак</string>
+    <string name="meal_type_lunch">Обед</string>
+    <string name="meal_type_dinner">Ужин</string>
+    <string name="meal_type_snack">Перекус</string>
+
 </resources>

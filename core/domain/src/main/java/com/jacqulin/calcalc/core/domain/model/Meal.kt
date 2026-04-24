@@ -13,9 +13,9 @@ data class Meal(
     val isFavorite: Boolean = false
 )
 
-enum class MealType(val displayName: String) {
-    BREAKFAST("Завтрак"),
-    LUNCH("Обед"),
-    DINNER("Ужин"),
-    SNACK("Перекус")
+enum class MealType {
+    BREAKFAST,
+    LUNCH,
+    DINNER,
+    SNACK
 }

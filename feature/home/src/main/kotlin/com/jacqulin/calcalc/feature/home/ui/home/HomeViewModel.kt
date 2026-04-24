@@ -250,7 +250,7 @@ class HomeViewModel @Inject constructor(
         selectedDate: Date
     ): List<CalendarDay> {
         val today = Date()
-        val dayFormat = SimpleDateFormat("EEE", Locale.forLanguageTag("ru"))
+        val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())
         val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
 
         return dates.map { date ->

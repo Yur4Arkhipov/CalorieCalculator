@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.jacqulin.calcalc.core.designsystem.extensions.displayName
 import com.jacqulin.calcalc.core.domain.model.MealType
 
 @Composable
@@ -42,7 +43,7 @@ fun MealTypeCard(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = mealType.displayName,
+                text = mealType.displayName(),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 color = if (isSelected) {

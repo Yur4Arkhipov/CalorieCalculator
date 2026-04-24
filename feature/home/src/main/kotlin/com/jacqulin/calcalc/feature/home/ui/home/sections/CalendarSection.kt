@@ -71,7 +71,9 @@ internal fun CalendarSection(
         }
     }
 
-    val monthFormat = SimpleDateFormat("LLLL yyyy", Locale("ru"))
+    val monthFormat = remember {
+        SimpleDateFormat("LLLL yyyy", Locale.getDefault())
+    }
     val weekTitle = weeks[currentWeekIndex]
         ?.firstOrNull()
         ?.date
