@@ -196,4 +196,16 @@
     <string name="meal_type_dinner">Dinner</string>
     <string name="meal_type_snack">Snack</string>
 
+    // Detail screen
+    <string name="detail_title">Detail info</string>
+    <string name="detail_back">Go back</string>
+    <string name="detail_consumed_meals">Meals eaten today</string>
+    <string name="detail_no_meals">No meals added yet</string>
+    <string name="detail_daily_calories">Calories for the day</string>
+    <string name="detail_consumed">Consumed</string>
+    <string name="detail_remaining">Remaining</string>
+    <string name="detail_goal">Goal</string>
+    <string name="detail_macro_progress_format">%1$d / %2$d g</string>
+    <string name="detail_macro_percentage_format">%1$d%% of daily goal</string>
+
 </resources>

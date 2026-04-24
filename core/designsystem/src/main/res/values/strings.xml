@@ -197,4 +197,16 @@
     <string name="meal_type_dinner">Ужин</string>
     <string name="meal_type_snack">Перекус</string>
 
+    // Detail screen
+    <string name="detail_title">Детальная информация</string>
+    <string name="detail_back">Назад</string>
+    <string name="detail_consumed_meals">Съеденные блюда за день</string>
+    <string name="detail_no_meals">Пока не добавлено ни одного блюда</string>
+    <string name="detail_daily_calories">Калории за день</string>
+    <string name="detail_consumed">Потреблено</string>
+    <string name="detail_remaining">Осталось</string>
+    <string name="detail_goal">Цель</string>
+    <string name="detail_macro_progress_format">%1$d / %2$d г</string>
+    <string name="detail_macro_percentage_format">%1$d%% от дневной нормы</string>
+
 </resources>
