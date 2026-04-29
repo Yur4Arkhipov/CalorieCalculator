@@ -205,7 +205,7 @@ class HomeViewModel @Inject constructor(
         editingMealFlow.value = Pair(null, false)
     }
 
-    fun onAddPhotoFromCamera(mealType: MealType) {
+    private fun onAddPhotoFromCamera(mealType: MealType) {
         viewModelScope.launch {
             val uri = imageRepository.createCameraFileUri()
             _uiEvents.send(HomeUiEvent.LaunchCamera(uri, mealType))

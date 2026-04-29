@@ -2,7 +2,10 @@ package com.jacqulin.calcalc.feature.home.ui.home
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -25,6 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,18 +57,21 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.AddMealFloatingActionButton
 import com.jacqulin.calcalc.core.designsystem.component.MealCard
 import com.jacqulin.calcalc.core.designsystem.extensions.displayName
+import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.PendingMeal
@@ -96,6 +103,12 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    var showRationaleDialog by remember { mutableStateOf(false) }
+    var showPermanentDeniedDialog by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val activity = context as? ComponentActivity
+
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
@@ -112,10 +125,25 @@ fun HomeScreen(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         val mealType = pendingCameraMealType ?: MealType.BREAKFAST
-        viewModel.onCameraPermissionResult(granted, mealType)
-        if (!granted) {
-            pendingCameraMealType = null
+
+        if (granted) {
+            pendingCameraUri?.let { uri ->
+                cameraLauncher.launch(uri)
+            }
+        } else {
+            viewModel.onCameraPermissionResult(granted = false, mealType = mealType)
+
+            val shouldShow = activity?.let {
+                ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)
+            } ?: false
+
+            if (shouldShow) {
+                showRationaleDialog = true
+            } else {
+                showPermanentDeniedDialog = true
+            }
         }
+        if (!granted) pendingCameraMealType = null
     }
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -208,6 +236,53 @@ fun HomeScreen(
         )
     }
 
+    if (showRationaleDialog) {
+        AlertDialog(
+            onDismissRequest = { showRationaleDialog = false },
+            title = { Text("Нужен доступ к камере") },
+            text = { Text("Камера используется для создания фото еды. Пожалуйста, разрешите доступ, чтобы продолжить.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRationaleDialog = false
+                    pendingCameraMealType?.let {
+                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
+                }) { Text("Попробовать снова") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showRationaleDialog = false
+                    pendingCameraMealType = null
+                }) { Text("Отмена") }
+            },
+            containerColor = White
+        )
+    }
+
+    if (showPermanentDeniedDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermanentDeniedDialog = false },
+            title = { Text("Доступ к камере заблокирован") },
+            text = { Text("Вы отключили разрешение. Чтобы использовать камеру, включите его в настройках приложения.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPermanentDeniedDialog = false
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                    }
+                    context.startActivity(intent)
+                    pendingCameraMealType = null
+                }) { Text("Открыть настройки") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showPermanentDeniedDialog = false
+                    pendingCameraMealType = null
+                }) { Text("Закрыть") }
+            },
+            containerColor = White
+        )
+    }
 
     if (uiState.isLoading) {
         Box(
