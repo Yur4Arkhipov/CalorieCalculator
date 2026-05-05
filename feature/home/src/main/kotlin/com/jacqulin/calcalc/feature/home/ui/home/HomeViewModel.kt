@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacqulin.calcalc.core.domain.model.Meal
-import com.jacqulin.calcalc.core.domain.model.PendingMeal
 import com.jacqulin.calcalc.core.domain.model.TempImage
 import com.jacqulin.calcalc.core.domain.repository.ImageRepository
 import com.jacqulin.calcalc.core.domain.usecase.DeleteMealUseCase
@@ -27,7 +26,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -51,7 +49,6 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val currentWeekIndexFlow = MutableStateFlow(0)
-    private val pendingMealsFlow = MutableStateFlow<List<PendingMeal>>(emptyList())
     private val editingMealFlow = MutableStateFlow<Pair<Meal?, Boolean>>(Pair(null, false))
 
     private val _uiEvents = Channel<HomeUiEvent>(Channel.BUFFERED)
@@ -82,9 +79,8 @@ class HomeViewModel @Inject constructor(
                 combine(
                     getDayDataUseCase(selectedDate),
                     weeksFlow,
-                    pendingMealsFlow,
                     editingMealFlow
-                ) { dayData, weeks, pendingMeals, editingPair ->
+                ) { dayData, weeks, editingPair ->
 
                     val consumedCalories = dayData.meals.sumOf { it.calories }
 
@@ -107,7 +103,6 @@ class HomeViewModel @Inject constructor(
                         currentWeekIndex = weekIndex,
                         weekDays = updatedWeeks[weekIndex] ?: emptyList(),
                         mealsToday = dayData.meals,
-                        pendingMeals = pendingMeals,
                         todayMacros = macrosWithGoals,
                         consumedCalories = consumedCalories,
                         dailyCaloriesGoal = profile.caloriesGoal,
@@ -133,10 +128,6 @@ class HomeViewModel @Inject constructor(
 
     fun onWeekChanged(weekIndex: Int) {
         currentWeekIndexFlow.value = weekIndex
-    }
-
-    fun dismissPendingError(id: String) {
-        pendingMealsFlow.update { list -> list.filter { it.id != id } }
     }
 
     fun onEditMeal(meal: Meal) {

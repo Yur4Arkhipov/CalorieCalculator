@@ -20,14 +20,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -58,7 +55,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
@@ -67,10 +63,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.AddMealFloatingActionButton
 import com.jacqulin.calcalc.core.designsystem.component.MealCard
-import com.jacqulin.calcalc.core.designsystem.extensions.displayName
 import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.Meal
-import com.jacqulin.calcalc.core.domain.model.PendingMeal
 import com.jacqulin.calcalc.core.domain.model.TempImage
 import com.jacqulin.calcalc.feature.home.ui.home.sections.AddMealBottomSheet
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CalendarSection
@@ -290,8 +284,6 @@ fun HomeScreen(
                     item {
                         TodayMealsSection(
                             meals = uiState.mealsToday,
-                            pendingMeals = uiState.pendingMeals,
-                            onDismissError = viewModel::dismissPendingError,
                             onDetailClick = onNavigateToMacroDetail,
                             onMealClick = viewModel::onEditMeal
                         )
@@ -361,8 +353,6 @@ fun HomeScreen(
 @Composable
 private fun TodayMealsSection(
     meals: List<Meal>,
-    pendingMeals: List<PendingMeal> = emptyList(),
-    onDismissError: (String) -> Unit = {},
     onDetailClick: () -> Unit = {},
     onMealClick: (Meal) -> Unit = {}
 ) {
@@ -386,8 +376,7 @@ private fun TodayMealsSection(
             }
         }
 
-        val isEmpty = meals.isEmpty() && pendingMeals.isEmpty()
-        if (isEmpty) {
+        if (meals.isEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -407,86 +396,10 @@ private fun TodayMealsSection(
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                pendingMeals.forEach { pending ->
-                    PendingMealCard(
-                        pending = pending,
-                        onDismissError = { onDismissError(pending.id) }
-                    )
-                }
                 meals.forEach { meal ->
                     MealCard(
                         meal = meal,
                         onClick = { onMealClick(meal) }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PendingMealCard(
-    pending: PendingMeal,
-    onDismissError: () -> Unit
-) {
-    val isError = pending.error != null
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(96.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isError)
-                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.35f)
-            else
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            if (pending.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(28.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                )
-            }
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = if (isError)
-                        stringResource(R.string.home_analyze_error)
-                    else
-                        stringResource(R.string.home_analyzing),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = if (isError)
-                        MaterialTheme.colorScheme.error
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-                Text(
-                    text = pending.type.displayName(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                )
-            }
-            if (isError) {
-                TextButton(onClick = onDismissError) {
-                    Text(
-                        text = stringResource(R.string.home_remove),
-                        color = MaterialTheme.colorScheme.error
                     )
                 }
             }
