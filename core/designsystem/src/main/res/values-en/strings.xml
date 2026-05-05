@@ -33,6 +33,14 @@
     <string name="home_analyzing">Analyzing…</string>
     <string name="home_remove">Remove</string>
 
+    <string name="home_alert_dialog_access_required">Camera access required</string>
+    <string name="home_alert_dialog_description">Permission is required to photograph food. Please allow access to continue</string>
+    <string name="home_alert_dialog_try_again">Try again</string>
+    <string name="home_alert_dialog_access_block">Access to the camera is blocked</string>
+    <string name="home_alert_dialog_access_description">No required permission for using camera. To use the camera, please enable it in the app settings.</string>
+    <string name="home_alert_dialog_open_settings">Open settings</string>
+    <string name="home_alert_dialog_close">Close</string>
+
     <string name="home_add_meal_from_favorite_title">Add from favorite</string>
     <string name="home_add_meal_from_favorite_subtitle">Choose favorite meal</string>
 

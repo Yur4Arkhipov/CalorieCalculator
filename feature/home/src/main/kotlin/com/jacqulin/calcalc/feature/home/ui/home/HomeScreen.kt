@@ -35,9 +35,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -80,8 +77,6 @@ import com.jacqulin.calcalc.feature.home.ui.home.sections.CalendarSection
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CaloriesSection
 import com.jacqulin.calcalc.feature.home.ui.home.sections.EditMealBottomSheet
 
-private enum class AddPhotoSource { CAMERA, GALLERY }
-
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,9 +92,7 @@ fun HomeScreen(
     var showAddFoodSheet by remember { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
     var cameraSession by remember { mutableStateOf<TempImage?>(null) }
-    val snackbarHostState = remember { SnackbarHostState() }
     val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     var showRationaleDialog by remember { mutableStateOf(false) }
     var showPermanentDeniedDialog by remember { mutableStateOf(false) }
 
@@ -199,9 +192,6 @@ fun HomeScreen(
                 is HomeUiEvent.LaunchGallery -> {
                     galleryLauncher.launch("image/*")
                 }
-                is HomeUiEvent.ShowNotFoodError -> {
-                    snackbarHostState.showSnackbar("На фото не обнаружена еда")
-                }
                 is HomeUiEvent.NavigateToMealReview -> {
                     onNavigateToMealReview(event.tempImage)
                 }
@@ -212,18 +202,18 @@ fun HomeScreen(
     if (showRationaleDialog) {
         AlertDialog(
             onDismissRequest = { showRationaleDialog = false },
-            title = { Text("Нужен доступ к камере") },
-            text = { Text("Камера используется для создания фото еды. Пожалуйста, разрешите доступ, чтобы продолжить.") },
+            title = { Text(stringResource(R.string.home_alert_dialog_access_required)) },
+            text = { Text(stringResource(R.string.home_alert_dialog_description)) },
             confirmButton = {
                 TextButton(onClick = {
                     showRationaleDialog = false
                     cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                }) { Text("Попробовать снова") }
+                }) { Text(stringResource(R.string.home_alert_dialog_try_again)) }
             },
             dismissButton = {
                 TextButton(onClick = {
                     showRationaleDialog = false
-                }) { Text("Отмена") }
+                }) { Text(stringResource(R.string.home_dialog_cancel)) }
             },
             containerColor = White
         )
@@ -232,8 +222,8 @@ fun HomeScreen(
     if (showPermanentDeniedDialog) {
         AlertDialog(
             onDismissRequest = { showPermanentDeniedDialog = false },
-            title = { Text("Доступ к камере заблокирован") },
-            text = { Text("Вы отключили разрешение. Чтобы использовать камеру, включите его в настройках приложения.") },
+            title = { Text(stringResource(R.string.home_alert_dialog_access_block)) },
+            text = { Text(stringResource(R.string.home_alert_dialog_access_description)) },
             confirmButton = {
                 TextButton(onClick = {
                     showPermanentDeniedDialog = false
@@ -241,12 +231,12 @@ fun HomeScreen(
                         data = Uri.fromParts("package", context.packageName, null)
                     }
                     context.startActivity(intent)
-                }) { Text("Открыть настройки") }
+                }) { Text(stringResource(R.string.home_alert_dialog_open_settings)) }
             },
             dismissButton = {
                 TextButton(onClick = {
                     showPermanentDeniedDialog = false
-                }) { Text("Закрыть") }
+                }) { Text(stringResource(R.string.home_alert_dialog_close)) }
             },
             containerColor = White
         )
@@ -261,21 +251,6 @@ fun HomeScreen(
         }
     } else {
         Scaffold(
-            snackbarHost = {
-                SnackbarHost(
-                    hostState = snackbarHostState,
-                    modifier = Modifier.padding(
-                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 44.dp
-                    )
-                ) { data ->
-                    Snackbar(
-                        snackbarData = data,
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-            },
             containerColor = MaterialTheme.colorScheme.background
         ) { _ ->
             Box(

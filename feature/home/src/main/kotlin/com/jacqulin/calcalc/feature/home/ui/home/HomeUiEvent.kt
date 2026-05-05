@@ -7,5 +7,4 @@ sealed interface HomeUiEvent {
     data class LaunchCamera(val tempImage: TempImage) : HomeUiEvent
     data object LaunchGallery : HomeUiEvent
     data class NavigateToMealReview(val tempImage: TempImage) : HomeUiEvent
-    data object ShowNotFoodError : HomeUiEvent
 }

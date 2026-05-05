@@ -34,6 +34,14 @@
     <string name="home_analyzing">Анализирую…</string>
     <string name="home_remove">Убрать</string>
 
+    <string name="home_alert_dialog_access_required">Требуется доступ к камере</string>
+    <string name="home_alert_dialog_description">Разрешение необходимо для фотографирования еды. Пожалуйста, разрешите доступ, чтобы продолжить</string>
+    <string name="home_alert_dialog_try_again">Попробовать снова</string>
+    <string name="home_alert_dialog_access_block">Доступ к камере заблокирован</string>
+    <string name="home_alert_dialog_access_description">Необходимое разрешение для использования камеры отсутствует. Чтобы использовать камеру, включите его в настройках приложения.</string>
+    <string name="home_alert_dialog_open_settings">Открыть настройки</string>
+    <string name="home_alert_dialog_close">Закрыть</string>
+
     <string name="home_add_meal_from_favorite_title">Добавить из избранного</string>
     <string name="home_add_meal_from_favorite_subtitle">Выбрать любимое блюдо</string>
 
