@@ -1,8 +1,6 @@
 package com.jacqulin.calcalc.feature.home.ui.review
 
 import android.annotation.SuppressLint
-import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -26,9 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -39,15 +36,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.jacqulin.calcalc.core.designsystem.theme.AppOnPrimaryContainer
-import com.jacqulin.calcalc.core.designsystem.theme.AppPrimary
 import com.jacqulin.calcalc.core.designsystem.theme.AppPrimaryContainer
-import com.jacqulin.calcalc.core.domain.model.Meal
-import com.jacqulin.calcalc.core.domain.model.MealType
-import com.jacqulin.calcalc.feature.home.ui.home.HomeViewModel
-import kotlinx.coroutines.delay
 import java.io.File
-import androidx.compose.runtime.collectAsState
-import androidx.core.net.toUri
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -164,6 +154,14 @@ fun MealReviewScreen(
                             style = MaterialTheme.typography.bodyMedium,
                             color = AppOnPrimaryContainer.copy(alpha = 0.75f)
                         )
+                        Button(
+                            onClick = {
+                                viewModel.saveMeal()
+                                onBackClick()
+                            }
+                        ) {
+                            Text("Save")
+                        }
                     }
                 }
             }

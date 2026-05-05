@@ -185,7 +185,7 @@ class HomeViewModel @Inject constructor(
             if (success) {
                 _uiEvents.send(HomeUiEvent.NavigateToMealReview(temp))
             } else {
-                imageRepository.deleteTempImage(temp)
+                imageRepository.deleteTempImage(temp.file.absolutePath)
             }
         }
     }

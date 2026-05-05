@@ -127,10 +127,10 @@ class ImageRepositoryImpl @Inject constructor(
             TempImage(tempUri, file)
         }
 
-    override suspend fun deleteTempImage(temp: TempImage) {
+    override suspend fun deleteTempImage(filePath: String) {
        withContext(Dispatchers.IO) {
            try {
-               temp.file.delete()
+               File(filePath).delete()
            } catch (_: Exception) {}
        }
     }

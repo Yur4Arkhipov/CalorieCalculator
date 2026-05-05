@@ -10,5 +10,5 @@ interface ImageRepository {
     suspend fun readImageBytesFromFile(path: String): ByteArray?
     suspend fun createTempImage(): TempImage
     suspend fun copyUriToTemp(uri: Uri): TempImage
-    suspend fun deleteTempImage(temp: TempImage)
+    suspend fun deleteTempImage(filePath: String)
 }
