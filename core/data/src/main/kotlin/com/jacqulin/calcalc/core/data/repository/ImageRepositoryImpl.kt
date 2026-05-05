@@ -3,6 +3,7 @@ package com.jacqulin.calcalc.core.data.repository
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Base64
 import androidx.core.content.FileProvider
 import androidx.core.graphics.scale
@@ -101,6 +102,29 @@ class ImageRepositoryImpl @Inject constructor(
                 file
             )
             TempImage(uri, file)
+        }
+
+    override suspend fun copyUriToTemp(uri: Uri): TempImage =
+        withContext(Dispatchers.IO) {
+
+            val file = File(
+                context.cacheDir,
+                "meal_gallery_${System.currentTimeMillis()}.jpg"
+            )
+
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                file.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            } ?: throw IllegalStateException("Failed to read gallery image")
+
+            val tempUri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                file
+            )
+
+            TempImage(tempUri, file)
         }
 
     override suspend fun deleteTempImage(temp: TempImage) {

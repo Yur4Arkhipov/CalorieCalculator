@@ -73,14 +73,12 @@ import com.jacqulin.calcalc.core.designsystem.component.MealCard
 import com.jacqulin.calcalc.core.designsystem.extensions.displayName
 import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.Meal
-import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.PendingMeal
 import com.jacqulin.calcalc.core.domain.model.TempImage
 import com.jacqulin.calcalc.feature.home.ui.home.sections.AddMealBottomSheet
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CalendarSection
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CaloriesSection
 import com.jacqulin.calcalc.feature.home.ui.home.sections.EditMealBottomSheet
-import com.jacqulin.calcalc.feature.home.ui.home.sections.MealTypePickerDialog
 
 private enum class AddPhotoSource { CAMERA, GALLERY }
 
@@ -97,11 +95,8 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddFoodSheet by remember { mutableStateOf(false) }
-    var showMealTypePicker by remember { mutableStateOf<AddPhotoSource?>(null) }
     val lazyListState = rememberLazyListState()
-    var pendingTempImage by remember { mutableStateOf<TempImage?>(null) }
-    var pendingCameraMealType by remember { mutableStateOf<MealType?>(null) }
-    var pendingGalleryMealType by remember { mutableStateOf<MealType?>(null) }
+    var cameraSession by remember { mutableStateOf<TempImage?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -114,11 +109,11 @@ fun HomeScreen(
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
-        val temp = pendingTempImage
+        val temp = cameraSession
         if (temp != null) {
             viewModel.onCameraResult(success = success, temp = temp)
         }
-        pendingTempImage = null
+        cameraSession = null
     }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
@@ -137,17 +132,14 @@ fun HomeScreen(
                 showPermanentDeniedDialog = true
             }
         }
-        if (!granted) pendingCameraMealType = null
     }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
-        val mealType = pendingGalleryMealType ?: MealType.BREAKFAST
         if (uri != null) {
-            viewModel.onGalleryResult(uri, mealType)
+            viewModel.onGalleryResult(uri)
         }
-        pendingGalleryMealType = null
     }
 
     val isAtBottom by remember {
@@ -198,14 +190,13 @@ fun HomeScreen(
         viewModel.uiEvents.collect { event ->
             when (event) {
                 is HomeUiEvent.LaunchCamera -> {
-                    pendingTempImage = event.tempImage
+                    cameraSession = event.tempImage
                     cameraLauncher.launch(event.tempImage.uri)
                 }
                 is HomeUiEvent.RequestCameraPermission -> {
                     cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                 }
                 is HomeUiEvent.LaunchGallery -> {
-                    pendingGalleryMealType = event.mealType
                     galleryLauncher.launch("image/*")
                 }
                 is HomeUiEvent.ShowNotFoodError -> {
@@ -218,19 +209,6 @@ fun HomeScreen(
         }
     }
 
-    showMealTypePicker?.let { source ->
-        MealTypePickerDialog(
-            onSelect = { mealType ->
-                showMealTypePicker = null
-                when (source) {
-                    AddPhotoSource.CAMERA -> viewModel.onRequestCameraPermission()
-                    AddPhotoSource.GALLERY -> viewModel.onAddPhotoFromGallery(mealType)
-                }
-            },
-            onDismiss = { showMealTypePicker = null }
-        )
-    }
-
     if (showRationaleDialog) {
         AlertDialog(
             onDismissRequest = { showRationaleDialog = false },
@@ -239,15 +217,12 @@ fun HomeScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showRationaleDialog = false
-                    pendingCameraMealType?.let {
-                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                    }
+                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                 }) { Text("Попробовать снова") }
             },
             dismissButton = {
                 TextButton(onClick = {
                     showRationaleDialog = false
-                    pendingCameraMealType = null
                 }) { Text("Отмена") }
             },
             containerColor = White
@@ -266,13 +241,11 @@ fun HomeScreen(
                         data = Uri.fromParts("package", context.packageName, null)
                     }
                     context.startActivity(intent)
-                    pendingCameraMealType = null
                 }) { Text("Открыть настройки") }
             },
             dismissButton = {
                 TextButton(onClick = {
                     showPermanentDeniedDialog = false
-                    pendingCameraMealType = null
                 }) { Text("Закрыть") }
             },
             containerColor = White
@@ -385,12 +358,12 @@ fun HomeScreen(
                             onNavigateToAiMealDescription()
                         },
                         onCamera = {
+                            viewModel.onRequestCameraPermission()
                             showAddFoodSheet = false
-                            showMealTypePicker = AddPhotoSource.CAMERA
                         },
                         onGallery = {
+                            viewModel.onAddPhotoFromGallery()
                             showAddFoodSheet = false
-                            showMealTypePicker = AddPhotoSource.GALLERY
                         },
                         onDismiss = { showAddFoodSheet = false }
                     )
