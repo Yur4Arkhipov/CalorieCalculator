@@ -12,7 +12,6 @@ class AnalyzeMealFromImageUseCaseImpl(
     override suspend fun invoke(imageBytes: ByteArray): ImageAnalysisResult {
         val base64 = imageRepository.encodeForAi(imageBytes)
         val nutrition = aiRepository.analyzeMealFromImage(base64)
-        val savedPath = imageRepository.saveImage(imageBytes)
-        return ImageAnalysisResult(nutrition = nutrition, savedImagePath = savedPath)
+        return ImageAnalysisResult(nutrition = nutrition)
     }
 }

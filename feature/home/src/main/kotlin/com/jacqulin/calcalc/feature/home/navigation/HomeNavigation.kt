@@ -10,7 +10,10 @@ import com.jacqulin.calcalc.feature.home.ui.favorite.FavoriteMealChooseScreen
 import com.jacqulin.calcalc.feature.home.ui.home.HomeScreen
 import com.jacqulin.calcalc.feature.home.ui.macrodetail.MacroDetailScreen
 import com.jacqulin.calcalc.feature.home.ui.manual.ManualAddMealScreen
+import com.jacqulin.calcalc.feature.home.ui.review.MealReviewScreen
 import kotlinx.serialization.Serializable
+import androidx.navigation.toRoute
+import com.jacqulin.calcalc.core.domain.model.TempImage
 
 @Serializable
 data object HomeRoute
@@ -30,6 +33,11 @@ data object ManualAddMealRoute
 @Serializable
 data object HomeBaseRoute
 
+@Serializable
+data class MealReviewRoute(
+    val filePath: String
+)
+
 fun NavController.navigateToHome(navOptions: NavOptions) = navigate(route = HomeRoute, navOptions)
 
 fun NavController.navigateToFavoriteChoose() = navigate(route = FavoriteMealChooseRoute)
@@ -40,11 +48,14 @@ fun NavController.navigateToAiMealDescription() = navigate(route = AiMealDescrip
 
 fun NavController.navigateToManualAddMeal() = navigate(route = ManualAddMealRoute)
 
+fun NavController.navigateToMealReview(temp: TempImage) = navigate(MealReviewRoute(temp.file.absolutePath))
+
 fun NavGraphBuilder.homeSection(
     onNavigateToFavoriteChoose: () -> Unit,
     onNavigateToMacroDetail: () -> Unit,
     onNavigateToAiMealDescription: () -> Unit,
     onNavigateToManualAddMeal: () -> Unit,
+    onNavigateToMealReview: (TempImage) -> Unit,
     onBackClick: () -> Unit
 ) {
     navigation<HomeBaseRoute>(startDestination = HomeRoute) {
@@ -54,6 +65,7 @@ fun NavGraphBuilder.homeSection(
                 onNavigateToMacroDetail = onNavigateToMacroDetail,
                 onNavigateToAiMealDescription = onNavigateToAiMealDescription,
                 onNavigateToManualAddMeal = onNavigateToManualAddMeal,
+                onNavigateToMealReview = onNavigateToMealReview
             )
         }
 
@@ -71,6 +83,15 @@ fun NavGraphBuilder.homeSection(
 
         composable<ManualAddMealRoute> {
             ManualAddMealScreen(onBackClick = onBackClick)
+        }
+
+        composable<MealReviewRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<MealReviewRoute>()
+
+            MealReviewScreen(
+                filePath = route.filePath,
+                onBackClick = onBackClick
+            )
         }
     }
 }

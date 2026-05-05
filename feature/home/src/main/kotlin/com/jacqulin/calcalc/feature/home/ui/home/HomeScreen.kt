@@ -75,6 +75,7 @@ import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.PendingMeal
+import com.jacqulin.calcalc.core.domain.model.TempImage
 import com.jacqulin.calcalc.feature.home.ui.home.sections.AddMealBottomSheet
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CalendarSection
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CaloriesSection
@@ -92,12 +93,13 @@ fun HomeScreen(
     onNavigateToAiMealDescription: () -> Unit = {},
     onNavigateToManualAddMeal: () -> Unit = {},
     onNavigateToAddFavoriteMeal: () -> Unit = {},
+    onNavigateToMealReview: (TempImage) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddFoodSheet by remember { mutableStateOf(false) }
     var showMealTypePicker by remember { mutableStateOf<AddPhotoSource?>(null) }
     val lazyListState = rememberLazyListState()
-    var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingTempImage by remember { mutableStateOf<TempImage?>(null) }
     var pendingCameraMealType by remember { mutableStateOf<MealType?>(null) }
     var pendingGalleryMealType by remember { mutableStateOf<MealType?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -112,27 +114,19 @@ fun HomeScreen(
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
-        val uri = pendingCameraUri
-        val mealType = pendingCameraMealType
-        if (success && uri != null && mealType != null) {
-            viewModel.onCameraResult(success = true, uri = uri, mealType = mealType)
+        val temp = pendingTempImage
+        if (temp != null) {
+            viewModel.onCameraResult(success = success, temp = temp)
         }
-        pendingCameraUri = null
-        pendingCameraMealType = null
+        pendingTempImage = null
     }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        val mealType = pendingCameraMealType ?: MealType.BREAKFAST
-
         if (granted) {
-            pendingCameraUri?.let { uri ->
-                cameraLauncher.launch(uri)
-            }
+            viewModel.onCameraPermissionResult(granted = true)
         } else {
-            viewModel.onCameraPermissionResult(granted = false, mealType = mealType)
-
             val shouldShow = activity?.let {
                 ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)
             } ?: false
@@ -204,12 +198,10 @@ fun HomeScreen(
         viewModel.uiEvents.collect { event ->
             when (event) {
                 is HomeUiEvent.LaunchCamera -> {
-                    pendingCameraUri = event.uri
-                    pendingCameraMealType = event.mealType
-                    cameraLauncher.launch(event.uri)
+                    pendingTempImage = event.tempImage
+                    cameraLauncher.launch(event.tempImage.uri)
                 }
                 is HomeUiEvent.RequestCameraPermission -> {
-                    pendingCameraMealType = event.mealType
                     cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                 }
                 is HomeUiEvent.LaunchGallery -> {
@@ -218,6 +210,9 @@ fun HomeScreen(
                 }
                 is HomeUiEvent.ShowNotFoodError -> {
                     snackbarHostState.showSnackbar("На фото не обнаружена еда")
+                }
+                is HomeUiEvent.NavigateToMealReview -> {
+                    onNavigateToMealReview(event.tempImage)
                 }
             }
         }
@@ -228,7 +223,7 @@ fun HomeScreen(
             onSelect = { mealType ->
                 showMealTypePicker = null
                 when (source) {
-                    AddPhotoSource.CAMERA -> viewModel.onRequestCameraPermission(mealType)
+                    AddPhotoSource.CAMERA -> viewModel.onRequestCameraPermission()
                     AddPhotoSource.GALLERY -> viewModel.onAddPhotoFromGallery(mealType)
                 }
             },
@@ -313,6 +308,14 @@ fun HomeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+//                    .background(
+//                        Brush.verticalGradient(
+//                            colors = listOf(
+//                                Color(0xFFFCFCFD),                    // верх
+//                                AppPrimaryContainer.copy(alpha = 0.2f) // низ, очень прозрачный
+//                            )
+//                        )
+//                    )
             ) {
                 LazyColumn(
                     state = lazyListState,

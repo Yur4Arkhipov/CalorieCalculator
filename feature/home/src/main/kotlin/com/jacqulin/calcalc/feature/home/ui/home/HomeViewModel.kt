@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.model.PendingMeal
+import com.jacqulin.calcalc.core.domain.model.TempImage
 import com.jacqulin.calcalc.core.domain.repository.ImageRepository
 import com.jacqulin.calcalc.core.domain.usecase.AnalyzeMealFromImageUseCase
 import com.jacqulin.calcalc.core.domain.usecase.DeleteMealUseCase
@@ -17,7 +18,6 @@ import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SetSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.UpdateMealUseCase
-import com.jacqulin.calcalc.core.util.NotFoodException
 import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -141,38 +141,55 @@ class HomeViewModel @Inject constructor(
         currentWeekIndexFlow.value = weekIndex
     }
 
-    fun onImageCaptured(imageBytes: ByteArray, mealType: MealType) {
-        val pending = PendingMeal(type = mealType, isLoading = true, imageUri = null)
-        pendingMealsFlow.update { it + pending }
-
-        viewModelScope.launch {
-            try {
-                val result = analyzeMealFromImageUseCase(imageBytes)
-                val meal = Meal(
-                    name = result.nutrition.name.ifBlank { "Блюдо" },
-                    calories = result.nutrition.calories.toInt(),
-                    proteins = result.nutrition.protein.toInt(),
-                    fats = result.nutrition.fat.toInt(),
-                    carbs = result.nutrition.carbs.toInt(),
-                    time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
-                    type = mealType,
-                    imageUri = result.savedImagePath
-                )
-                saveManualAddMealDBUseCase(selectedDate.value, meal)
-                pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
-            } catch (_: NotFoodException) {
-                pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
-                _uiEvents.send(HomeUiEvent.ShowNotFoodError)
-            } catch (_: Exception) {
-                pendingMealsFlow.update { list ->
-                    list.map {
-                        if (it.id == pending.id) it.copy(isLoading = false, error = "Ошибка анализа")
-                        else it
-                    }
-                }
-            }
-        }
-    }
+//    fun onImageCaptured(imageBytes: ByteArray, mealType: MealType = MealType.BREAKFAST) {
+//
+//        viewModelScope.launch {
+//            try {
+//                val result = analyzeMealFromImageUseCase(imageBytes)
+//
+////                val imagePath = result.savedImagePath
+////                if (imagePath.isNullOrBlank()) {
+////                    Log.e("Preview", "❌ savedImagePath is null/blank!")
+////                    _isPreviewLoading.value = false
+////                    return@launch
+////                }
+//
+//                val previewMeal = Meal(
+//                    id = -1,
+//                    name = result.nutrition.name.ifBlank { "Блюдо" },
+//                    calories = result.nutrition.calories.toInt(),
+//                    proteins = result.nutrition.protein.toInt(),
+//                    fats = result.nutrition.fat.toInt(),
+//                    carbs = result.nutrition.carbs.toInt(),
+//                    time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
+//                    type = mealType,
+////                    imageUri = imagePath,
+//                    isFavorite = false
+//                )
+//
+//
+////                _uiEvents.send(HomeUiEvent.NavigateToMealReview)
+////                saveManualAddMealDBUseCase(selectedDate.value, meal)
+////                pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
+//                Log.d("Preview", "previewStateFlowAfterOpen: $previewMeal")
+//            } catch (_: NotFoodException) {
+//                Log.w("Preview", "⚠️ NotFoodException")
+////                pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
+//                _isPreviewLoading.value = false
+//                _uiEvents.send(HomeUiEvent.ShowNotFoodError)
+//            } catch (e: Exception) {
+//                _isPreviewLoading.value = false
+//                Log.e("Preview", "❌ Exception: ${e.message}", e)
+////                updatePreviewState { copy(isPreviewLoading = false) }
+////                pendingMealsFlow.update { list ->
+////                    list.map {
+////                        if (it.id == pending.id) it.copy(isLoading = false, error = "Ошибка анализа")
+////                        else it
+////                    }
+////                }
+//            }
+//        }
+//    }
 
     fun dismissPendingError(id: String) {
         pendingMealsFlow.update { list -> list.filter { it.id != id } }
@@ -205,43 +222,43 @@ class HomeViewModel @Inject constructor(
         editingMealFlow.value = Pair(null, false)
     }
 
-    private fun onAddPhotoFromCamera(mealType: MealType) {
-        viewModelScope.launch {
-            val uri = imageRepository.createCameraFileUri()
-            _uiEvents.send(HomeUiEvent.LaunchCamera(uri, mealType))
-        }
-    }
-
     fun onAddPhotoFromGallery(mealType: MealType) {
         viewModelScope.launch {
             _uiEvents.send(HomeUiEvent.LaunchGallery(mealType))
         }
     }
 
-    fun onRequestCameraPermission(mealType: MealType) {
+    private fun onAddPhotoFromCamera() {
         viewModelScope.launch {
-            _uiEvents.send(HomeUiEvent.RequestCameraPermission(mealType))
+            val temp = imageRepository.createTempImage()
+            _uiEvents.send(HomeUiEvent.LaunchCamera(temp))
         }
     }
 
-    fun onCameraPermissionResult(granted: Boolean, mealType: MealType) {
-        if (granted) onAddPhotoFromCamera(mealType)
+    fun onRequestCameraPermission() {
+        viewModelScope.launch {
+            _uiEvents.send(HomeUiEvent.RequestCameraPermission)
+        }
     }
 
-    fun onCameraResult(success: Boolean, uri: Uri, mealType: MealType) {
+    fun onCameraPermissionResult(granted: Boolean) {
+        if (granted) onAddPhotoFromCamera()
+    }
+
+    fun onCameraResult(success: Boolean, temp: TempImage) {
         viewModelScope.launch {
             if (success) {
-                val bytes = imageRepository.readImageBytes(uri)
-                if (bytes != null) onImageCaptured(bytes, mealType)
+                _uiEvents.send(HomeUiEvent.NavigateToMealReview(temp))
+            } else {
+                imageRepository.deleteTempImage(temp)
             }
-            imageRepository.deleteCameraFile(uri)
         }
     }
 
     fun onGalleryResult(uri: Uri, mealType: MealType) {
         viewModelScope.launch {
             val bytes = imageRepository.readImageBytes(uri)
-            if (bytes != null) onImageCaptured(bytes, mealType)
+//            if (bytes != null) onImageCaptured(bytes, mealType)
         }
     }
 
