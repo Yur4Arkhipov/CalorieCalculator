@@ -40,7 +40,8 @@ class MealReviewScreenViewModel @Inject constructor(
     private var cachedBytes: ByteArray? = null
 
     init {
-        analyzeImage()
+//        analyzeImage()
+        analyzeImageMock()
     }
 
     private fun analyzeImage() {
@@ -70,17 +71,46 @@ class MealReviewScreenViewModel @Inject constructor(
         }
     }
 
+    private fun analyzeImageMock() {
+        viewModelScope.launch {
+            val analyzedMeal = Meal(
+                id = -1,
+                name = "Стейк из говядины с овощами и горчицей",
+                calories = 550,
+                proteins = 45,
+                fats = 30,
+                carbs = 20,
+                time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
+                type = MealType.BREAKFAST,
+                isFavorite = false
+            )
+            _uiState.update {
+                it.copy(
+                    meal = analyzedMeal,
+                    name = analyzedMeal.name,
+                    isLoading = false
+                )
+            }
+        }
+    }
+
 //    fun updateMeal(update: (Meal) -> Meal) {
 //        _uiState.update { state -> state.copy(meal = state.meal?.let(update)) }
 //    }
 
     fun saveMeal() {
         viewModelScope.launch {
+            val state = _uiState.value
             val meal = _uiState.value.meal ?: return@launch
             val bytes = cachedBytes ?: imageRepository.readImageBytesFromFile(filePath)
             val savedPath = imageRepository.saveImage(bytes!!)
                 ?: return@launch
             val updatedMeal = meal.copy(
+                name = state.name,
+                calories = state.calories.toIntOrNull() ?: 0,
+                proteins = state.proteins.toIntOrNull() ?: 0,
+                fats = state.fats.toIntOrNull() ?: 0,
+                carbs = state.carbs.toIntOrNull() ?: 0,
                 imageUri = savedPath
             )
             saveManualAddMealDBUseCase(
@@ -89,6 +119,16 @@ class MealReviewScreenViewModel @Inject constructor(
             )
             imageRepository.deleteTempImage(filePath)
         }
+    }
+
+    fun onNameChange(newValue: String) {
+        if (newValue.length <= 40) {
+            _uiState.update { it.copy(name = newValue) }
+        }
+    }
+
+    fun onCaloriesChange(newValue: String) {
+        _uiState.update { it.copy(calories = newValue.filter { it.isDigit() }) }
     }
 
 //    fun discard(onCancel: () -> Unit) {
