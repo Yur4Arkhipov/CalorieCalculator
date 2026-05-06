@@ -7,6 +7,7 @@ data class Meal(
     val proteins: Int = 0,
     val carbs: Int = 0,
     val fats: Int = 0,
+    val weight: Int = 0,
     val time: String,
     val type: MealType,
     val imageUri: String? = null,

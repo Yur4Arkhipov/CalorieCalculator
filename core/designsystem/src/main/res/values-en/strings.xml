@@ -94,6 +94,10 @@
     <string name="edit_meal_bottom_sheet_cancel">Cancel</string>
     <string name="edit_meal_bottom_sheet_save">Save</string>
 
+    // Home -> preview
+    <string name="preview_meal_weight">Weight:</string>
+    <string name="preview_meal_weight_desc">AI Rating - Can Be Changed</string>
+
     // Effects
     <string name="effect_meal_saved">"The dish is saved!"</string>
     <string name="effect_meal_save_error">"Error saving the meal"</string>

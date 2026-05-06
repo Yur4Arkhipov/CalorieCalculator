@@ -16,6 +16,7 @@ import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.util.NotFoodException
+import com.jacqulin.calcalc.core.util.funtions.filterNumericInput
 import kotlinx.coroutines.flow.update
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -80,6 +81,7 @@ class MealReviewScreenViewModel @Inject constructor(
                 proteins = 45,
                 fats = 30,
                 carbs = 20,
+                weight = 300,
                 time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
                 type = MealType.BREAKFAST,
                 isFavorite = false
@@ -127,8 +129,49 @@ class MealReviewScreenViewModel @Inject constructor(
         }
     }
 
-    fun onCaloriesChange(newValue: String) {
-        _uiState.update { it.copy(calories = newValue.filter { it.isDigit() }) }
+    fun onWeightChanged(newValue: String) {
+        val filtered = filterNumericInput(
+            input = newValue,
+            maxLength = 4,
+            maxValue = 2000
+        )
+        _uiState.update { it.copy(weight = filtered) }
+    }
+
+    fun onCaloriesChanged(newValue: String) {
+        val filtered = filterNumericInput(
+            input = newValue,
+            maxLength = 4,
+            maxValue = 2500
+        )
+        _uiState.update { it.copy(calories = filtered) }
+    }
+
+    fun onCarbsChanged(newValue: String) {
+        val filtered = filterNumericInput(
+            input = newValue,
+            maxLength = 3,
+            maxValue = 300
+        )
+        _uiState.update { it.copy(carbs = filtered) }
+    }
+
+    fun onProteinsChanged(newValue: String) {
+        val filtered = filterNumericInput(
+            input = newValue,
+            maxLength = 3,
+            maxValue = 150
+        )
+        _uiState.update { it.copy(proteins = filtered) }
+    }
+
+    fun onFatsChanged(newValue: String) {
+        val filtered = filterNumericInput(
+            input = newValue,
+            maxLength = 3,
+            maxValue = 150
+        )
+        _uiState.update { it.copy(fats = filtered) }
     }
 
 //    fun discard(onCancel: () -> Unit) {

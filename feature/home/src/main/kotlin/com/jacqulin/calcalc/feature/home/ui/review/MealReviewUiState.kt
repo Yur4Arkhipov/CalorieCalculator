@@ -10,5 +10,6 @@ data class MealReviewUiState(
     val calories: String = "",
     val proteins: String = "",
     val fats: String = "",
-    val carbs: String = ""
+    val carbs: String = "",
+    var weight: String = ""
 )

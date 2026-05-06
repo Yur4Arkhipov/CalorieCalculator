@@ -31,6 +31,10 @@ val MealLunchColor = Color(0xFF62B6F8)
 val MealDinnerColor = Color(0xFF298C29)
 val MealSnackColor = Color(0xFFFAB35D)
 
+val reviewLoadingColor = Color.Gray
+
+val reviewIconColor = Color(0xFFA2D4FC)
+
 val White = Color(0xFFFFFFFF)
 
 val Favorite = Color(0xFFFC4242)
