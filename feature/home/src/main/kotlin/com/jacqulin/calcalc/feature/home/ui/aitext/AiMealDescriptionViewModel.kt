@@ -79,7 +79,7 @@ class AiMealDescriptionViewModel @Inject constructor(
                 val calories = state.result.calories.toInt()
                 val proteins = state.result.protein.toInt()
                 val fats = state.result.fat.toInt()
-                val carbs = state.result.carbs.toInt()
+                val carbs = state.result.carb.toInt()
 
                 val meal = Meal(
                     name = nutrition.name,

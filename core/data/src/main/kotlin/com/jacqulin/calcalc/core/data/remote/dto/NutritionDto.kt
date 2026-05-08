@@ -10,14 +10,16 @@ data class NutritionDto(
     val calories: Double,
     val protein: Double,
     val fat: Double,
-    val carbs: Double
+    val carb: Double,
+    val ingredient: List<IngredientDto> = emptyList()
 )
 
 fun NutritionDto.toDomain() = Nutrition(
     name = name ?: "",
-    weight,
-    calories,
-    protein,
-    fat,
-    carbs
+    weight = weight,
+    calories = calories,
+    protein = protein,
+    fat = fat,
+    carb = carb,
+    ingredient = ingredient.map { it.toDomain() }
 )

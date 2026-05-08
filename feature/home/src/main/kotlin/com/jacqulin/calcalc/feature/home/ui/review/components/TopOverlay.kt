@@ -20,6 +20,7 @@ import com.jacqulin.calcalc.core.designsystem.theme.AppOnPrimary
 @Composable
 fun TopOverlay(
     modifier: Modifier = Modifier,
+    onSaveClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
     val buttonModifier = Modifier
@@ -47,12 +48,12 @@ fun TopOverlay(
         }
 
         IconButton(
-            onClick = {  },
+            onClick = onSaveClick,
             colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Transparent),
             modifier = buttonModifier
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_favorite),
+                painter = painterResource(R.drawable.ic_check),
                 contentDescription = null,
                 tint = Color.Black,
                 modifier = Modifier.size(24.dp)

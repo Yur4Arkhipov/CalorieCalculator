@@ -480,7 +480,7 @@ fun NutritionResultCard(
                 )
                 MacroItem(
                     label = stringResource(R.string.carbs),
-                    value = nutrition.carbs,
+                    value = nutrition.carb,
                     unit = stringResource(R.string.weight_suffix)
                 )
             }

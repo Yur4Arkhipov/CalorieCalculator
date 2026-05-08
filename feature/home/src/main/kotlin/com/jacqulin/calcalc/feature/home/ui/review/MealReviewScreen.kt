@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -46,8 +47,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.jacqulin.calcalc.core.designsystem.R
-import com.jacqulin.calcalc.core.designsystem.theme.AppOnPrimaryContainer
 import com.jacqulin.calcalc.core.designsystem.theme.reviewLoadingColor
+import com.jacqulin.calcalc.feature.home.ui.review.components.IngredientCard
 import com.jacqulin.calcalc.feature.home.ui.review.components.MealNameField
 import com.jacqulin.calcalc.feature.home.ui.review.components.MealReviewLoading
 import com.jacqulin.calcalc.feature.home.ui.review.components.MealWeightField
@@ -130,8 +131,12 @@ fun MealReviewScreen(
                     TopOverlay(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(20.dp)
+                            .padding(16.dp)
                             .align(Alignment.TopCenter),
+                        onSaveClick = {
+                            viewModel.saveMeal()
+                            onBackClick()
+                        },
                         onBackClick = onBackClick
                     )
 
@@ -190,23 +195,28 @@ fun MealReviewScreen(
                             onCarbsChange = viewModel::onCarbsChanged
                         )
 
-                        repeat(15) {
-                            Text(
-                                text = "Описание блюда, ингредиенты, вес порции и другая информация.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = AppOnPrimaryContainer.copy(alpha = 0.75f),
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(text = "Ингредиенты")
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            uiState.ingredients.forEach { ingredient ->
+                                IngredientCard(ingredient)
+                            }
                         }
 
-                        Button(
-                            onClick = {
-                                viewModel.saveMeal()
-                                onBackClick()
-                            }
-                        ) {
-                            Text(stringResource(R.string.save))
-                        }
+//                        Button(
+//                            onClick = {
+//                                viewModel.saveMeal()
+//                                onBackClick()
+//                            }
+//                        ) {
+//                            Text(stringResource(R.string.save))
+//                        }
                     }
                 }
             }

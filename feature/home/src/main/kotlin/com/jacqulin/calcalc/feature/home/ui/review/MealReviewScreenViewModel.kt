@@ -1,5 +1,6 @@
 package com.jacqulin.calcalc.feature.home.ui.review
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacqulin.calcalc.core.domain.repository.ImageRepository
@@ -41,8 +42,8 @@ class MealReviewScreenViewModel @Inject constructor(
     private var cachedBytes: ByteArray? = null
 
     init {
-        analyzeImage()
-//        analyzeImageMock()
+//        analyzeImage()
+        analyzeImageMock()
     }
 
     private fun analyzeImage() {
@@ -52,15 +53,25 @@ class MealReviewScreenViewModel @Inject constructor(
                     ?: throw IllegalStateException("Failed to read image bytes")
                 cachedBytes = bytes
                 val result = analyzeMealFromImageUseCase(bytes)
-                _uiState.update {
+                _uiState.update { it ->
                     it.copy(
                         isLoading = false,
                         name = result.nutrition.name.ifBlank { "Meal" },
                         calories = result.nutrition.calories.toInt().toString(),
                         proteins = result.nutrition.protein.toInt().toString(),
                         fats = result.nutrition.fat.toInt().toString(),
-                        carbs = result.nutrition.carbs.toInt().toString(),
-                        weight = result.nutrition.weight.toInt().toString()
+                        carbs = result.nutrition.carb.toInt().toString(),
+                        weight = result.nutrition.weight.toInt().toString(),
+                        ingredients = result.nutrition.ingredient.map {
+                            IngredientUi(
+                                name = it.name,
+                                weight = it.weight.toInt().toString(),
+                                calories = it.calories.toInt().toString(),
+                                protein = it.protein.toInt().toString(),
+                                fat = it.fat.toInt().toString(),
+                                carb = it.carb.toInt().toString()
+                            )
+                        }
                     )
                 }
             } catch (_: NotFoodException) {
@@ -77,33 +88,60 @@ class MealReviewScreenViewModel @Inject constructor(
                         isError = "Ошибка анализа: ${e.message}"
                     )
                 }
+                Log.d("Error", "Error: $e")
             }
         }
     }
 
-//    private fun analyzeImageMock() {
-//        viewModelScope.launch {
-//            val analyzedMeal = Meal(
-//                id = -1,
-//                name = "Стейк из говядины с овощами и горчицей",
-//                calories = 550,
-//                proteins = 45,
-//                fats = 30,
-//                carbs = 20,
-//                weight = 300,
-//                time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
-//                type = MealType.BREAKFAST,
-//                isFavorite = false
-//            )
-//            _uiState.update {
-//                it.copy(
-//                    meal = analyzedMeal,
-//                    name = analyzedMeal.name,
-//                    isLoading = false
-//                )
-//            }
-//        }
-//    }
+    private fun analyzeImageMock() {
+        viewModelScope.launch {
+            _uiState.update { it ->
+                it.copy(
+                    isLoading = false,
+                    name = "Стейк из говядины с овощами и горчицей",
+                    calories = "450",
+                    proteins = "30",
+                    fats = "25",
+                    carbs = "20",
+                    weight = "300",
+                    ingredients = listOf(
+                        IngredientUi(
+                            name = "Говядина",
+                            weight = "180",
+                            calories = "320",
+                            protein = "26",
+                            fat = "22",
+                            carb = "0"
+                        ),
+                        IngredientUi(
+                            name = "Картофель",
+                            weight = "80",
+                            calories = "70",
+                            protein = "2",
+                            fat = "0",
+                            carb = "15"
+                        ),
+                        IngredientUi(
+                            name = "Помидоры",
+                            weight = "40",
+                            calories = "10",
+                            protein = "1",
+                            fat = "0",
+                            carb = "2"
+                        ),
+                        IngredientUi(
+                            name = "Горчица",
+                            weight = "10",
+                            calories = "50",
+                            protein = "1",
+                            fat = "3",
+                            carb = "3"
+                        )
+                    )
+                )
+            }
+        }
+    }
 
     fun saveMeal() {
         viewModelScope.launch {
@@ -134,7 +172,7 @@ class MealReviewScreenViewModel @Inject constructor(
     }
 
     fun onNameChange(newValue: String) {
-        if (newValue.length <= 40) {
+        if (newValue.length <= 50) {
             _uiState.update { it.copy(name = newValue) }
         }
     }

@@ -152,7 +152,7 @@ fun MealCard(
 }
 
 @Composable
-private fun MacroBadge(label: String, value: Int, color: Color) {
+fun MacroBadge(label: String, value: Int, color: Color) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp),

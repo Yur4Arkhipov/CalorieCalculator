@@ -1,11 +1,10 @@
 package com.jacqulin.calcalc.core.domain.model
 
-data class Nutrition(
-    val name: String = "",
+data class Ingredient(
+    val name: String,
     val weight: Double,
     val calories: Double,
     val protein: Double,
     val fat: Double,
-    val carb: Double,
-    val ingredient: List<Ingredient> = emptyList()
+    val carb: Double
 )

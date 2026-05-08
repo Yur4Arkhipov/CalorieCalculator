@@ -22,28 +22,76 @@ class AiRepositoryImpl @Inject constructor(
 //    private val model = "gpt://b1gd0h769ghblmknef7n/qwen3.6-35b-a3b/latest"
     private val model = "gpt://b1gd0h769ghblmknef7n/gemma-3-27b-it/latest"
 
-     private val systemInstructions = """
-        Ты профессиональный диетолог.
-        Правила:
-        - Название блюда должно быть конкретным и понятным (например: "Омлет с сыром", а не "Еда").
+    private val systemInstructions = """
+        Ты профессиональный диетолог и анализатор пищи по изображению.
+        
+        Твоя задача:
+        - определить блюдо на изображении
+        - оценить примерный вес порции
+        - определить калории и БЖУ
+        - определить основные ингредиенты блюда
+        
+        ВАЖНЫЕ ПРАВИЛА:
+        
+        - Ответ должен быть ТОЛЬКО валидным JSON.
+        - Не используй markdown.
+        - Не добавляй пояснения.
+        - Не добавляй текст до или после JSON.
+        
+        - Название блюда должно быть конкретным и понятным.
         - Если на изображении несколько продуктов — объединяй их в одно блюдо.
-        - Рассчитывай калорийность и БЖУ для всей порции.
-        - Значения должны быть реалистичными и основанными на средних данных.
-        - Белки, жиры и углеводы указывай в граммах.
-        - Калории указывай в килокалориях.
-        - Не добавляй пояснений.
-        - Если размер порции неясен, предполагается средняя порция (примерно 250-400 г).
-        - Если невозможно точно определить состав — используй наиболее вероятный вариант.
-        - Если продукт промышленный (например, шоколадка), ориентируйся на стандартные данные.
-        - Не придумывай еду там, где её нет.
-        - Если на изображении нет еды, или невозможно определить блюдо, пиши 
+        - Не придумывай ингредиенты, которых нет на изображении.
+        - Если состав определить невозможно — используй наиболее вероятный вариант.
+        - Если размер порции неясен — предполагай среднюю порцию 250-400 г.
+        - Все значения должны быть реалистичными.
+        - Не завышай белки.
+        - Не занижай жиры.
+        - Используй средние пищевые значения для обычных домашних блюд.
+        - Для промышленных продуктов используй типичные данные продукта.
+        
+        ingredients должен содержать массив объектов.
+        
+        Каждый ingredient:
+        - name — название ингредиента
+        - weight — примерный вес ингредиента в граммах
+        - calories — калории
+        - protein — белки
+        - fat — жиры
+        - carb — углеводы
+        
+        Сумма weight всех ingredient должна быть примерно равна общему weight блюда.
+        
+        Формат ответа:
+        
+        {
+          "name": "string",
+          "weight": number,
+          "calories": number,
+          "protein": number,
+          "fat": number,
+          "carb": number,
+          "ingredients": [
+            {
+              "name": "string",
+              "weight": number,
+              "calories": number,
+              "protein": number,
+              "fat": number,
+              "carb": number
+            }
+          ]
+        }
+        
+        Если на изображении нет еды или блюдо невозможно определить, ответ:
+        
         {
           "name": "not_food",
           "weight": 0,
           "calories": 0,
           "protein": 0,
           "fat": 0,
-          "carbs": 0
+          "carbs": 0,
+          "ingredients": []
         }
         """.trimIndent()
 
@@ -55,7 +103,33 @@ class AiRepositoryImpl @Inject constructor(
             "calories" to mapOf("type" to "number"),
             "protein" to mapOf("type" to "number"),
             "fat" to mapOf("type" to "number"),
-            "carbs" to mapOf("type" to "number")
+            "carb" to mapOf("type" to "number"),
+            "ingredient" to mapOf(
+                "type" to "array",
+                "items" to mapOf(
+                    "type" to "object",
+                    "properties" to mapOf(
+                        "name" to mapOf(
+                            "type" to "string"
+                        ),
+                        "weight" to mapOf(
+                            "type" to "number"
+                        ),
+                        "calories" to mapOf(
+                            "type" to "number"
+                        ),
+                        "protein" to mapOf(
+                            "type" to "number"
+                        ),
+                        "fat" to mapOf(
+                            "type" to "number"
+                        ),
+                        "carb" to mapOf(
+                            "type" to "number"
+                        )
+                    )
+                )
+            )
         ),
         "required" to listOf("name", "weight", "calories", "protein", "fat", "carbs")
     )
