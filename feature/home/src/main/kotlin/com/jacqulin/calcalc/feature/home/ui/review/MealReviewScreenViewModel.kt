@@ -41,8 +41,8 @@ class MealReviewScreenViewModel @Inject constructor(
     private var cachedBytes: ByteArray? = null
 
     init {
-//        analyzeImage()
-        analyzeImageMock()
+        analyzeImage()
+//        analyzeImageMock()
     }
 
     private fun analyzeImage() {
@@ -52,73 +52,83 @@ class MealReviewScreenViewModel @Inject constructor(
                     ?: throw IllegalStateException("Failed to read image bytes")
                 cachedBytes = bytes
                 val result = analyzeMealFromImageUseCase(bytes)
-                val analyzedMeal = Meal(
-                    id = -1,
-                    name = result.nutrition.name.ifBlank { "Meal" },
-                    calories = result.nutrition.calories.toInt(),
-                    proteins = result.nutrition.protein.toInt(),
-                    fats = result.nutrition.fat.toInt(),
-                    carbs = result.nutrition.carbs.toInt(),
-                    time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
-                    type = MealType.BREAKFAST,
-                    isFavorite = false
-                )
-                _uiState.update { it.copy(meal = analyzedMeal, isLoading = false) }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        name = result.nutrition.name.ifBlank { "Meal" },
+                        calories = result.nutrition.calories.toInt().toString(),
+                        proteins = result.nutrition.protein.toInt().toString(),
+                        fats = result.nutrition.fat.toInt().toString(),
+                        carbs = result.nutrition.carbs.toInt().toString(),
+                        weight = result.nutrition.weight.toInt().toString()
+                    )
+                }
             } catch (_: NotFoodException) {
-                _uiState.update { it.copy(isLoading = false, isError = "На фото не обнаружена еда") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isError = "На фото не обнаружена еда"
+                    )
+                }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, isError = "Ошибка анализа: ${e.message}") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isError = "Ошибка анализа: ${e.message}"
+                    )
+                }
             }
         }
     }
 
-    private fun analyzeImageMock() {
-        viewModelScope.launch {
-            val analyzedMeal = Meal(
-                id = -1,
-                name = "Стейк из говядины с овощами и горчицей",
-                calories = 550,
-                proteins = 45,
-                fats = 30,
-                carbs = 20,
-                weight = 300,
-                time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
-                type = MealType.BREAKFAST,
-                isFavorite = false
-            )
-            _uiState.update {
-                it.copy(
-                    meal = analyzedMeal,
-                    name = analyzedMeal.name,
-                    isLoading = false
-                )
-            }
-        }
-    }
-
-//    fun updateMeal(update: (Meal) -> Meal) {
-//        _uiState.update { state -> state.copy(meal = state.meal?.let(update)) }
+//    private fun analyzeImageMock() {
+//        viewModelScope.launch {
+//            val analyzedMeal = Meal(
+//                id = -1,
+//                name = "Стейк из говядины с овощами и горчицей",
+//                calories = 550,
+//                proteins = 45,
+//                fats = 30,
+//                carbs = 20,
+//                weight = 300,
+//                time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
+//                type = MealType.BREAKFAST,
+//                isFavorite = false
+//            )
+//            _uiState.update {
+//                it.copy(
+//                    meal = analyzedMeal,
+//                    name = analyzedMeal.name,
+//                    isLoading = false
+//                )
+//            }
+//        }
 //    }
 
     fun saveMeal() {
         viewModelScope.launch {
-            val state = _uiState.value
-            val meal = _uiState.value.meal ?: return@launch
+
             val bytes = cachedBytes ?: imageRepository.readImageBytesFromFile(filePath)
             val savedPath = imageRepository.saveImage(bytes!!)
                 ?: return@launch
-            val updatedMeal = meal.copy(
-                name = state.name,
-                calories = state.calories.toIntOrNull() ?: 0,
-                proteins = state.proteins.toIntOrNull() ?: 0,
-                fats = state.fats.toIntOrNull() ?: 0,
-                carbs = state.carbs.toIntOrNull() ?: 0,
-                imageUri = savedPath
+
+            val meal = Meal(
+                name = _uiState.value.name,
+                calories = uiState.value.calories.toIntOrNull() ?: 0,
+                proteins = uiState.value.proteins.toIntOrNull() ?: 0,
+                fats = uiState.value.fats.toIntOrNull() ?: 0,
+                carbs = uiState.value.carbs.toIntOrNull() ?: 0,
+                time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
+                type = MealType.BREAKFAST,
+                imageUri = savedPath,
+                isFavorite = false
             )
+
             saveManualAddMealDBUseCase(
                 date = selectedDate.value,
-                meal = updatedMeal
+                meal = meal
             )
+
             imageRepository.deleteTempImage(filePath)
         }
     }

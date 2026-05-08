@@ -19,6 +19,7 @@ class AiRepositoryImpl @Inject constructor(
     private val aiApi: YandexAiApi
 ) : AiRepository {
 
+//    private val model = "gpt://b1gd0h769ghblmknef7n/qwen3.6-35b-a3b/latest"
     private val model = "gpt://b1gd0h769ghblmknef7n/gemma-3-27b-it/latest"
 
      private val systemInstructions = """
@@ -38,6 +39,7 @@ class AiRepositoryImpl @Inject constructor(
         - Если на изображении нет еды, или невозможно определить блюдо, пиши 
         {
           "name": "not_food",
+          "weight": 0,
           "calories": 0,
           "protein": 0,
           "fat": 0,
@@ -49,12 +51,13 @@ class AiRepositoryImpl @Inject constructor(
         "type" to "object",
         "properties" to mapOf(
             "name" to mapOf("type" to "string"),
+            "weight" to mapOf("type" to "number"),
             "calories" to mapOf("type" to "number"),
             "protein" to mapOf("type" to "number"),
             "fat" to mapOf("type" to "number"),
             "carbs" to mapOf("type" to "number")
         ),
-        "required" to listOf("name","calories","protein","fat","carbs")
+        "required" to listOf("name", "weight", "calories", "protein", "fat", "carbs")
     )
 
     override suspend fun analyzeMeal(description: String): Nutrition {
