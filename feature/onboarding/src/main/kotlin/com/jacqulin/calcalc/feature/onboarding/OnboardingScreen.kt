@@ -70,6 +70,14 @@ fun OnboardingScreen(
     val loadingPage = 7
     val resultPage = 8
 
+    val isResultPage = state.currentPage == resultPage
+
+    val areFieldsFilled = isResultPage &&
+            (state.calories ?: 0) > 0 &&
+            (state.protein ?: 0) > 0 &&
+            (state.fat ?: 0) > 0 &&
+            (state.carbs ?: 0) > 0
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -134,14 +142,14 @@ fun OnboardingScreen(
                     }
                 )
                 resultPage -> ResultPage(
-                    calories = state.calories,
-                    protein = state.protein,
-                    fat = state.fat,
-                    carbs = state.carbs,
-                    onCaloriesChange = { viewModel.onEvent(OnboardingEvent.UpdateCalories(it)) },
-                    onProteinChange = { viewModel.onEvent(OnboardingEvent.UpdateProtein(it)) },
-                    onFatChange = { viewModel.onEvent(OnboardingEvent.UpdateFat(it)) },
-                    onCarbsChange = { viewModel.onEvent(OnboardingEvent.UpdateCarbs(it)) }
+                    calories = state.calories?.takeIf { it != 0 }?.toString() ?: "",
+                    protein = state.protein?.takeIf { it != 0 }?.toString() ?: "",
+                    fat = state.fat?.takeIf { it != 0 }?.toString() ?: "",
+                    carbs = state.carbs?.takeIf { it != 0 }?.toString() ?: "",
+                    onCaloriesChange = { viewModel.onEvent(OnboardingEvent.UpdateCalories(it.toIntOrNull())) },
+                    onProteinChange = { viewModel.onEvent(OnboardingEvent.UpdateProtein(it.toIntOrNull())) },
+                    onFatChange = { viewModel.onEvent(OnboardingEvent.UpdateFat(it.toIntOrNull())) },
+                    onCarbsChange = { viewModel.onEvent(OnboardingEvent.UpdateCarbs(it.toIntOrNull())) }
                 )
             }
         }
@@ -189,7 +197,8 @@ fun OnboardingScreen(
                                 viewModel.onEvent(OnboardingEvent.NextPage)
                             }
                         }
-                    }
+                    },
+                    enabled = if (isResultPage) areFieldsFilled else true
                 ) {
                     Text( text = if (state.currentPage == resultPage)
                         stringResource(R.string.onboarding_start)

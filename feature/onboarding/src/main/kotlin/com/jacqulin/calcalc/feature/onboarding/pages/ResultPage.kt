@@ -25,17 +25,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.util.funtions.filterNumericInput
 
 @Composable
 fun ResultPage(
-    calories: Int,
-    protein: Int,
-    fat: Int,
-    carbs: Int,
-    onCaloriesChange: (Int) -> Unit,
-    onProteinChange: (Int) -> Unit,
-    onFatChange: (Int) -> Unit,
-    onCarbsChange: (Int) -> Unit
+    calories: String,
+    protein: String,
+    fat: String,
+    carbs: String,
+    onCaloriesChange: (String) -> Unit,
+    onProteinChange: (String) -> Unit,
+    onFatChange: (String) -> Unit,
+    onCarbsChange: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -60,6 +61,8 @@ fun ResultPage(
             label = stringResource(R.string.calories),
             value = calories,
             unit = stringResource(R.string.calories_suffix),
+            maxValue = 8000,
+            maxLength = 4,
             onValueChange = onCaloriesChange
         )
         Spacer(Modifier.height(12.dp))
@@ -67,6 +70,8 @@ fun ResultPage(
             label = stringResource(R.string.proteins),
             value = protein,
             unit = stringResource(R.string.weight_suffix),
+            maxValue = 500,
+            maxLength = 3,
             onValueChange = onProteinChange
         )
         Spacer(Modifier.height(12.dp))
@@ -74,12 +79,16 @@ fun ResultPage(
             label = stringResource(R.string.fats),
             value = fat,
             unit = stringResource(R.string.weight_suffix),
+            maxValue = 300,
+            maxLength = 3,
             onValueChange = onFatChange
         )
         Spacer(Modifier.height(12.dp))
         NutrientField(
             label = stringResource(R.string.carbs),
             value = carbs,
+            maxValue = 1000,
+            maxLength = 3,
             unit = stringResource(R.string.weight_suffix),
             onValueChange = onCarbsChange
         )
@@ -89,11 +98,13 @@ fun ResultPage(
 @Composable
 private fun NutrientField(
     label: String,
-    value: Int,
+    value: String,
     unit: String,
-    onValueChange: (Int) -> Unit
+    maxLength: Int,
+    maxValue: Int,
+    onValueChange: (String) -> Unit
 ) {
-    var text by remember(value) { mutableStateOf(value.toString()) }
+    var text by remember(value) { mutableStateOf(value) }
 
     Row(
         modifier = Modifier
@@ -109,8 +120,13 @@ private fun NutrientField(
         OutlinedTextField(
             value = text,
             onValueChange = { input ->
-                text = input
-                input.toIntOrNull()?.let { onValueChange(it) }
+                val filtered = filterNumericInput(
+                    input = input,
+                    maxLength = maxLength,
+                    maxValue = maxValue
+                )
+                text = filtered
+                onValueChange(filtered)
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             suffix = { Text(unit) },
