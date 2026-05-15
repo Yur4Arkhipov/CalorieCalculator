@@ -1,6 +1,7 @@
 package com.jacqulin.calcalc.core.data.repository
 
 import com.jacqulin.calcalc.core.data.local.dao.MealDao
+import com.jacqulin.calcalc.core.data.local.entities.IngredientEntity
 import com.jacqulin.calcalc.core.data.local.entities.MealEntity
 import com.jacqulin.calcalc.core.data.local.entities.toDomain
 import com.jacqulin.calcalc.core.domain.model.DayData
@@ -61,19 +62,29 @@ class MealRepositoryImpl @Inject constructor(
 
     override suspend fun addMeal(date: Date, meal: Meal) {
         val dateKey = getDateKey(date)
-        mealDao.insertMeal(
-            MealEntity(
-                name = meal.name,
-                calories = meal.calories,
-                protein = meal.proteins,
-                fat = meal.fats,
-                carbs = meal.carbs,
-                time = meal.time,
-                type = meal.type,
-                date = dateKey,
-                imageUri = meal.imageUri
-            )
+        val mealEntity = MealEntity(
+            name = meal.name,
+            calories = meal.calories,
+            protein = meal.proteins,
+            fat = meal.fats,
+            carbs = meal.carbs,
+            time = meal.time,
+            type = meal.type,
+            date = dateKey,
+            imageUri = meal.imageUri
         )
+        val ingredientEntities = meal.ingredient.map { ing ->
+            IngredientEntity(
+                mealId = 0,
+                name = ing.name,
+                weight = ing.weight,
+                calories = ing.calories,
+                protein = ing.protein,
+                carb = ing.carb,
+                fat = ing.fat
+            )
+        }
+        mealDao.insertMealWithIngredients(mealEntity, ingredientEntities)
     }
 
     override suspend fun updateMeal(meal: Meal) {

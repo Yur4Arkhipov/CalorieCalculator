@@ -18,6 +18,7 @@ import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.util.NotFoodException
 import com.jacqulin.calcalc.core.util.funtions.filterNumericInput
+import com.jacqulin.calcalc.feature.home.ui.review.mapper.toDomainIngredients
 import kotlinx.coroutines.flow.update
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -147,8 +148,14 @@ class MealReviewScreenViewModel @Inject constructor(
         viewModelScope.launch {
 
             val bytes = cachedBytes ?: imageRepository.readImageBytesFromFile(filePath)
-            val savedPath = imageRepository.saveImage(bytes!!)
-                ?: return@launch
+            val savedPath = bytes?.let {
+                imageRepository.saveImage(it)
+            } ?: run {
+                _uiState.update { it.copy(isError = "Не удалось сохранить изображение") }
+                return@launch
+            }
+
+            val currentState = _uiState.value
 
             val meal = Meal(
                 name = _uiState.value.name,
@@ -159,7 +166,8 @@ class MealReviewScreenViewModel @Inject constructor(
                 time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
                 type = MealType.BREAKFAST,
                 imageUri = savedPath,
-                isFavorite = false
+                isFavorite = false,
+                ingredient = currentState.ingredients.toDomainIngredients()
             )
 
             saveManualAddMealDBUseCase(
@@ -168,6 +176,8 @@ class MealReviewScreenViewModel @Inject constructor(
             )
 
             imageRepository.deleteTempImage(filePath)
+            cachedBytes = null
+            _uiState.update { it.copy(isSaved = true) }
         }
     }
 

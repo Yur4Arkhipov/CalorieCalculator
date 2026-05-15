@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.jacqulin.calcalc.core.data.local.dao.MealDao
 import com.jacqulin.calcalc.core.data.local.database.MealDatabase
+import com.jacqulin.calcalc.core.data.local.database.MealDatabase.Companion.provideMigrations
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,7 +24,7 @@ object DatabaseModule {
             MealDatabase::class.java,
             "meal_db"
         )
-            .addMigrations(MealDatabase.MIGRATION_1_2, MealDatabase.MIGRATION_2_3)
+            .addMigrations(*provideMigrations())
             .build()
 
     @Provides

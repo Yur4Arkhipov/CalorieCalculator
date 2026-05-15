@@ -11,7 +11,8 @@ data class Meal(
     val time: String,
     val type: MealType,
     val imageUri: String? = null,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val ingredient: List<Ingredient> = listOf()
 )
 
 enum class MealType {

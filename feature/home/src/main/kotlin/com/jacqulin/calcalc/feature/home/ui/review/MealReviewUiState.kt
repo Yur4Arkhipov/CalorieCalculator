@@ -3,6 +3,7 @@ package com.jacqulin.calcalc.feature.home.ui.review
 data class MealReviewUiState(
     val isLoading: Boolean = false,
     val isError: String? = null,
+    val isSaved: Boolean = false,
     val name: String = "",
     val calories: String = "",
     val proteins: String = "",
