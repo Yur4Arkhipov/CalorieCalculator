@@ -30,28 +30,20 @@ fun App(appState: AppState) {
         )
     }
 
-    Scaffold { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    top = paddingValues.calculateTopPadding(),
-//                    bottom = paddingValues.calculateBottomPadding() + 6.dp,
-                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current) + 12.dp,
-                    end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 12.dp
-                )
-        ) {
-            AppNavHost(appState = appState)
+    Box(
+        modifier = Modifier.fillMaxSize()
 
-            if (appState.currentTopLevelDestination != null) {
-                FloatingBottomBar(
-                    items = bottomBarItems,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(horizontal = 20.dp, vertical = 4.dp)
-                        .navigationBarsPadding()
-                )
-            }
+    ) {
+        AppNavHost(appState = appState)
+
+        if (appState.currentTopLevelDestination != null) {
+            FloatingBottomBar(
+                items = bottomBarItems,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 20.dp, vertical = 4.dp)
+                    .navigationBarsPadding()
+            )
         }
     }
 }

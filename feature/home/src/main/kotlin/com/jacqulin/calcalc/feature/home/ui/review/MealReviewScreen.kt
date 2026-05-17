@@ -60,7 +60,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ConfigurationScreenWidthHeight")
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun MealReviewScreen(
     modifier: Modifier = Modifier,

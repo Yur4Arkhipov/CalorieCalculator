@@ -1,7 +1,6 @@
 package com.jacqulin.calcalc.feature.home.ui.home
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -18,6 +17,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
@@ -52,6 +53,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -71,7 +73,6 @@ import com.jacqulin.calcalc.feature.home.ui.home.sections.CalendarSection
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CaloriesSection
 import com.jacqulin.calcalc.feature.home.ui.home.sections.EditMealBottomSheet
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -246,7 +247,7 @@ fun HomeScreen(
     } else {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background
-        ) { _ ->
+        ) { paddingValues ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -258,6 +259,12 @@ fun HomeScreen(
 //                            )
 //                        )
 //                    )
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        bottom = paddingValues.calculateBottomPadding(),
+                        start = paddingValues.calculateStartPadding(LocalLayoutDirection.current) + 12.dp,
+                        end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 12.dp
+                    )
             ) {
                 LazyColumn(
                     state = lazyListState,

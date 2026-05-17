@@ -5,17 +5,23 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,63 +41,83 @@ fun ProfileScreen(
     val paramsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val macrosSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (uiState.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 60.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                item {
-                    ProfileStatsCard(
-                        profile = uiState.userProfile,
-                        onEditClick = { onEvent(ProfileEvent.OpenParamsSheet) }
-                    )
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                top = paddingValues.calculateTopPadding(),
+                bottom = paddingValues.calculateBottomPadding(),
+                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current) + 12.dp,
+                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 12.dp
+            )
+        ) {
+            if (uiState.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        bottom = WindowInsets.navigationBars.asPaddingValues()
+                            .calculateBottomPadding() + 60.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    item {
+                        ProfileStatsCard(
+                            profile = uiState.userProfile,
+                            onEditClick = { onEvent(ProfileEvent.OpenParamsSheet) }
+                        )
+                    }
+                    item {
+                        NutriGoalsCard(
+                            profile = uiState.userProfile,
+                            onEditClick = { onEvent(ProfileEvent.OpenMacrosSheet) },
+                            isHintDismissed = uiState.isMacrosHintDismissed,
+                            onDismissHint = { onEvent(ProfileEvent.DismissMacrosHint) }
+                        )
+                    }
+                    item { SettingsCard() }
                 }
-                item {
-                    NutriGoalsCard(
-                        profile = uiState.userProfile,
-                        onEditClick = { onEvent(ProfileEvent.OpenMacrosSheet) },
-                        isHintDismissed = uiState.isMacrosHintDismissed,
-                        onDismissHint = { onEvent(ProfileEvent.DismissMacrosHint) }
-                    )
-                }
-                item { SettingsCard() }
             }
         }
-    }
-
-    if (uiState.isParamsSheetOpen) {
-        ModalBottomSheet(
-            onDismissRequest = { onEvent(ProfileEvent.CloseParamsSheet) },
-            sheetState = paramsSheetState
-        ) {
-            EditParamsSheet(
-                profile = uiState.userProfile,
-                onDismiss = { onEvent(ProfileEvent.CloseParamsSheet) },
-                onSave = { age, height, weight, gender, goal, activity ->
-                    onEvent(ProfileEvent.SaveParams(age, height, weight, gender, goal, activity))
-                }
-            )
+        if (uiState.isParamsSheetOpen) {
+            ModalBottomSheet(
+                onDismissRequest = { onEvent(ProfileEvent.CloseParamsSheet) },
+                sheetState = paramsSheetState
+            ) {
+                EditParamsSheet(
+                    profile = uiState.userProfile,
+                    onDismiss = { onEvent(ProfileEvent.CloseParamsSheet) },
+                    onSave = { age, height, weight, gender, goal, activity ->
+                        onEvent(
+                            ProfileEvent.SaveParams(
+                                age,
+                                height,
+                                weight,
+                                gender,
+                                goal,
+                                activity
+                            )
+                        )
+                    }
+                )
+            }
         }
-    }
-
-    if (uiState.isMacrosSheetOpen) {
-        ModalBottomSheet(
-            onDismissRequest = { onEvent(ProfileEvent.CloseMacrosSheet) },
-            sheetState = macrosSheetState
-        ) {
-            EditMacrosSheet(
-                profile = uiState.userProfile,
-                onDismiss = { onEvent(ProfileEvent.CloseMacrosSheet) },
-                onSave = { calories, protein, carbs, fat ->
-                    onEvent(ProfileEvent.SaveMacros(calories, protein, carbs, fat))
-                }
-            )
+        if (uiState.isMacrosSheetOpen) {
+            ModalBottomSheet(
+                onDismissRequest = { onEvent(ProfileEvent.CloseMacrosSheet) },
+                sheetState = macrosSheetState
+            ) {
+                EditMacrosSheet(
+                    profile = uiState.userProfile,
+                    onDismiss = { onEvent(ProfileEvent.CloseMacrosSheet) },
+                    onSave = { calories, protein, carbs, fat ->
+                        onEvent(ProfileEvent.SaveMacros(calories, protein, carbs, fat))
+                    }
+                )
+            }
         }
     }
 }

@@ -1,9 +1,10 @@
 package com.jacqulin.calcalc.feature.home.ui.favorite
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,7 +32,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.MealCard
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoriteMealChooseScreen(
@@ -41,11 +42,16 @@ fun FavoriteMealChooseScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
-    ) { _ ->
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 20.dp),
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = paddingValues.calculateBottomPadding(),
+                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current) + 12.dp,
+                    end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 12.dp
+                ),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
@@ -68,7 +74,8 @@ fun FavoriteMealChooseScreen(
                     Text(
                         text = stringResource(R.string.home_add_meal_from_favorite_title),
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
