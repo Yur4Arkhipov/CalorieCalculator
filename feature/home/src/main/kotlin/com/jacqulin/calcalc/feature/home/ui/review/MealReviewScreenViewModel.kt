@@ -1,28 +1,32 @@
 package com.jacqulin.calcalc.feature.home.ui.review
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jacqulin.calcalc.core.domain.model.Meal
+import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.repository.ImageRepository
 import com.jacqulin.calcalc.core.domain.usecase.AnalyzeMealFromImageUseCase
+import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
+import com.jacqulin.calcalc.core.util.NotFoodException
+import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
+import com.jacqulin.calcalc.core.util.effects.UiEffect
+import com.jacqulin.calcalc.core.util.funtions.filterNumericInput
+import com.jacqulin.calcalc.feature.home.ui.review.mapper.toDomainIngredients
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-import androidx.lifecycle.SavedStateHandle
-import com.jacqulin.calcalc.core.domain.model.Meal
-import com.jacqulin.calcalc.core.domain.model.MealType
-import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
-import com.jacqulin.calcalc.core.util.NotFoodException
-import com.jacqulin.calcalc.core.util.funtions.filterNumericInput
-import com.jacqulin.calcalc.feature.home.ui.review.mapper.toDomainIngredients
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 
 @HiltViewModel
 class MealReviewScreenViewModel @Inject constructor(
@@ -41,6 +45,9 @@ class MealReviewScreenViewModel @Inject constructor(
 
     private val selectedDate = observeSelectedDateUseCase()
     private var cachedBytes: ByteArray? = null
+
+    private val _effect = Channel<UiEffect>(Channel.BUFFERED)
+    val effect = _effect.receiveAsFlow()
 
     init {
 //        analyzeImage()
@@ -66,11 +73,11 @@ class MealReviewScreenViewModel @Inject constructor(
                         ingredients = result.nutrition.ingredient.map {
                             IngredientUi(
                                 name = it.name,
-                                weight = it.weight.toInt().toString(),
-                                calories = it.calories.toInt().toString(),
-                                protein = it.protein.toInt().toString(),
-                                fat = it.fat.toInt().toString(),
-                                carb = it.carb.toInt().toString()
+                                weight = it.weight.toString(),
+                                calories = it.calories.toString(),
+                                protein = it.protein.toString(),
+                                fat = it.fat.toString(),
+                                carb = it.carb.toString()
                             )
                         }
                     )
@@ -96,7 +103,7 @@ class MealReviewScreenViewModel @Inject constructor(
 
     private fun analyzeImageMock() {
         viewModelScope.launch {
-            _uiState.update { it ->
+            _uiState.update {
                 it.copy(
                     isLoading = false,
                     name = "Стейк из говядины с овощами и горчицей",
@@ -146,38 +153,73 @@ class MealReviewScreenViewModel @Inject constructor(
 
     fun saveMeal() {
         viewModelScope.launch {
+            try {
+                val currentState = _uiState.value
+                val bytes = cachedBytes ?: imageRepository.readImageBytesFromFile(filePath)
+                val savedPath = bytes?.let {
+                    imageRepository.saveImage(it)
+                } ?: run {
+                    _uiState.update { it.copy(isError = "Не удалось сохранить изображение") }
+                    _effect.send(
+                        UiEffect.ShowSnackbar(
+                            messageCode = SnackbarMessageCode.MEAL_SAVE_ERROR,
+                            isError = true
+                        )
+                    )
+                    return@launch
+                }
 
-            val bytes = cachedBytes ?: imageRepository.readImageBytesFromFile(filePath)
-            val savedPath = bytes?.let {
-                imageRepository.saveImage(it)
-            } ?: run {
-                _uiState.update { it.copy(isError = "Не удалось сохранить изображение") }
-                return@launch
+                if (
+                    currentState.weight == "" ||
+                    currentState.calories == "" ||
+                    currentState.proteins == "" ||
+                    currentState.fats == "" ||
+                    currentState.carbs == ""
+                ) {
+                    _effect.send(
+                        UiEffect.ShowSnackbar(
+                            messageCode = SnackbarMessageCode.MEAL_SAVE_ERROR,
+                            isError = true
+                        )
+                    )
+                    return@launch
+                }
+
+                val meal = Meal(
+                    name = currentState.name,
+                    calories = currentState.calories.toIntOrNull() ?: 0,
+                    proteins = currentState.proteins.toIntOrNull() ?: 0,
+                    fats = currentState.fats.toIntOrNull() ?: 0,
+                    carbs = currentState.carbs.toIntOrNull() ?: 0,
+                    time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
+                    type = MealType.BREAKFAST,
+                    imageUri = savedPath,
+                    isFavorite = false,
+                    ingredient = currentState.ingredients.toDomainIngredients()
+                )
+
+                saveManualAddMealDBUseCase(
+                    date = selectedDate.value,
+                    meal = meal
+                )
+
+                imageRepository.deleteTempImage(filePath)
+                cachedBytes = null
+
+                _effect.send(
+                    element = UiEffect.ShowSnackbar(
+                        messageCode = SnackbarMessageCode.MEAL_SAVED,
+                        isError = false
+                    )
+                )
+            } catch (_: Exception) {
+                _effect.send(
+                    element = UiEffect.ShowSnackbar(
+                        messageCode = SnackbarMessageCode.MEAL_SAVE_ERROR,
+                        isError = true
+                    )
+                )
             }
-
-            val currentState = _uiState.value
-
-            val meal = Meal(
-                name = _uiState.value.name,
-                calories = uiState.value.calories.toIntOrNull() ?: 0,
-                proteins = uiState.value.proteins.toIntOrNull() ?: 0,
-                fats = uiState.value.fats.toIntOrNull() ?: 0,
-                carbs = uiState.value.carbs.toIntOrNull() ?: 0,
-                time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
-                type = MealType.BREAKFAST,
-                imageUri = savedPath,
-                isFavorite = false,
-                ingredient = currentState.ingredients.toDomainIngredients()
-            )
-
-            saveManualAddMealDBUseCase(
-                date = selectedDate.value,
-                meal = meal
-            )
-
-            imageRepository.deleteTempImage(filePath)
-            cachedBytes = null
-            _uiState.update { it.copy(isSaved = true) }
         }
     }
 
