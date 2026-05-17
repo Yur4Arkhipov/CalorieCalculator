@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,6 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -135,14 +139,10 @@ fun MealReviewScreen(
                 }
             }
         },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-//                .padding(
-//                    horizontal = paddingValues.calculateStartPadding(LocalLayoutDirection.current) - 12.dp
-//                )
-                .background(Color(0xFFFCFCFD))
+            modifier = Modifier.fillMaxSize()
         ) {
             Column(
                 modifier = modifier
@@ -170,7 +170,11 @@ fun MealReviewScreen(
                     TopOverlay(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(
+                                top = paddingValues.calculateTopPadding() + 16.dp,
+                                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current) + 12.dp,
+                                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 12.dp
+                            )
                             .align(Alignment.TopCenter),
                         onSaveClick = { viewModel.saveMeal() },
                         onBackClick = onBackClick
@@ -185,11 +189,9 @@ fun MealReviewScreen(
                                 Brush.verticalGradient(
                                     colors = listOf(
                                         Color.Transparent,
-                                        Color(0xFFFCFCFD).copy(alpha = 0.9f),
-                                        Color(0xFFFCFCFD).copy(alpha = 0.95f)
-                                    ),
-                                    startY = 0f,
-                                    endY = 60f
+                                        MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
+                                        MaterialTheme.colorScheme.background.copy(alpha = 0.95f)
+                                    )
                                 )
                             )
                     )
@@ -197,7 +199,12 @@ fun MealReviewScreen(
 
                 Column(
                     modifier = Modifier
-                        .padding(top = 24.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
+                        .padding(
+                            top = 24.dp,
+                            bottom = paddingValues.calculateBottomPadding(),
+                            start = paddingValues.calculateStartPadding(LocalLayoutDirection.current) + 12.dp,
+                            end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 12.dp
+                        )
                         .fillMaxWidth()
                 ) {
                     if (uiState.isLoading) {
