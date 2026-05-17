@@ -6,11 +6,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class IngredientDto(
     val name: String,
-    val weight: Double,
-    val calories: Double,
-    val protein: Double,
-    val fat: Double,
-    val carb: Double
+    val weight: Int,
+    val calories: Int,
+    val protein: Int,
+    val fat: Int,
+    val carb: Int
 )
 
 fun IngredientDto.toDomain() = Ingredient(

@@ -23,9 +23,9 @@ data class IngredientEntity(
     val id: Int = 0,
     val mealId: Int,
     val name: String,
-    val weight: Double,
-    val calories: Double,
-    val protein: Double,
-    val carb: Double,
-    val fat: Double
+    val weight: Int,
+    val calories: Int,
+    val protein: Int,
+    val carb: Int,
+    val fat: Int
 )

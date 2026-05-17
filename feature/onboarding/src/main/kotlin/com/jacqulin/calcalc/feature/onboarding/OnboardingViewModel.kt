@@ -24,7 +24,7 @@ data class OnboardingState(
     val weight: Int = 65,
     val gender: Gender = Gender.MALE,
     val goal: Goal = Goal.MAINTAIN,
-    val activityLevel: ActivityLevel = ActivityLevel.ACTIVE,
+    val activityLevel: ActivityLevel = ActivityLevel.MODERATE,
     val calories: Int? = 0,
     val protein: Int? = 0,
     val fat: Int? = 0,

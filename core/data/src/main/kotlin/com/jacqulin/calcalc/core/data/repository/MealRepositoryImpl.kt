@@ -68,6 +68,7 @@ class MealRepositoryImpl @Inject constructor(
             protein = meal.proteins,
             fat = meal.fats,
             carbs = meal.carbs,
+            weight = meal.weight,
             time = meal.time,
             type = meal.type,
             date = dateKey,

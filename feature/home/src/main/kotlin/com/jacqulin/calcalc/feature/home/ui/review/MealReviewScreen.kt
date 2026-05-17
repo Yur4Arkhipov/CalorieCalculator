@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,12 +40,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.theme.reviewLoadingColor
 import com.jacqulin.calcalc.feature.home.ui.review.components.IngredientCard
 import com.jacqulin.calcalc.feature.home.ui.review.components.MealNameField
@@ -83,6 +80,12 @@ fun MealReviewScreen(
         }
     }
 
+    LaunchedEffect(uiState.isSaved) {
+        uiState.isSaved.let {
+            snackbarHostState.showSnackbar("Meal is saved!")
+        }
+    }
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(
@@ -99,10 +102,13 @@ fun MealReviewScreen(
                 )
             }
         },
-    ) { _ ->
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
+//                .padding(
+//                    horizontal = paddingValues.calculateStartPadding(LocalLayoutDirection.current) - 12.dp
+//                )
                 .background(Color(0xFFFCFCFD))
         ) {
             Column(

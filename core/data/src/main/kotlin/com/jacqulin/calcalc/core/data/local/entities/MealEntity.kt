@@ -13,6 +13,7 @@ data class MealEntity(
     val protein: Int,
     val fat: Int,
     val carbs: Int,
+    val weight: Int,
     val time: String,
     val type: MealType,
     val date: String,
