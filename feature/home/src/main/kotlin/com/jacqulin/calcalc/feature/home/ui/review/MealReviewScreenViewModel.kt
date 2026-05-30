@@ -69,11 +69,11 @@ class MealReviewScreenViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         name = result.nutrition.name.ifBlank { "Meal" },
-                        calories = result.nutrition.calories.toInt().toString(),
-                        proteins = result.nutrition.protein.toInt().toString(),
-                        fats = result.nutrition.fat.toInt().toString(),
-                        carbs = result.nutrition.carb.toInt().toString(),
-                        weight = result.nutrition.weight.toInt().toString(),
+                        calories = result.nutrition.calories.toString(),
+                        proteins = result.nutrition.protein.toString(),
+                        fats = result.nutrition.fat.toString(),
+                        carbs = result.nutrition.carb.toString(),
+                        weight = result.nutrition.weight.toString(),
                         ingredients = result.nutrition.ingredient.map {
                             IngredientUi(
                                 name = it.name,
@@ -305,19 +305,11 @@ class MealReviewScreenViewModel @Inject constructor(
                         isProcessingDescription = false,
                         isLoading = false,
                         name = refinedMeal.name,
-                        calories = refinedMeal.calories
-                            .toInt()
-                            .toString(),
-                        proteins = refinedMeal.protein
-                            .toInt()
-                            .toString(),
-                        fats = refinedMeal.fat
-                            .toInt()
-                            .toString(),
-                        carbs = refinedMeal.carb
-                            .toInt()
-                            .toString(),
-                        weight = refinedMeal.weight.toInt().toString(),
+                        calories = refinedMeal.calories.toString(),
+                        proteins = refinedMeal.protein.toString(),
+                        fats = refinedMeal.fat.toString(),
+                        carbs = refinedMeal.carb.toString(),
+                        weight = refinedMeal.weight.toString(),
                         ingredients = refinedMeal.ingredient.map { ingredient ->
                             IngredientUi(
                                 name = ingredient.name,
@@ -344,19 +336,19 @@ class MealReviewScreenViewModel @Inject constructor(
     private fun MealReviewUiState.toNutrition(): Nutrition {
         return Nutrition(
             name = name,
-            weight = weight.toDoubleOrNull() ?: 0.0,
-            calories = calories.toDoubleOrNull() ?: 0.0,
-            protein = proteins.toDoubleOrNull() ?: 0.0,
-            fat = fats.toDoubleOrNull() ?: 0.0,
-            carb = carbs.toDoubleOrNull() ?: 0.0,
+            weight = weight.toIntOrNull() ?: 0,
+            calories = calories.toIntOrNull() ?: 0,
+            protein = proteins.toIntOrNull() ?: 0,
+            fat = fats.toIntOrNull() ?: 0,
+            carb = carbs.toIntOrNull() ?: 0,
             ingredient = ingredients.map {
                 Ingredient(
                     name = it.name,
-                    weight = it.weight.toDoubleOrNull() ?: 0.0,
-                    calories = it.calories.toDoubleOrNull() ?: 0.0,
-                    protein = it.protein.toDoubleOrNull() ?: 0.0,
-                    fat = it.fat.toDoubleOrNull() ?: 0.0,
-                    carb = it.carb.toDoubleOrNull() ?: 0.0
+                    weight = it.weight.toIntOrNull() ?: 0,
+                    calories = it.calories.toIntOrNull() ?: 0,
+                    protein = it.protein.toIntOrNull() ?: 0,
+                    fat = it.fat.toIntOrNull() ?: 0,
+                    carb = it.carb.toIntOrNull() ?: 0
                 )
             }
         )

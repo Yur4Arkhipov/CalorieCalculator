@@ -76,10 +76,10 @@ class AiMealDescriptionViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = state.copy(isSaving = true)
             try {
-                val calories = state.result.calories.toInt()
-                val proteins = state.result.protein.toInt()
-                val fats = state.result.fat.toInt()
-                val carbs = state.result.carb.toInt()
+                val calories = state.result.calories
+                val proteins = state.result.protein
+                val fats = state.result.fat
+                val carbs = state.result.carb
 
                 val meal = Meal(
                     name = nutrition.name,

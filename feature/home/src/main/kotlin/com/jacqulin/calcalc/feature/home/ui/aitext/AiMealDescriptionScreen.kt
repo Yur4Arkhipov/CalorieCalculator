@@ -75,8 +75,6 @@ fun AiMealDescriptionScreen(
 
     val focusManager = LocalFocusManager.current
 
-    var expanded by remember { mutableStateOf(false) }
-
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
     var snackbarIsError by remember { mutableStateOf(false) }
     var snackbarVisible by remember { mutableStateOf(false) }
@@ -333,7 +331,7 @@ fun NutritionResultCard(
                 Text(
                     text = stringResource(
                         id = R.string.home_ai_text_calories_suffix,
-                        formatArgs = arrayOf(nutrition.calories.toInt())
+                        formatArgs = arrayOf(nutrition.calories)
                     ),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
@@ -393,7 +391,7 @@ fun NutritionResultCard(
 @Composable
 private fun MacroItem(
     label: String,
-    value: Double,
+    value: Int,
     unit: String
 ) {
     Column(
@@ -401,7 +399,7 @@ private fun MacroItem(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            text = "%.1f $unit".format(value),
+            text = "%d $unit".format(value),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onPrimaryContainer

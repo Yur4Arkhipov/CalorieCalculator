@@ -2,6 +2,7 @@ package com.jacqulin.calcalc.core.data.remote.dto
 
 import com.jacqulin.calcalc.core.domain.model.Nutrition
 import kotlinx.serialization.Serializable
+import kotlin.math.roundToInt
 
 @Serializable
 data class NutritionDto(
@@ -16,10 +17,10 @@ data class NutritionDto(
 
 fun NutritionDto.toDomain() = Nutrition(
     name = name ?: "",
-    weight = weight,
-    calories = calories,
-    protein = protein,
-    fat = fat,
-    carb = carb,
+    weight = weight.roundToInt(),
+    calories = calories.roundToInt(),
+    protein = protein.roundToInt(),
+    fat = fat.roundToInt(),
+    carb = carb.roundToInt(),
     ingredient = ingredient.map { it.toDomain() }
 )
