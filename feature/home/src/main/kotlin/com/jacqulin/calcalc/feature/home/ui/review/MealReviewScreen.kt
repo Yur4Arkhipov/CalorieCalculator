@@ -274,7 +274,7 @@ fun MealReviewScreen(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        Text(text = stringResource(R.string.preview_meal_ingredients))
+                        Text(text = stringResource(R.string.review_meal_ingredients))
 
                         Spacer(modifier = Modifier.height(8.dp))
 

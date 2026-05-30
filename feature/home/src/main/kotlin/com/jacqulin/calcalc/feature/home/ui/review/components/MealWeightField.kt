@@ -37,7 +37,7 @@ fun MealWeightField(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.preview_meal_weight),
+                text = stringResource(R.string.review_meal_weight),
                 style = MaterialTheme.typography.bodyLarge
             )
 
@@ -57,7 +57,7 @@ fun MealWeightField(
         }
 
         Text(
-            text = stringResource(R.string.preview_meal_weight_desc),
+            text = stringResource(R.string.review_meal_weight_desc),
             style = MaterialTheme.typography.bodySmall,
             color = Color.Gray,
             modifier = Modifier.align(Alignment.End)

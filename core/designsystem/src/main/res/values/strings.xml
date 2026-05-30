@@ -95,11 +95,11 @@
     <string name="edit_meal_bottom_sheet_cancel">Отменить</string>
     <string name="edit_meal_bottom_sheet_save">Сохранить</string>
 
-    // Home -> preview
-    <string name="preview_meal_weight">Вес:</string>
-    <string name="preview_meal_weight_desc">Оценка ИИ — можно изменить</string>
-    <string name="preview_meal_ai_desc">Вы можете дополнить или исправить информацию:</string>
-    <string name="preview_meal_ingredients">Ингредиенты</string>
+    // Home -> review
+    <string name="review_meal_weight">Вес:</string>
+    <string name="review_meal_weight_desc">Оценка ИИ — можно изменить</string>
+    <string name="review_meal_ai_desc">Вы можете дополнить или исправить информацию:</string>
+    <string name="review_meal_ingredients">Ингредиенты</string>
 
 
     // Effects

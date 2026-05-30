@@ -53,7 +53,7 @@ fun AiDescriptionTextField(
     val focusManager = LocalFocusManager.current
 
     if (isForReview) {
-        Text(stringResource(R.string.preview_meal_ai_desc))
+        Text(stringResource(R.string.review_meal_ai_desc))
     }
 
     Box(modifier = Modifier.fillMaxWidth()) {
