@@ -85,7 +85,9 @@ internal fun CalendarSection(
             weekOffset = currentWeekIndex,
             title = weekTitle,
             onPreviousWeek = {
-                onWeekChanged(currentWeekIndex - 1)
+                if (currentWeekIndex > -MAX_PAST_WEEKS) {
+                    onWeekChanged(currentWeekIndex - 1)
+                }
             },
             onNextWeek = {
                 if (currentWeekIndex < MAX_FUTURE_WEEKS) {
@@ -123,10 +125,17 @@ private fun WeekHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onPreviousWeek) {
+        IconButton(
+            onClick = onPreviousWeek,
+            enabled = weekOffset > -MAX_PAST_WEEKS
+        ) {
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_back),
-                contentDescription = stringResource(R.string.home_calendar_section_prev_week)
+                contentDescription = stringResource(R.string.home_calendar_section_prev_week),
+                tint = if (weekOffset > -MAX_PAST_WEEKS)
+                    MaterialTheme.colorScheme.onBackground
+                else
+                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
             )
         }
 
