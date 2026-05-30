@@ -31,7 +31,6 @@ fun NutrientsGrid(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-
         Row(Modifier.fillMaxWidth()) {
             NutrientItem(
                 label = stringResource(R.string.calories),

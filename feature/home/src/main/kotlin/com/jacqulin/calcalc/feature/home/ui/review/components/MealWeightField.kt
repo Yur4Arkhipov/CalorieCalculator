@@ -29,7 +29,6 @@ fun MealWeightField(
     Column(
         modifier = modifier.padding(vertical = 8.dp)
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()

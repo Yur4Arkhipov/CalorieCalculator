@@ -173,13 +173,14 @@ class MealReviewScreenViewModel @Inject constructor(
                     return@launch
                 }
 
-                if (
+                val hasInvalidInput =
                     currentState.weight == "" ||
                     currentState.calories == "" ||
                     currentState.proteins == "" ||
                     currentState.fats == "" ||
                     currentState.carbs == ""
-                ) {
+
+                if (hasInvalidInput) {
                     _effect.send(
                         UiEffect.ShowSnackbar(
                             messageCode = SnackbarMessageCode.MEAL_SAVE_ERROR,

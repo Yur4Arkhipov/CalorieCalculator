@@ -26,9 +26,7 @@ import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 import com.jacqulin.calcalc.feature.home.ui.review.IngredientUi
 
 @Composable
-fun IngredientCard(
-    ingredient: IngredientUi
-) {
+fun IngredientCard(ingredient: IngredientUi) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -41,9 +39,7 @@ fun IngredientCard(
             )
             .padding(2.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
