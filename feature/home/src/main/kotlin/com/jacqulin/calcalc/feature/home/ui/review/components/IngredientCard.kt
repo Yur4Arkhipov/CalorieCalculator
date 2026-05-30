@@ -70,17 +70,29 @@ fun IngredientCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     MacroBadge(
                         label = stringResource(R.string.macro_protein_short),
-                        value = ingredient.protein.toInt(),
+//                        value = ingredient.protein.toInt(),
+                        value = ingredient.protein
+                            .toDoubleOrNull()
+                            ?.toInt()
+                            ?: 0,
                         color = AppColors.proteinMain
                     )
                     MacroBadge(
                         label = stringResource(R.string.macro_fat_short),
-                        value = ingredient.fat.toInt(),
+//                        value = ingredient.fat.toInt(),
+                        value = ingredient.fat
+                            .toDoubleOrNull()
+                            ?.toInt()
+                            ?: 0,
                         color = AppColors.fatMain
                     )
                     MacroBadge(
                         label = stringResource(R.string.macro_carbs_short),
-                        value = ingredient.carb.toInt(),
+//                        value = ingredient.carb.toInt(),
+                        value = ingredient.carb
+                            .toDoubleOrNull()
+                            ?.toInt()
+                            ?: 0,
                         color = AppColors.carbsMain
                     )
                 }

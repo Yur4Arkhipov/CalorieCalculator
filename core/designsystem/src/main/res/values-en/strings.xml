@@ -97,6 +97,8 @@
     // Home -> preview
     <string name="preview_meal_weight">Weight:</string>
     <string name="preview_meal_weight_desc">AI Rating - Can Be Changed</string>
+    <string name="preview_meal_ai_desc">You can add or edit information:</string>
+    <string name="preview_meal_ingredients">Ingredients</string>
 
     // Effects
     <string name="effect_meal_saved">"The dish is saved!"</string>

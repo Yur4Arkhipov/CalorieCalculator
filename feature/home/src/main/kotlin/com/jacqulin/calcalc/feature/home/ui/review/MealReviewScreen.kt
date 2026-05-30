@@ -20,10 +20,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -44,11 +49,15 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.AddMealSnackbar
+import com.jacqulin.calcalc.core.designsystem.component.AiDescriptionTextField
 import com.jacqulin.calcalc.core.designsystem.theme.reviewLoadingColor
 import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
 import com.jacqulin.calcalc.core.util.effects.UiEffect
@@ -240,12 +249,37 @@ fun MealReviewScreen(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        Text(text = "Ингредиенты")
+                        AiDescriptionTextField(
+                            value = uiState.description,
+                            onValueChange = viewModel::onDescriptionChange,
+                            enabled = true,
+                            isForReview = true,
+                            isDropdownEnable = false
+                        )
+
+                        Button(
+                            onClick = { viewModel.onAnalyzeDescription() },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = uiState.description.isNotBlank(),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_send),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = stringResource(R.string.home_ai_text_analyze))
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(text = stringResource(R.string.preview_meal_ingredients))
 
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             uiState.ingredients.forEach { ingredient ->
                                 IngredientCard(ingredient)

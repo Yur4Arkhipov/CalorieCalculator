@@ -78,11 +78,11 @@ class MealRepositoryImpl @Inject constructor(
             IngredientEntity(
                 mealId = 0,
                 name = ing.name,
-                weight = ing.weight,
-                calories = ing.calories,
-                protein = ing.protein,
-                carb = ing.carb,
-                fat = ing.fat
+                weight = ing.weight.toInt(),
+                calories = ing.calories.toInt(),
+                protein = ing.protein.toInt(),
+                carb = ing.carb.toInt(),
+                fat = ing.fat.toInt()
             )
         }
         mealDao.insertMealWithIngredients(mealEntity, ingredientEntities)

@@ -10,7 +10,10 @@ data class MealReviewUiState(
     val fats: String = "",
     val carbs: String = "",
     val weight: String = "",
-    val ingredients: List<IngredientUi> = emptyList()
+    val ingredients: List<IngredientUi> = emptyList(),
+    val description: String = "",
+    val isProcessingDescription: Boolean = false
+
 )
 
 data class IngredientUi(

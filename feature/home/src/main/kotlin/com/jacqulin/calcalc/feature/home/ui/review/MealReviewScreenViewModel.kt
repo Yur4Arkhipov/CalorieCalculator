@@ -4,11 +4,14 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jacqulin.calcalc.core.domain.model.Ingredient
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.MealType
+import com.jacqulin.calcalc.core.domain.model.Nutrition
 import com.jacqulin.calcalc.core.domain.repository.ImageRepository
 import com.jacqulin.calcalc.core.domain.usecase.AnalyzeMealFromImageUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
+import com.jacqulin.calcalc.core.domain.usecase.RefineMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
 import com.jacqulin.calcalc.core.util.NotFoodException
 import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
@@ -34,6 +37,7 @@ class MealReviewScreenViewModel @Inject constructor(
     observeSelectedDateUseCase: ObserveSelectedDateUseCase,
     private val analyzeMealFromImageUseCase: AnalyzeMealFromImageUseCase,
     private val saveManualAddMealDBUseCase: SaveManualAddMealDBUseCase,
+    private val refineMealUseCase: RefineMealUseCase,
     private val imageRepository: ImageRepository
 ): ViewModel() {
 
@@ -50,8 +54,8 @@ class MealReviewScreenViewModel @Inject constructor(
     val effect = _effect.receiveAsFlow()
 
     init {
-//        analyzeImage()
-        analyzeImageMock()
+        analyzeImage()
+//        analyzeImageMock()
     }
 
     private fun analyzeImage() {
@@ -272,6 +276,89 @@ class MealReviewScreenViewModel @Inject constructor(
             maxValue = 150
         )
         _uiState.update { it.copy(fats = filtered) }
+    }
+
+    fun onDescriptionChange(description: String) {
+        _uiState.value = _uiState.value.copy(description = description)
+    }
+
+    fun onAnalyzeDescription() {
+        viewModelScope.launch {
+            try {
+                _uiState.update {
+                    it.copy(
+                        isProcessingDescription = true,
+                        isLoading = true
+                    )
+                }
+
+                val currentMeal = uiState.value.toNutrition()
+
+                val refinedMeal = refineMealUseCase(
+                    currentMeal = currentMeal,
+                    userPrompt = uiState.value.description
+                )
+
+                _uiState.update {
+                    it.copy(
+                        isProcessingDescription = false,
+                        isLoading = false,
+                        name = refinedMeal.name,
+                        calories = refinedMeal.calories
+                            .toInt()
+                            .toString(),
+                        proteins = refinedMeal.protein
+                            .toInt()
+                            .toString(),
+                        fats = refinedMeal.fat
+                            .toInt()
+                            .toString(),
+                        carbs = refinedMeal.carb
+                            .toInt()
+                            .toString(),
+                        weight = refinedMeal.weight.toInt().toString(),
+                        ingredients = refinedMeal.ingredient.map { ingredient ->
+                            IngredientUi(
+                                name = ingredient.name,
+                                weight = ingredient.weight.toString(),
+                                calories = ingredient.calories.toString(),
+                                protein = ingredient.protein.toString(),
+                                fat = ingredient.fat.toString(),
+                                carb = ingredient.carb.toString()
+                            )
+                        }
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isProcessingDescription = false,
+                        isError = e.message
+                    )
+                }
+            }
+        }
+    }
+
+    private fun MealReviewUiState.toNutrition(): Nutrition {
+        return Nutrition(
+            name = name,
+            weight = weight.toDoubleOrNull() ?: 0.0,
+            calories = calories.toDoubleOrNull() ?: 0.0,
+            protein = proteins.toDoubleOrNull() ?: 0.0,
+            fat = fats.toDoubleOrNull() ?: 0.0,
+            carb = carbs.toDoubleOrNull() ?: 0.0,
+            ingredient = ingredients.map {
+                Ingredient(
+                    name = it.name,
+                    weight = it.weight.toDoubleOrNull() ?: 0.0,
+                    calories = it.calories.toDoubleOrNull() ?: 0.0,
+                    protein = it.protein.toDoubleOrNull() ?: 0.0,
+                    fat = it.fat.toDoubleOrNull() ?: 0.0,
+                    carb = it.carb.toDoubleOrNull() ?: 0.0
+                )
+            }
+        )
     }
 
 //    fun discard(onCancel: () -> Unit) {
