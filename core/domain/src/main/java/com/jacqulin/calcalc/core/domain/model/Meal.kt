@@ -7,15 +7,17 @@ data class Meal(
     val proteins: Int = 0,
     val carbs: Int = 0,
     val fats: Int = 0,
+    val weight: Int = 0,
     val time: String,
     val type: MealType,
     val imageUri: String? = null,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val ingredient: List<Ingredient> = listOf()
 )
 
-enum class MealType(val displayName: String) {
-    BREAKFAST("Завтрак"),
-    LUNCH("Обед"),
-    DINNER("Ужин"),
-    SNACK("Перекус")
+enum class MealType {
+    BREAKFAST,
+    LUNCH,
+    DINNER,
+    SNACK
 }

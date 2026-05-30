@@ -33,6 +33,17 @@
     <string name="home_analyzing">Analyzing…</string>
     <string name="home_remove">Remove</string>
 
+    <string name="home_alert_dialog_access_required">Camera access required</string>
+    <string name="home_alert_dialog_description">Permission is required to photograph food. Please allow access to continue</string>
+    <string name="home_alert_dialog_try_again">Try again</string>
+    <string name="home_alert_dialog_access_block">Access to the camera is blocked</string>
+    <string name="home_alert_dialog_access_description">No required permission for using camera. To use the camera, please enable it in the app settings.</string>
+    <string name="home_alert_dialog_open_settings">Open settings</string>
+    <string name="home_alert_dialog_close">Close</string>
+
+    <string name="home_add_meal_from_favorite_title">Add from favorite</string>
+    <string name="home_add_meal_from_favorite_subtitle">Choose favorite meal</string>
+
     // Home -> ai meal description
     <string name="home_ai_text_meal_entry">Meal entry</string>
     <string name="home_ai_text_describe_the_dish">Describe the dish</string>
@@ -82,6 +93,12 @@
     <string name="edit_meal_bottom_sheet_fats">Fats (g)</string>
     <string name="edit_meal_bottom_sheet_cancel">Cancel</string>
     <string name="edit_meal_bottom_sheet_save">Save</string>
+
+    // Home -> review
+    <string name="review_meal_weight">Weight:</string>
+    <string name="review_meal_weight_desc">AI Rating - Can Be Changed</string>
+    <string name="review_meal_ai_desc">You can add or edit information:</string>
+    <string name="review_meal_ingredients">Ingredients</string>
 
     // Effects
     <string name="effect_meal_saved">"The dish is saved!"</string>
@@ -188,5 +205,27 @@
     <string name="onboarding_result_title">Your target</string>
     <string name="onboarding_result_subtitle">You can adjust these values for yourself</string>
 
+    <string name="meal_type_breakfast">Breakfast</string>
+    <string name="meal_type_lunch">Lunch</string>
+    <string name="meal_type_dinner">Dinner</string>
+    <string name="meal_type_snack">Snack</string>
+
+    // Detail screen
+    <string name="detail_title">Detail info</string>
+    <string name="detail_back">Go back</string>
+    <string name="detail_consumed_meals">Meals eaten today</string>
+    <string name="detail_no_meals">No meals added yet</string>
+    <string name="detail_daily_calories">Calories for the day</string>
+    <string name="detail_consumed">Consumed</string>
+    <string name="detail_remaining">Remaining</string>
+    <string name="detail_goal">Goal</string>
+    <string name="detail_macro_progress_format">%1$d / %2$d g</string>
+    <string name="detail_macro_percentage_format">%1$d%% of daily goal</string>
+
+    // Meal card
+    <string name="macro_protein_short">P</string>
+    <string name="macro_fat_short">F</string>
+    <string name="macro_carbs_short">C</string>
+    <string name="macro_weight_format">%1$dg</string>
 
 </resources>

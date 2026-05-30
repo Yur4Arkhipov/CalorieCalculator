@@ -1,8 +1,10 @@
 package com.jacqulin.calcalc.feature.home.ui.home
 
 import android.Manifest
-import android.annotation.SuppressLint
+import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -15,25 +17,22 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -53,29 +52,27 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.AddMealFloatingActionButton
 import com.jacqulin.calcalc.core.designsystem.component.MealCard
+import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.Meal
-import com.jacqulin.calcalc.core.domain.model.MealType
-import com.jacqulin.calcalc.core.domain.model.PendingMeal
+import com.jacqulin.calcalc.core.domain.model.TempImage
 import com.jacqulin.calcalc.feature.home.ui.home.sections.AddMealBottomSheet
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CalendarSection
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CaloriesSection
 import com.jacqulin.calcalc.feature.home.ui.home.sections.EditMealBottomSheet
-import com.jacqulin.calcalc.feature.home.ui.home.sections.MealTypePickerDialog
 
-private enum class AddPhotoSource { CAMERA, GALLERY }
-
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -83,47 +80,54 @@ fun HomeScreen(
     onNavigateToMacroDetail: () -> Unit = {},
     onNavigateToAiMealDescription: () -> Unit = {},
     onNavigateToManualAddMeal: () -> Unit = {},
+    onNavigateToAddFavoriteMeal: () -> Unit = {},
+    onNavigateToMealReview: (TempImage) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddFoodSheet by remember { mutableStateOf(false) }
-    var showMealTypePicker by remember { mutableStateOf<AddPhotoSource?>(null) }
     val lazyListState = rememberLazyListState()
-    var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
-    var pendingCameraMealType by remember { mutableStateOf<MealType?>(null) }
-    var pendingGalleryMealType by remember { mutableStateOf<MealType?>(null) }
-    val snackbarHostState = remember { SnackbarHostState() }
+    var cameraSession by remember { mutableStateOf<TempImage?>(null) }
     val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showRationaleDialog by remember { mutableStateOf(false) }
+    var showPermanentDeniedDialog by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val activity = context as? ComponentActivity
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
-        val uri = pendingCameraUri
-        val mealType = pendingCameraMealType
-        if (success && uri != null && mealType != null) {
-            viewModel.onCameraResult(success = true, uri = uri, mealType = mealType)
+        val temp = cameraSession
+        if (temp != null) {
+            viewModel.onCameraResult(success = success, temp = temp)
         }
-        pendingCameraUri = null
-        pendingCameraMealType = null
+        cameraSession = null
     }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        val mealType = pendingCameraMealType ?: MealType.BREAKFAST
-        viewModel.onCameraPermissionResult(granted, mealType)
-        if (!granted) {
-            pendingCameraMealType = null
+        if (granted) {
+            viewModel.onCameraPermissionResult(granted = true)
+        } else {
+            val shouldShow = activity?.let {
+                ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)
+            } ?: false
+
+            if (shouldShow) {
+                showRationaleDialog = true
+            } else {
+                showPermanentDeniedDialog = true
+            }
         }
     }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
-        val mealType = pendingGalleryMealType ?: MealType.BREAKFAST
         if (uri != null) {
-            viewModel.onGalleryResult(uri, mealType)
+            viewModel.onGalleryResult(uri)
         }
-        pendingGalleryMealType = null
     }
 
     val isAtBottom by remember {
@@ -174,38 +178,64 @@ fun HomeScreen(
         viewModel.uiEvents.collect { event ->
             when (event) {
                 is HomeUiEvent.LaunchCamera -> {
-                    pendingCameraUri = event.uri
-                    pendingCameraMealType = event.mealType
-                    cameraLauncher.launch(event.uri)
+                    cameraSession = event.tempImage
+                    cameraLauncher.launch(event.tempImage.uri)
                 }
                 is HomeUiEvent.RequestCameraPermission -> {
-                    pendingCameraMealType = event.mealType
                     cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                 }
                 is HomeUiEvent.LaunchGallery -> {
-                    pendingGalleryMealType = event.mealType
                     galleryLauncher.launch("image/*")
                 }
-                is HomeUiEvent.ShowNotFoodError -> {
-                    snackbarHostState.showSnackbar("На фото не обнаружена еда")
+                is HomeUiEvent.NavigateToMealReview -> {
+                    onNavigateToMealReview(event.tempImage)
                 }
             }
         }
     }
 
-    showMealTypePicker?.let { source ->
-        MealTypePickerDialog(
-            onSelect = { mealType ->
-                showMealTypePicker = null
-                when (source) {
-                    AddPhotoSource.CAMERA -> viewModel.onRequestCameraPermission(mealType)
-                    AddPhotoSource.GALLERY -> viewModel.onAddPhotoFromGallery(mealType)
-                }
+    if (showRationaleDialog) {
+        AlertDialog(
+            onDismissRequest = { showRationaleDialog = false },
+            title = { Text(stringResource(R.string.home_alert_dialog_access_required)) },
+            text = { Text(stringResource(R.string.home_alert_dialog_description)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRationaleDialog = false
+                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                }) { Text(stringResource(R.string.home_alert_dialog_try_again)) }
             },
-            onDismiss = { showMealTypePicker = null }
+            dismissButton = {
+                TextButton(onClick = {
+                    showRationaleDialog = false
+                }) { Text(stringResource(R.string.home_dialog_cancel)) }
+            },
+            containerColor = White
         )
     }
 
+    if (showPermanentDeniedDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermanentDeniedDialog = false },
+            title = { Text(stringResource(R.string.home_alert_dialog_access_block)) },
+            text = { Text(stringResource(R.string.home_alert_dialog_access_description)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPermanentDeniedDialog = false
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                    }
+                    context.startActivity(intent)
+                }) { Text(stringResource(R.string.home_alert_dialog_open_settings)) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showPermanentDeniedDialog = false
+                }) { Text(stringResource(R.string.home_alert_dialog_close)) }
+            },
+            containerColor = White
+        )
+    }
 
     if (uiState.isLoading) {
         Box(
@@ -216,26 +246,25 @@ fun HomeScreen(
         }
     } else {
         Scaffold(
-            snackbarHost = {
-                SnackbarHost(
-                    hostState = snackbarHostState,
-                    modifier = Modifier.padding(
-                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 44.dp
-                    )
-                ) { data ->
-                    Snackbar(
-                        snackbarData = data,
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-            },
             containerColor = MaterialTheme.colorScheme.background
-        ) { _ ->
+        ) { paddingValues ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+//                    .background(
+//                        Brush.verticalGradient(
+//                            colors = listOf(
+//                                Color(0xFFFCFCFD),                    // верх
+//                                AppPrimaryContainer.copy(alpha = 0.2f) // низ, очень прозрачный
+//                            )
+//                        )
+//                    )
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        bottom = paddingValues.calculateBottomPadding(),
+                        start = paddingValues.calculateStartPadding(LocalLayoutDirection.current) + 12.dp,
+                        end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 12.dp
+                    )
             ) {
                 LazyColumn(
                     state = lazyListState,
@@ -262,8 +291,6 @@ fun HomeScreen(
                     item {
                         TodayMealsSection(
                             meals = uiState.mealsToday,
-                            pendingMeals = uiState.pendingMeals,
-                            onDismissError = viewModel::dismissPendingError,
                             onDetailClick = onNavigateToMacroDetail,
                             onMealClick = viewModel::onEditMeal
                         )
@@ -292,6 +319,10 @@ fun HomeScreen(
 
                 if (showAddFoodSheet) {
                     AddMealBottomSheet(
+                        onFavorite = {
+                            showAddFoodSheet = false
+                            onNavigateToAddFavoriteMeal()
+                        },
                         onManual = {
                             showAddFoodSheet = false
                             onNavigateToManualAddMeal()
@@ -301,12 +332,12 @@ fun HomeScreen(
                             onNavigateToAiMealDescription()
                         },
                         onCamera = {
+                            viewModel.onRequestCameraPermission()
                             showAddFoodSheet = false
-                            showMealTypePicker = AddPhotoSource.CAMERA
                         },
                         onGallery = {
+                            viewModel.onAddPhotoFromGallery()
                             showAddFoodSheet = false
-                            showMealTypePicker = AddPhotoSource.GALLERY
                         },
                         onDismiss = { showAddFoodSheet = false }
                     )
@@ -329,8 +360,6 @@ fun HomeScreen(
 @Composable
 private fun TodayMealsSection(
     meals: List<Meal>,
-    pendingMeals: List<PendingMeal> = emptyList(),
-    onDismissError: (String) -> Unit = {},
     onDetailClick: () -> Unit = {},
     onMealClick: (Meal) -> Unit = {}
 ) {
@@ -354,8 +383,7 @@ private fun TodayMealsSection(
             }
         }
 
-        val isEmpty = meals.isEmpty() && pendingMeals.isEmpty()
-        if (isEmpty) {
+        if (meals.isEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -375,86 +403,10 @@ private fun TodayMealsSection(
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                pendingMeals.forEach { pending ->
-                    PendingMealCard(
-                        pending = pending,
-                        onDismissError = { onDismissError(pending.id) }
-                    )
-                }
                 meals.forEach { meal ->
                     MealCard(
                         meal = meal,
                         onClick = { onMealClick(meal) }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PendingMealCard(
-    pending: PendingMeal,
-    onDismissError: () -> Unit
-) {
-    val isError = pending.error != null
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(96.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isError)
-                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.35f)
-            else
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            if (pending.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(28.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                )
-            }
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = if (isError)
-                        stringResource(R.string.home_analyze_error)
-                    else
-                        stringResource(R.string.home_analyzing),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = if (isError)
-                        MaterialTheme.colorScheme.error
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-                Text(
-                    text = pending.type.displayName,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                )
-            }
-            if (isError) {
-                TextButton(onClick = onDismissError) {
-                    Text(
-                        text = stringResource(R.string.home_remove),
-                        color = MaterialTheme.colorScheme.error
                     )
                 }
             }

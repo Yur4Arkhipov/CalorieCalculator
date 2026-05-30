@@ -5,7 +5,9 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
+import com.jacqulin.calcalc.core.data.local.entities.IngredientEntity
 import com.jacqulin.calcalc.core.data.local.entities.MealEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -22,11 +24,24 @@ interface MealDao {
     suspend fun getMealById(id: Int): MealEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMeal(meal: MealEntity)
+    suspend fun insertMeal(meal: MealEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertIngredients(ingredients: List<IngredientEntity>)
+
+//    @Query("SELECT * FROM ingredient WHERE mealId = :mealId")
+//    suspend fun getIngredientsByMealId(mealId: Int): List<IngredientEntity>
 
     @Update
     suspend fun updateMeal(meal: MealEntity)
 
     @Delete
     suspend fun deleteMeal(meal: MealEntity)
+
+    @Transaction
+    suspend fun insertMealWithIngredients(meal: MealEntity, ingredients: List<IngredientEntity>) {
+        val generatedMealId = insertMeal(meal).toInt()
+        val ingredientsWithMealId = ingredients.map { it.copy(mealId = generatedMealId) }
+        insertIngredients(ingredientsWithMealId)
+    }
 }

@@ -31,6 +31,7 @@ import com.jacqulin.calcalc.core.designsystem.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddMealBottomSheet(
+    onFavorite: () -> Unit,
     onManual: () -> Unit,
     onAiDescription: () -> Unit,
     onCamera: () -> Unit,
@@ -60,6 +61,13 @@ fun AddMealBottomSheet(
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                AddMealOptionCard(
+                    icon = painterResource(R.drawable.ic_bookmark_outlined),
+                    text = stringResource(R.string.home_add_meal_from_favorite_title),
+                    subtitle = stringResource(R.string.home_add_meal_from_favorite_subtitle),
+                    onClick = onFavorite
+                )
+
                 AddMealOptionCard(
                     icon = painterResource(R.drawable.ic_edit),
                     text = stringResource(R.string.home_add_meal_manual_title),

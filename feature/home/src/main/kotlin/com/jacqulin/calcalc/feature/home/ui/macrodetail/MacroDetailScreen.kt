@@ -3,9 +3,10 @@ package com.jacqulin.calcalc.feature.home.ui.macrodetail
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -33,7 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -67,34 +71,39 @@ fun MacroDetailScreen(
         return
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                top = 0.dp,
-                bottom = 10.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = paddingValues.calculateBottomPadding(),
+                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current) + 12.dp,
+                    end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 12.dp
+                ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 12.dp),
+                        .padding(vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(
+                        modifier = Modifier.size(26.dp),
+                        onClick = onBackClick
+                    ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Назад",
-                            tint = MaterialTheme.colorScheme.onBackground
+                            contentDescription = stringResource(R.string.detail_back),
                         )
                     }
+                    Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "Детальная информация",
+                        text = stringResource(R.string.detail_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -105,7 +114,7 @@ fun MacroDetailScreen(
             item { MacroProgressCards(uiState = uiState) }
             item {
                 Text(
-                    text = "Съеденные блюда за день",
+                    text = stringResource(R.string.detail_consumed_meals),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground,
@@ -127,7 +136,7 @@ fun MacroDetailScreen(
                         )
                     ) {
                         Text(
-                            text = "Пока не добавлено ни одного блюда",
+                            text = stringResource(R.string.detail_no_meals),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier
@@ -166,7 +175,7 @@ private fun CaloriesCard(uiState: MacroDetailUiState) {
             modifier = Modifier.padding(20.dp)
         ) {
             Text(
-                text = "Калории за день",
+                text = stringResource(R.string.detail_daily_calories),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -186,7 +195,7 @@ private fun CaloriesCard(uiState: MacroDetailUiState) {
                         color = CaloriesDark
                     )
                     Text(
-                        text = "Потреблено",
+                        text = stringResource(R.string.detail_consumed),
                         style = MaterialTheme.typography.bodySmall,
                         color = TextSecondary
                     )
@@ -201,7 +210,7 @@ private fun CaloriesCard(uiState: MacroDetailUiState) {
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Text(
-                        text = "Осталось",
+                        text = stringResource(R.string.detail_remaining),
                         style = MaterialTheme.typography.bodySmall,
                         color = TextSecondary
                     )
@@ -215,7 +224,7 @@ private fun CaloriesCard(uiState: MacroDetailUiState) {
                         color = CaloriesDark
                     )
                     Text(
-                        text = "Цель",
+                        text = stringResource(R.string.detail_goal),
                         style = MaterialTheme.typography.bodySmall,
                         color = TextTertiary
                     )
@@ -231,19 +240,19 @@ private fun MacroProgressCards(uiState: MacroDetailUiState) {
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         MacroProgressCard(
-            title = "Белки",
+            title = stringResource(R.string.proteins),
             current = uiState.todayMacros.protein,
             goal = uiState.todayMacros.proteinsGoal,
             color = AppColors.proteinMain
         )
         MacroProgressCard(
-            title = "Углеводы",
+            title = stringResource(R.string.carbs),
             current = uiState.todayMacros.carb,
             goal = uiState.todayMacros.carbsGoal,
             color = AppColors.carbsMain
         )
         MacroProgressCard(
-            title = "Жиры",
+            title = stringResource(R.string.fats),
             current = uiState.todayMacros.fat,
             goal = uiState.todayMacros.fatsGoal,
             color = AppColors.fatMain
@@ -292,7 +301,7 @@ private fun MacroProgressCard(
                 }
 
                 Text(
-                    text = "$current / $goal г",
+                    text = stringResource(R.string.detail_macro_progress_format, current, goal),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = color
@@ -312,7 +321,7 @@ private fun MacroProgressCard(
 
             val percentage = ((current.toFloat() / goal.toFloat()) * 100).roundToInt()
             Text(
-                text = "$percentage% от дневной нормы",
+                text = stringResource(R.string.detail_macro_percentage_format, percentage),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )

@@ -5,19 +5,15 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacqulin.calcalc.core.domain.model.Meal
-import com.jacqulin.calcalc.core.domain.model.MealType
-import com.jacqulin.calcalc.core.domain.model.PendingMeal
+import com.jacqulin.calcalc.core.domain.model.TempImage
 import com.jacqulin.calcalc.core.domain.repository.ImageRepository
-import com.jacqulin.calcalc.core.domain.usecase.AnalyzeMealFromImageUseCase
 import com.jacqulin.calcalc.core.domain.usecase.DeleteMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GenerateWeekDaysUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GetDayDataUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
-import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SetSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.UpdateMealUseCase
-import com.jacqulin.calcalc.core.util.NotFoodException
 import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,7 +26,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -48,17 +43,13 @@ class HomeViewModel @Inject constructor(
     private val generateWeekDaysUseCase: GenerateWeekDaysUseCase,
     observeUserProfileUseCase: ObserveUserProfileUseCase,
     private val setSelectedDateUseCase: SetSelectedDateUseCase,
-    private val analyzeMealFromImageUseCase: AnalyzeMealFromImageUseCase,
-    private val saveManualAddMealDBUseCase: SaveManualAddMealDBUseCase,
     private val updateMealUseCase: UpdateMealUseCase,
     private val deleteMealUseCase: DeleteMealUseCase,
     private val imageRepository: ImageRepository
 ) : ViewModel() {
 
     private val currentWeekIndexFlow = MutableStateFlow(0)
-    private val pendingMealsFlow = MutableStateFlow<List<PendingMeal>>(emptyList())
     private val editingMealFlow = MutableStateFlow<Pair<Meal?, Boolean>>(Pair(null, false))
-    private val selectedDate = observeSelectedDateUseCase()
 
     private val _uiEvents = Channel<HomeUiEvent>(Channel.BUFFERED)
     val uiEvents = _uiEvents.receiveAsFlow()
@@ -88,9 +79,8 @@ class HomeViewModel @Inject constructor(
                 combine(
                     getDayDataUseCase(selectedDate),
                     weeksFlow,
-                    pendingMealsFlow,
                     editingMealFlow
-                ) { dayData, weeks, pendingMeals, editingPair ->
+                ) { dayData, weeks, editingPair ->
 
                     val consumedCalories = dayData.meals.sumOf { it.calories }
 
@@ -113,7 +103,6 @@ class HomeViewModel @Inject constructor(
                         currentWeekIndex = weekIndex,
                         weekDays = updatedWeeks[weekIndex] ?: emptyList(),
                         mealsToday = dayData.meals,
-                        pendingMeals = pendingMeals,
                         todayMacros = macrosWithGoals,
                         consumedCalories = consumedCalories,
                         dailyCaloriesGoal = profile.caloriesGoal,
@@ -139,43 +128,6 @@ class HomeViewModel @Inject constructor(
 
     fun onWeekChanged(weekIndex: Int) {
         currentWeekIndexFlow.value = weekIndex
-    }
-
-    fun onImageCaptured(imageBytes: ByteArray, mealType: MealType) {
-        val pending = PendingMeal(type = mealType, isLoading = true, imageUri = null)
-        pendingMealsFlow.update { it + pending }
-
-        viewModelScope.launch {
-            try {
-                val result = analyzeMealFromImageUseCase(imageBytes)
-                val meal = Meal(
-                    name = result.nutrition.name.ifBlank { "Блюдо" },
-                    calories = result.nutrition.calories.toInt(),
-                    proteins = result.nutrition.protein.toInt(),
-                    fats = result.nutrition.fat.toInt(),
-                    carbs = result.nutrition.carbs.toInt(),
-                    time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
-                    type = mealType,
-                    imageUri = result.savedImagePath
-                )
-                saveManualAddMealDBUseCase(selectedDate.value, meal)
-                pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
-            } catch (_: NotFoodException) {
-                pendingMealsFlow.update { list -> list.filter { it.id != pending.id } }
-                _uiEvents.send(HomeUiEvent.ShowNotFoodError)
-            } catch (_: Exception) {
-                pendingMealsFlow.update { list ->
-                    list.map {
-                        if (it.id == pending.id) it.copy(isLoading = false, error = "Ошибка анализа")
-                        else it
-                    }
-                }
-            }
-        }
-    }
-
-    fun dismissPendingError(id: String) {
-        pendingMealsFlow.update { list -> list.filter { it.id != id } }
     }
 
     fun onEditMeal(meal: Meal) {
@@ -205,43 +157,43 @@ class HomeViewModel @Inject constructor(
         editingMealFlow.value = Pair(null, false)
     }
 
-    fun onAddPhotoFromCamera(mealType: MealType) {
+    fun onAddPhotoFromGallery() {
         viewModelScope.launch {
-            val uri = imageRepository.createCameraFileUri()
-            _uiEvents.send(HomeUiEvent.LaunchCamera(uri, mealType))
+            _uiEvents.send(HomeUiEvent.LaunchGallery)
         }
     }
 
-    fun onAddPhotoFromGallery(mealType: MealType) {
+    private fun onAddPhotoFromCamera() {
         viewModelScope.launch {
-            _uiEvents.send(HomeUiEvent.LaunchGallery(mealType))
+            val temp = imageRepository.createTempImage()
+            _uiEvents.send(HomeUiEvent.LaunchCamera(temp))
         }
     }
 
-    fun onRequestCameraPermission(mealType: MealType) {
+    fun onRequestCameraPermission() {
         viewModelScope.launch {
-            _uiEvents.send(HomeUiEvent.RequestCameraPermission(mealType))
+            _uiEvents.send(HomeUiEvent.RequestCameraPermission)
         }
     }
 
-    fun onCameraPermissionResult(granted: Boolean, mealType: MealType) {
-        if (granted) onAddPhotoFromCamera(mealType)
+    fun onCameraPermissionResult(granted: Boolean) {
+        if (granted) onAddPhotoFromCamera()
     }
 
-    fun onCameraResult(success: Boolean, uri: Uri, mealType: MealType) {
+    fun onCameraResult(success: Boolean, temp: TempImage) {
         viewModelScope.launch {
             if (success) {
-                val bytes = imageRepository.readImageBytes(uri)
-                if (bytes != null) onImageCaptured(bytes, mealType)
+                _uiEvents.send(HomeUiEvent.NavigateToMealReview(temp))
+            } else {
+                imageRepository.deleteTempImage(temp.file.absolutePath)
             }
-            imageRepository.deleteCameraFile(uri)
         }
     }
 
-    fun onGalleryResult(uri: Uri, mealType: MealType) {
+    fun onGalleryResult(uri: Uri) {
         viewModelScope.launch {
-            val bytes = imageRepository.readImageBytes(uri)
-            if (bytes != null) onImageCaptured(bytes, mealType)
+            val temp = imageRepository.copyUriToTemp(uri)
+            _uiEvents.send(HomeUiEvent.NavigateToMealReview(temp))
         }
     }
 
@@ -250,7 +202,7 @@ class HomeViewModel @Inject constructor(
         selectedDate: Date
     ): List<CalendarDay> {
         val today = Date()
-        val dayFormat = SimpleDateFormat("EEE", Locale.forLanguageTag("ru"))
+        val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())
         val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
 
         return dates.map { date ->

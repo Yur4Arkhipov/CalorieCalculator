@@ -1,0 +1,82 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:CalendarSection.kt$@Composable private fun CalendarDayItem( day: CalendarDay, onClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>CyclomaticComplexMethod:HomeScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun HomeScreen( viewModel: HomeViewModel = hiltViewModel(), onNavigateToMacroDetail: () -&gt; Unit = {}, onNavigateToAiMealDescription: () -&gt; Unit = {}, onNavigateToManualAddMeal: () -&gt; Unit = {}, onNavigateToAddFavoriteMeal: () -&gt; Unit = {}, onNavigateToMealReview: (TempImage) -&gt; Unit, )</ID>
+    <ID>CyclomaticComplexMethod:MealReviewScreenViewModel.kt$MealReviewScreenViewModel$fun saveMeal()</ID>
+    <ID>ExplicitItLambdaParameter:MealReviewScreenViewModel.kt$MealReviewScreenViewModel${ it -&gt; it.copy( isLoading = false, name = result.nutrition.name.ifBlank { "Meal" }, calories = result.nutrition.calories.toInt().toString(), proteins = result.nutrition.protein.toInt().toString(), fats = result.nutrition.fat.toInt().toString(), carbs = result.nutrition.carb.toInt().toString(), weight = result.nutrition.weight.toInt().toString(), ingredients = result.nutrition.ingredient.map { IngredientUi( name = it.name, weight = it.weight.toString(), calories = it.calories.toString(), protein = it.protein.toString(), fat = it.fat.toString(), carb = it.carb.toString() ) } ) }</ID>
+    <ID>LongMethod:AiMealDescriptionScreen.kt$@Composable fun NutritionResultCard( nutrition: Nutrition, isSaving: Boolean = false, onSave: () -&gt; Unit = {} )</ID>
+    <ID>LongMethod:AiMealDescriptionScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun AiMealDescriptionScreen( modifier: Modifier = Modifier, viewModel: AiMealDescriptionViewModel = hiltViewModel(), onBackClick: () -&gt; Unit = { }, )</ID>
+    <ID>LongMethod:CalendarSection.kt$@Composable private fun CalendarDayItem( day: CalendarDay, onClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:CaloriesSection.kt$@Composable private fun CaloriesCard( consumed: Int, goal: Int )</ID>
+    <ID>LongMethod:EditMealBottomSheet.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun EditMealBottomSheet( meal: Meal, sheetState: SheetState, onDismiss: () -&gt; Unit, onSave: (Meal) -&gt; Unit, onDelete: (Meal) -&gt; Unit = {} )</ID>
+    <ID>LongMethod:HomeScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun HomeScreen( viewModel: HomeViewModel = hiltViewModel(), onNavigateToMacroDetail: () -&gt; Unit = {}, onNavigateToAiMealDescription: () -&gt; Unit = {}, onNavigateToManualAddMeal: () -&gt; Unit = {}, onNavigateToAddFavoriteMeal: () -&gt; Unit = {}, onNavigateToMealReview: (TempImage) -&gt; Unit, )</ID>
+    <ID>LongMethod:IngredientCard.kt$@Composable fun IngredientCard(ingredient: IngredientUi)</ID>
+    <ID>LongMethod:MacroDetailScreen.kt$@Composable private fun CaloriesCard(uiState: MacroDetailUiState)</ID>
+    <ID>LongMethod:MacroDetailScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun MacroDetailScreen( viewModel: MacroDetailViewModel = hiltViewModel(), onBackClick: () -&gt; Unit = {} )</ID>
+    <ID>LongMethod:ManualAddMealScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ManualAddMealScreen( modifier: Modifier = Modifier, viewModel: ManualAddMealScreenViewModel = hiltViewModel(), onBackClick: () -&gt; Unit = { }, )</ID>
+    <ID>LongMethod:MealReviewScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @SuppressLint("ConfigurationScreenWidthHeight") @Composable fun MealReviewScreen( modifier: Modifier = Modifier, viewModel: MealReviewScreenViewModel = hiltViewModel(), filePath: String, onBackClick: () -&gt; Unit = {}, )</ID>
+    <ID>LongMethod:MealReviewScreenViewModel.kt$MealReviewScreenViewModel$fun saveMeal()</ID>
+    <ID>LongParameterList:AddMealBottomSheet.kt$( onFavorite: () -&gt; Unit, onManual: () -&gt; Unit, onAiDescription: () -&gt; Unit, onCamera: () -&gt; Unit, onGallery: () -&gt; Unit, onDismiss: () -&gt; Unit )</ID>
+    <ID>LongParameterList:HomeNavigation.kt$( onNavigateToFavoriteChoose: () -&gt; Unit, onNavigateToMacroDetail: () -&gt; Unit, onNavigateToAiMealDescription: () -&gt; Unit, onNavigateToManualAddMeal: () -&gt; Unit, onNavigateToMealReview: (TempImage) -&gt; Unit, onBackClick: () -&gt; Unit )</ID>
+    <ID>LongParameterList:HomeScreen.kt$( viewModel: HomeViewModel = hiltViewModel(), onNavigateToMacroDetail: () -&gt; Unit = {}, onNavigateToAiMealDescription: () -&gt; Unit = {}, onNavigateToManualAddMeal: () -&gt; Unit = {}, onNavigateToAddFavoriteMeal: () -&gt; Unit = {}, onNavigateToMealReview: (TempImage) -&gt; Unit, )</ID>
+    <ID>LongParameterList:HomeViewModel.kt$HomeViewModel$( observeSelectedDateUseCase: ObserveSelectedDateUseCase, private val getDayDataUseCase: GetDayDataUseCase, private val generateWeekDaysUseCase: GenerateWeekDaysUseCase, observeUserProfileUseCase: ObserveUserProfileUseCase, private val setSelectedDateUseCase: SetSelectedDateUseCase, private val updateMealUseCase: UpdateMealUseCase, private val deleteMealUseCase: DeleteMealUseCase, private val imageRepository: ImageRepository )</ID>
+    <ID>LongParameterList:NutrientsGrid.kt$( calories: String, protein: String, fat: String, carbs: String, onCaloriesChange: (String) -&gt; Unit, onProteinChange: (String) -&gt; Unit, onFatChange: (String) -&gt; Unit, onCarbsChange: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>MagicNumber:AiMealDescriptionScreen.kt$2000</ID>
+    <ID>MagicNumber:AiMealDescriptionScreen.kt$3000</ID>
+    <ID>MagicNumber:FavoriteMealChooseViewModel.kt$FavoriteMealChooseViewModel$5000</ID>
+    <ID>MagicNumber:HomeViewModel.kt$HomeViewModel$5000</ID>
+    <ID>MagicNumber:MacroDetailScreen.kt$100</ID>
+    <ID>MagicNumber:MacroDetailViewModel.kt$MacroDetailViewModel$5000</ID>
+    <ID>MagicNumber:ManualAddMealScreen.kt$2000</ID>
+    <ID>MagicNumber:ManualAddMealScreen.kt$3000</ID>
+    <ID>MagicNumber:MealReviewLoading.kt$0.6f</ID>
+    <ID>MagicNumber:MealReviewLoading.kt$3</ID>
+    <ID>MagicNumber:MealReviewScreen.kt$0.35f</ID>
+    <ID>MagicNumber:MealReviewScreen.kt$2000</ID>
+    <ID>MagicNumber:MealReviewScreen.kt$3000</ID>
+    <ID>MagicNumber:MealReviewScreenViewModel.kt$MealReviewScreenViewModel$50</ID>
+    <ID>MaxLineLength:AiMealDescriptionScreen.kt$Text(text = "•", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
+    <ID>MaxLineLength:AiMealDescriptionScreen.kt$Text(text = text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
+    <ID>MaxLineLength:EditMealBottomSheet.kt$painter = if (isFavorite) painterResource(R.drawable.ic_favorite_filled) else painterResource(R.drawable.ic_favorite)</ID>
+    <ID>NewLineAtEndOfFile:AddMealBottomSheet.kt$com.jacqulin.calcalc.feature.home.ui.home.sections.AddMealBottomSheet.kt</ID>
+    <ID>NewLineAtEndOfFile:AiMealDescriptionScreen.kt$com.jacqulin.calcalc.feature.home.ui.aitext.AiMealDescriptionScreen.kt</ID>
+    <ID>NewLineAtEndOfFile:AiMealDescriptionViewModel.kt$com.jacqulin.calcalc.feature.home.ui.aitext.AiMealDescriptionViewModel.kt</ID>
+    <ID>NewLineAtEndOfFile:CalendarDay.kt$com.jacqulin.calcalc.feature.home.model.CalendarDay.kt</ID>
+    <ID>NewLineAtEndOfFile:CalendarSection.kt$com.jacqulin.calcalc.feature.home.ui.home.sections.CalendarSection.kt</ID>
+    <ID>NewLineAtEndOfFile:CaloriesSection.kt$com.jacqulin.calcalc.feature.home.ui.home.sections.CaloriesSection.kt</ID>
+    <ID>NewLineAtEndOfFile:EditMealBottomSheet.kt$com.jacqulin.calcalc.feature.home.ui.home.sections.EditMealBottomSheet.kt</ID>
+    <ID>NewLineAtEndOfFile:FavoriteMealChooseScreen.kt$com.jacqulin.calcalc.feature.home.ui.favorite.FavoriteMealChooseScreen.kt</ID>
+    <ID>NewLineAtEndOfFile:FavoriteMealChooseViewModel.kt$com.jacqulin.calcalc.feature.home.ui.favorite.FavoriteMealChooseViewModel.kt</ID>
+    <ID>NewLineAtEndOfFile:HomeNavigation.kt$com.jacqulin.calcalc.feature.home.navigation.HomeNavigation.kt</ID>
+    <ID>NewLineAtEndOfFile:HomeScreen.kt$com.jacqulin.calcalc.feature.home.ui.home.HomeScreen.kt</ID>
+    <ID>NewLineAtEndOfFile:HomeUiEvent.kt$com.jacqulin.calcalc.feature.home.ui.home.HomeUiEvent.kt</ID>
+    <ID>NewLineAtEndOfFile:HomeUiState.kt$com.jacqulin.calcalc.feature.home.ui.home.HomeUiState.kt</ID>
+    <ID>NewLineAtEndOfFile:HomeViewModel.kt$com.jacqulin.calcalc.feature.home.ui.home.HomeViewModel.kt</ID>
+    <ID>NewLineAtEndOfFile:IngredientCard.kt$com.jacqulin.calcalc.feature.home.ui.review.components.IngredientCard.kt</ID>
+    <ID>NewLineAtEndOfFile:MacroDetailScreen.kt$com.jacqulin.calcalc.feature.home.ui.macrodetail.MacroDetailScreen.kt</ID>
+    <ID>NewLineAtEndOfFile:MacroDetailUiState.kt$com.jacqulin.calcalc.feature.home.ui.macrodetail.MacroDetailUiState.kt</ID>
+    <ID>NewLineAtEndOfFile:MacroDetailViewModel.kt$com.jacqulin.calcalc.feature.home.ui.macrodetail.MacroDetailViewModel.kt</ID>
+    <ID>NewLineAtEndOfFile:ManualAddMealScreen.kt$com.jacqulin.calcalc.feature.home.ui.manual.ManualAddMealScreen.kt</ID>
+    <ID>NewLineAtEndOfFile:ManualAddMealScreenViewModel.kt$com.jacqulin.calcalc.feature.home.ui.manual.ManualAddMealScreenViewModel.kt</ID>
+    <ID>NewLineAtEndOfFile:MealNameField.kt$com.jacqulin.calcalc.feature.home.ui.review.components.MealNameField.kt</ID>
+    <ID>NewLineAtEndOfFile:MealReviewLoading.kt$com.jacqulin.calcalc.feature.home.ui.review.components.MealReviewLoading.kt</ID>
+    <ID>NewLineAtEndOfFile:MealReviewScreen.kt$com.jacqulin.calcalc.feature.home.ui.review.MealReviewScreen.kt</ID>
+    <ID>NewLineAtEndOfFile:MealReviewScreenViewModel.kt$com.jacqulin.calcalc.feature.home.ui.review.MealReviewScreenViewModel.kt</ID>
+    <ID>NewLineAtEndOfFile:MealReviewUiState.kt$com.jacqulin.calcalc.feature.home.ui.review.MealReviewUiState.kt</ID>
+    <ID>NewLineAtEndOfFile:MealTypePickerDialog.kt$com.jacqulin.calcalc.feature.home.ui.home.sections.MealTypePickerDialog.kt</ID>
+    <ID>NewLineAtEndOfFile:MealWeightField.kt$com.jacqulin.calcalc.feature.home.ui.review.components.MealWeightField.kt</ID>
+    <ID>NewLineAtEndOfFile:NutrientsGrid.kt$com.jacqulin.calcalc.feature.home.ui.review.components.NutrientsGrid.kt</ID>
+    <ID>NewLineAtEndOfFile:ReviewMappers.kt$com.jacqulin.calcalc.feature.home.ui.review.mapper.ReviewMappers.kt</ID>
+    <ID>NewLineAtEndOfFile:TopOverlay.kt$com.jacqulin.calcalc.feature.home.ui.review.components.TopOverlay.kt</ID>
+    <ID>TooGenericExceptionCaught:AiMealDescriptionViewModel.kt$AiMealDescriptionViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:HomeViewModel.kt$HomeViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MealReviewScreenViewModel.kt$MealReviewScreenViewModel$e: Exception</ID>
+    <ID>TooManyFunctions:HomeViewModel.kt$HomeViewModel : ViewModel</ID>
+    <ID>TooManyFunctions:MealReviewScreenViewModel.kt$MealReviewScreenViewModel : ViewModel</ID>
+    <ID>UnusedPrivateMember:MealReviewScreenViewModel.kt$MealReviewScreenViewModel$private fun analyzeImageMock()</ID>
+    <ID>UnusedPrivateProperty:AiMealDescriptionScreen.kt$var expanded by remember { mutableStateOf(false) }</ID>
+    <ID>UseCheckOrError:MealReviewScreenViewModel.kt$MealReviewScreenViewModel$throw IllegalStateException("Failed to read image bytes")</ID>
+  </CurrentIssues>
+</SmellBaseline>

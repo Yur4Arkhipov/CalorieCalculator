@@ -24,11 +24,11 @@ data class OnboardingState(
     val weight: Int = 65,
     val gender: Gender = Gender.MALE,
     val goal: Goal = Goal.MAINTAIN,
-    val activityLevel: ActivityLevel = ActivityLevel.ACTIVE,
-    val calories: Int = 0,
-    val protein: Int = 0,
-    val fat: Int = 0,
-    val carbs: Int = 0
+    val activityLevel: ActivityLevel = ActivityLevel.MODERATE,
+    val calories: Int? = 0,
+    val protein: Int? = 0,
+    val fat: Int? = 0,
+    val carbs: Int? = 0
 )
 
 sealed interface OnboardingEvent {
@@ -41,10 +41,10 @@ sealed interface OnboardingEvent {
     data class UpdateAge(val age: Int) : OnboardingEvent
     data class UpdateHeight(val height: Int) : OnboardingEvent
     data class UpdateWeight(val weight: Int) : OnboardingEvent
-    data class UpdateCalories(val calories: Int) : OnboardingEvent
-    data class UpdateProtein(val protein: Int) : OnboardingEvent
-    data class UpdateFat(val fat: Int) : OnboardingEvent
-    data class UpdateCarbs(val carbs: Int) : OnboardingEvent
+    data class UpdateCalories(val calories: Int?) : OnboardingEvent
+    data class UpdateProtein(val protein: Int?) : OnboardingEvent
+    data class UpdateFat(val fat: Int?) : OnboardingEvent
+    data class UpdateCarbs(val carbs: Int?) : OnboardingEvent
 }
 
 @HiltViewModel
@@ -71,10 +71,10 @@ class OnboardingViewModel @Inject constructor(
             is OnboardingEvent.UpdateWeight -> _state.update { it.copy(weight = event.weight) }
             is OnboardingEvent.UpdateActivityLevel -> _state.update { it.copy(activityLevel = event.level) }
             is OnboardingEvent.UpdateGoal -> _state.update { it.copy(goal = event.goal) }
-            is OnboardingEvent.UpdateCalories -> _state.update { it.copy(calories = event.calories) }
-            is OnboardingEvent.UpdateProtein -> _state.update { it.copy(protein = event.protein) }
-            is OnboardingEvent.UpdateFat -> _state.update { it.copy(fat = event.fat) }
-            is OnboardingEvent.UpdateCarbs -> _state.update { it.copy(carbs = event.carbs) }
+            is OnboardingEvent.UpdateCalories -> _state.update { it.copy(calories = event.calories ?: 0) }
+            is OnboardingEvent.UpdateProtein -> _state.update { it.copy(protein = event.protein ?: 0) }
+            is OnboardingEvent.UpdateFat -> _state.update { it.copy(fat = event.fat ?: 0) }
+            is OnboardingEvent.UpdateCarbs -> _state.update { it.copy(carbs = event.carbs ?: 0) }
         }
     }
 
@@ -134,10 +134,10 @@ class OnboardingViewModel @Inject constructor(
                     gender = state.value.gender,
                     goal = state.value.goal,
                     activityLevel = state.value.activityLevel,
-                    caloriesGoal = state.value.calories,
-                    carbsGoal = state.value.carbs,
-                    fatGoal = state.value.fat,
-                    proteinGoal = state.value.protein
+                    caloriesGoal = state.value.calories ?: 0,
+                    carbsGoal = state.value.carbs ?: 0,
+                    fatGoal = state.value.fat ?: 0,
+                    proteinGoal = state.value.protein ?: 0
                 )
             )
             onboardingRepository.setOnboardingCompleted()

@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 import com.jacqulin.calcalc.core.designsystem.theme.Bulb
 import com.jacqulin.calcalc.core.domain.model.UserProfile
 
@@ -74,28 +75,28 @@ fun NutriGoalsCard(
                     label = stringResource(R.string.calories),
                     value = "${profile.caloriesGoal}",
                     unit = stringResource(R.string.calories_suffix),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = AppColors.proteinLight,
                     modifier = Modifier.weight(1f)
                 )
                 NutriItem(
                     label = stringResource(R.string.proteins),
                     value = "${profile.proteinGoal}",
                     unit = stringResource(R.string.weight_suffix),
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = AppColors.proteinLight,
                     modifier = Modifier.weight(1f)
                 )
                 NutriItem(
                     label = stringResource(R.string.carbs),
                     value = "${profile.carbsGoal}",
                     unit = stringResource(R.string.weight_suffix),
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = AppColors.proteinLight,
                     modifier = Modifier.weight(1f)
                 )
                 NutriItem(
                     label = stringResource(R.string.fats),
                     value = "${profile.fatGoal}",
                     unit = stringResource(R.string.weight_suffix),
-                    color = MaterialTheme.colorScheme.error,
+                    color = AppColors.proteinLight,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -168,7 +169,7 @@ private fun NutriItem(
             Text(
                 text = unit,
                 style = MaterialTheme.typography.labelSmall,
-                color = color.copy(alpha = 0.7f)
+                color = color
             )
             Text(
                 text = label,

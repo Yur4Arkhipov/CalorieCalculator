@@ -28,12 +28,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.extensions.displayName
 import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 import com.jacqulin.calcalc.core.designsystem.theme.CaloriesDark
 import com.jacqulin.calcalc.core.designsystem.theme.TextSecondary
@@ -104,7 +106,7 @@ fun MealCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${meal.calories} ккал",
+                        text = "${meal.calories} ${stringResource(R.string.calories_suffix)}",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = CaloriesDark
@@ -114,7 +116,7 @@ fun MealCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = meal.type.displayName,
+                            text = meal.type.displayName(),
                             style = MaterialTheme.typography.bodySmall,
                             color = TextSecondary
                         )
@@ -128,9 +130,21 @@ fun MealCard(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    MacroBadge(label = "Б", value = meal.proteins, color = AppColors.proteinMain)
-                    MacroBadge(label = "Ж", value = meal.fats, color = AppColors.fatMain)
-                    MacroBadge(label = "У", value = meal.carbs, color = AppColors.carbsMain)
+                    MacroBadge(
+                        label = stringResource(R.string.macro_protein_short),
+                        value = meal.proteins,
+                        color = AppColors.proteinMain
+                    )
+                    MacroBadge(
+                        label = stringResource(R.string.macro_fat_short),
+                        value = meal.fats,
+                        color = AppColors.fatMain
+                    )
+                    MacroBadge(
+                        label = stringResource(R.string.macro_carbs_short),
+                        value = meal.carbs,
+                        color = AppColors.carbsMain
+                    )
                 }
             }
         }
@@ -138,7 +152,7 @@ fun MealCard(
 }
 
 @Composable
-private fun MacroBadge(label: String, value: Int, color: Color) {
+fun MacroBadge(label: String, value: Int, color: Color) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -173,7 +187,7 @@ private fun MacroBadge(label: String, value: Int, color: Color) {
             }
         }
         Text(
-            text = "${value}г",
+            text = stringResource(R.string.macro_weight_format, value),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Normal,

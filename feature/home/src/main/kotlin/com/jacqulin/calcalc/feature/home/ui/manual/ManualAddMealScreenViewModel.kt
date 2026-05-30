@@ -101,13 +101,14 @@ class ManualAddMealScreenViewModel @Inject constructor(
                 val fats = state.fats.toIntOrNull()
                 val carbs = state.carbs.toIntOrNull()
 
-                if (
+                val hasInvalidInput =
                     state.mealName.isBlank() ||
                     calories == null ||
                     proteins == null ||
                     fats == null ||
                     carbs == null
-                ) {
+
+                if (hasInvalidInput) {
                     _effect.send(
                         UiEffect.ShowSnackbar(
                             messageCode = SnackbarMessageCode.MEAL_SAVE_ERROR,
