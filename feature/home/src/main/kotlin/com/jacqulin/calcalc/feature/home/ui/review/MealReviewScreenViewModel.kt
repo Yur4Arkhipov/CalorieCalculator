@@ -54,8 +54,8 @@ class MealReviewScreenViewModel @Inject constructor(
     val effect = _effect.receiveAsFlow()
 
     init {
-        analyzeImage()
-//        analyzeImageMock()
+//        analyzeImage()
+        analyzeImageMock()
     }
 
     private fun analyzeImage() {
@@ -197,7 +197,7 @@ class MealReviewScreenViewModel @Inject constructor(
                     fats = currentState.fats.toIntOrNull() ?: 0,
                     carbs = currentState.carbs.toIntOrNull() ?: 0,
                     time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
-                    type = MealType.BREAKFAST,
+                    type = currentState.selectedMealType,
                     imageUri = savedPath,
                     isFavorite = false,
                     ingredient = currentState.ingredients.toDomainIngredients()
@@ -319,7 +319,8 @@ class MealReviewScreenViewModel @Inject constructor(
                                 fat = ingredient.fat.toString(),
                                 carb = ingredient.carb.toString()
                             )
-                        }
+                        },
+                        description = ""
                     )
                 }
             } catch (e: Exception) {
@@ -354,13 +355,7 @@ class MealReviewScreenViewModel @Inject constructor(
         )
     }
 
-//    fun discard(onCancel: () -> Unit) {
-//        viewModelScope.launch {
-//            _uiState.value.meal?.imageUri?.let { uri ->
-//                imageRepository.deleteCameraFile(uri.toUri())
-//            }
-//            imageRepository.clearCachedImageUri(cacheKey)
-//            onCancel()
-//        }
-//    }
+    fun onMealTypeSelected(type: MealType) {
+        _uiState.value = _uiState.value.copy(selectedMealType = type)
+    }
 }

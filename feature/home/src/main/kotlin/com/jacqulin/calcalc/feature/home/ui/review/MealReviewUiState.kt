@@ -1,5 +1,7 @@
 package com.jacqulin.calcalc.feature.home.ui.review
 
+import com.jacqulin.calcalc.core.domain.model.MealType
+
 data class MealReviewUiState(
     val isLoading: Boolean = false,
     val isError: String? = null,
@@ -12,6 +14,7 @@ data class MealReviewUiState(
     val weight: String = "",
     val ingredients: List<IngredientUi> = emptyList(),
     val description: String = "",
+    val selectedMealType: MealType = MealType.BREAKFAST,
     val isProcessingDescription: Boolean = false
 
 )

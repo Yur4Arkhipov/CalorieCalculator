@@ -13,6 +13,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -58,7 +60,9 @@ import coil.compose.AsyncImage
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.AddMealSnackbar
 import com.jacqulin.calcalc.core.designsystem.component.AiDescriptionTextField
+import com.jacqulin.calcalc.core.designsystem.component.MealTypeCard
 import com.jacqulin.calcalc.core.designsystem.theme.reviewLoadingColor
+import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
 import com.jacqulin.calcalc.core.util.effects.UiEffect
 import com.jacqulin.calcalc.feature.home.ui.review.components.IngredientCard
@@ -226,6 +230,30 @@ fun MealReviewScreen(
                             nameFocusRequester = nameFocusRequester,
                             keyboardController = keyboardController
                         )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                modifier = Modifier.widthIn(max = 360.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                MealType.entries.forEach { mealType ->
+                                    MealTypeCard(
+                                        mealType = mealType,
+                                        isSelected = uiState.selectedMealType == mealType,
+                                        onClick = {
+                                            focusManager.clearFocus(force = true)
+                                            viewModel.onMealTypeSelected(mealType)
+                                        },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                        }
 
                         Spacer(modifier = Modifier.height(8.dp))
 
