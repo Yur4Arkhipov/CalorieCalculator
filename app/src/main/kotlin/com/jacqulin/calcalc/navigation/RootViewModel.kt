@@ -15,13 +15,17 @@ class RootViewModel @Inject constructor(
     onboardingRepository: OnboardingRepository
 ) : ViewModel() {
 
+    private companion object {
+        const val STOP_TIMEOUT_MILLIS = 5_000L
+    }
+
     val uiState: StateFlow<RootUiState> = onboardingRepository.isOnboardingCompleted
         .map { completed ->
             if (completed) RootUiState.Main else RootUiState.Onboarding
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
             initialValue = RootUiState.Loading
         )
 }

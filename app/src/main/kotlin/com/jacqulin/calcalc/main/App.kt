@@ -15,8 +15,8 @@ import com.jacqulin.calcalc.navigation.AppNavHost
 @Composable
 fun App(appState: AppState) {
 
-    val currentDestination = appState.currentDestination
-    val currentTopLevel = appState.currentTopLevelDestination
+//    val currentDestination = appState.currentDestination
+//    val currentTopLevel = appState.currentTopLevelDestination
     val bottomBarItems = appState.topLevelDestinations.map { destination ->
         BottomBarItem(
             iconRes = destination.iconRes,
