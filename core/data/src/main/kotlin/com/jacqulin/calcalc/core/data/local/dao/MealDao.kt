@@ -29,8 +29,8 @@ interface MealDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertIngredients(ingredients: List<IngredientEntity>)
 
-//    @Query("SELECT * FROM ingredient WHERE mealId = :mealId")
-//    suspend fun getIngredientsByMealId(mealId: Int): List<IngredientEntity>
+    @Query("UPDATE meal SET isFavorite = 0 WHERE id IN (:ids)")
+    suspend fun removeFromFavorites(ids: List<Int>)
 
     @Update
     suspend fun updateMeal(meal: MealEntity)

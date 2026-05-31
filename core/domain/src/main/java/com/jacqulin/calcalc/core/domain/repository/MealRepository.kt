@@ -11,4 +11,5 @@ interface MealRepository {
     suspend fun addMeal(date: Date, meal: Meal)
     suspend fun updateMeal(meal: Meal)
     suspend fun deleteMeal(meal: Meal)
+    suspend fun removeFromFavorites(ids: List<Int>)
 }
