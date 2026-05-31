@@ -241,7 +241,7 @@ fun AiMealDescriptionScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(R.string.home_ai_text_analyze_error),
+                            text = uiState.error ?: stringResource(R.string.home_ai_text_analyze_error),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.weight(1f)

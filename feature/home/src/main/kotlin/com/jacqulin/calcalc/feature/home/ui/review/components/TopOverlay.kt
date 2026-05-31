@@ -20,6 +20,7 @@ import com.jacqulin.calcalc.core.designsystem.theme.AppOnPrimary
 @Composable
 fun TopOverlay(
     modifier: Modifier = Modifier,
+    isError: Boolean,
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -47,17 +48,19 @@ fun TopOverlay(
             )
         }
 
-        IconButton(
-            onClick = onSaveClick,
-            colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Transparent),
-            modifier = buttonModifier
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_check),
-                contentDescription = null,
-                tint = Color.Black,
-                modifier = Modifier.size(24.dp)
-            )
+        if (!isError) {
+            IconButton(
+                onClick = onSaveClick,
+                colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Transparent),
+                modifier = buttonModifier
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_check),
+                    contentDescription = null,
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }

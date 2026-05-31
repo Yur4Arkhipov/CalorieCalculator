@@ -8,8 +8,10 @@ import com.jacqulin.calcalc.core.domain.model.Nutrition
 import com.jacqulin.calcalc.core.domain.usecase.AnalyzeMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
+import com.jacqulin.calcalc.core.util.Result
 import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
 import com.jacqulin.calcalc.core.util.effects.UiEffect
+import com.jacqulin.calcalc.core.util.errors.ErrorUiMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,14 +60,17 @@ class AiMealDescriptionViewModel @Inject constructor(
     fun onAnalyze() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isProcessing = true, error = null, result = null)
-            try {
-                val nutrition = analyzeMealUseCase(_uiState.value.description)
-                _uiState.value = _uiState.value.copy(isProcessing = false, result = nutrition)
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isProcessing = false,
-                    error = e.localizedMessage
-                )
+            when(val result = analyzeMealUseCase(_uiState.value.description)) {
+                is Result.Success -> {
+                    _uiState.value = _uiState.value.copy(isProcessing = false, result = result.data)
+                }
+                is Result.Error -> {
+                    val message = ErrorUiMapper.toMessage(result.error)
+                    _uiState.value = _uiState.value.copy(
+                        isProcessing = false,
+                        error = message
+                    )
+                }
             }
         }
     }

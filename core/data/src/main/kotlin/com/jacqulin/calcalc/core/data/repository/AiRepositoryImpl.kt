@@ -1,5 +1,6 @@
 ﻿package com.jacqulin.calcalc.core.data.repository
 
+import android.util.Log
 import com.jacqulin.calcalc.core.data.remote.dto.NutritionDto
 import com.jacqulin.calcalc.core.data.remote.dto.toDomain
 import com.jacqulin.calcalc.core.data.remote.dto.yandex.YandexChatRequest
@@ -12,7 +13,9 @@ import com.jacqulin.calcalc.core.data.remote.service.YandexAiApi
 import com.jacqulin.calcalc.core.domain.model.Nutrition
 import com.jacqulin.calcalc.core.domain.model.toJsonString
 import com.jacqulin.calcalc.core.domain.repository.AiRepository
-import com.jacqulin.calcalc.core.util.NotFoodException
+import com.jacqulin.calcalc.core.util.Result
+import com.jacqulin.calcalc.core.util.errors.AppError
+import com.jacqulin.calcalc.core.util.errors.ErrorHandler
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -71,7 +74,7 @@ class AiRepositoryImpl @Inject constructor(
           "protein": number,
           "fat": number,
           "carb": number,
-          "ingredients": [
+          "ingredient": [
             {
               "name": "string",
               "weight": number,
@@ -143,22 +146,29 @@ class AiRepositoryImpl @Inject constructor(
         "required" to listOf("name", "weight", "calories", "protein", "fat", "carb", "ingredient")
     )
 
-    override suspend fun analyzeMeal(description: String): Nutrition {
-        val request = buildTextRequest(description)
-        val response = aiApi.chat(request)
+    override suspend fun analyzeMeal(description: String): Result<Nutrition, AppError> {
+        return try {
+            val request = buildTextRequest(description)
+            val response = aiApi.chat(request)
 
-        val content = response.choices
-            .firstOrNull()
-            ?.message
-            ?.content
-            ?: error("AI returned empty response")
+            val content = response.choices
+                .firstOrNull()
+                ?.message
+                ?.content
+                ?: error("AI returned empty response")
 
-        val dto = Json.decodeFromString<NutritionDto>(content)
-        if (dto.name?.trim()?.lowercase() == "not_food") throw NotFoodException()
-        return dto.toDomain()
+            val dto = Json.decodeFromString<NutritionDto>(content)
+            if (dto.name?.trim()?.lowercase() == "not_food") {
+                return Result.Error(AppError.NotFood)
+            }
+            Result.Success(dto.toDomain())
+        } catch (e: Throwable) {
+            Result.Error(ErrorHandler.mapError(e))
+        }
     }
 
-    override suspend fun analyzeMealFromImage(imageBase64: String): Nutrition {
+    override suspend fun analyzeMealFromImage(imageBase64: String): Result <Nutrition, AppError> {
+        return try {
             val request = buildImageRequest(imageBase64)
             val response = aiApi.chat(request)
 
@@ -169,34 +179,39 @@ class AiRepositoryImpl @Inject constructor(
                 ?: error("AI returned empty response")
 
             val dto = Json.decodeFromString<NutritionDto>(content)
-            if (dto.name?.trim()?.lowercase() == "not_food") throw NotFoodException()
-            return dto.toDomain()
+            if (dto.name?.trim()?.lowercase() == "not_food") {
+                return Result.Error(AppError.NotFood)
+            }
+            Result.Success( dto.toDomain())
+        } catch (e: Throwable) {
+            Log.e("AI_PARSE", "Error", e)
+            Result.Error(ErrorHandler.mapError(e))
+        }
     }
 
     override suspend fun refineMeal(
         currentMeal: Nutrition,
         userPrompt: String
-    ): Nutrition {
-        val request = buildRefineRequest(
-            currentMeal = currentMeal,
-            userPrompt = userPrompt
-        )
-
-        val response = aiApi.chat(request)
-
-        val content = response.choices
-            .firstOrNull()
-            ?.message
-            ?.content
-            ?: error("AI returned empty response")
-
-        val dto = Json.decodeFromString<NutritionDto>(content)
-
-        if (dto.name?.trim()?.lowercase() == "not_food") {
-            throw NotFoodException()
+    ): Result<Nutrition, AppError> {
+        return try {
+            val request = buildRefineRequest(
+                currentMeal = currentMeal,
+                userPrompt = userPrompt
+            )
+            val response = aiApi.chat(request)
+            val content = response.choices
+                .firstOrNull()
+                ?.message
+                ?.content
+                ?: error("AI returned empty response")
+            val dto = Json.decodeFromString<NutritionDto>(content)
+            if (dto.name?.trim()?.lowercase() == "not_food") {
+                return Result.Error(AppError.NotFood)
+            }
+            Result.Success(dto.toDomain())
+        } catch (e: Throwable) {
+            Result.Error(ErrorHandler.mapError(e))
         }
-
-        return dto.toDomain()
     }
 
     private fun buildTextRequest(description: String) =

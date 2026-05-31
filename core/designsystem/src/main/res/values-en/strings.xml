@@ -99,6 +99,7 @@
     <string name="review_meal_weight_desc">AI Rating - Can Be Changed</string>
     <string name="review_meal_ai_desc">You can add or edit information:</string>
     <string name="review_meal_ingredients">Ingredients</string>
+    <string name="review_meal_retry_send">Повторить</string>
 
     // Effects
     <string name="effect_meal_saved">"The dish is saved!"</string>

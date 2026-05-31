@@ -5,7 +5,7 @@ data class YandexChatRequest(
     val messages: List<YandexMessage>,
     val response_format: YandexResponseFormat? = null,
 //    val temperature: Double = 0.3,
-    val max_completion_tokens: Int = 500
+    val max_completion_tokens: Int = 1000
 )
 
 data class YandexMessage(
