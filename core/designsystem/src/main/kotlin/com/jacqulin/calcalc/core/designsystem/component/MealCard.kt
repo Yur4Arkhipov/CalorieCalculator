@@ -2,6 +2,7 @@ package com.jacqulin.calcalc.core.designsystem.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,17 +58,23 @@ fun MealCard(
         else
             MaterialTheme.colorScheme.surface
 
+    val clickableModifier =
+        if (isSelectionEnabled) {
+            Modifier.combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
+        } else {
+            Modifier.clickable(
+                onClick = onClick
+            )
+        }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = {
-                    if (isSelectionEnabled) {
-                        onLongClick()
-                    }
-                }
-            ),
+            .clip(RoundedCornerShape(16.dp))
+            .then(clickableModifier),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor
