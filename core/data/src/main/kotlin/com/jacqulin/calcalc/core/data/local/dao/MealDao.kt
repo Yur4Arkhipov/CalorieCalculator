@@ -21,7 +21,7 @@ interface MealDao {
     fun observeFavoriteMeals(): Flow<List<MealEntity>>
 
     @Query("SELECT * FROM meal WHERE id = :id LIMIT 1")
-    suspend fun getMealById(id: Int): MealEntity?
+    suspend fun getMealById(id: Int): MealEntity
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMeal(meal: MealEntity): Long

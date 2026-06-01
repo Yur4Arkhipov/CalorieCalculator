@@ -11,6 +11,7 @@ import com.jacqulin.calcalc.core.data.usecase.ObserveUserProfileUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.SaveManualAddMealDBUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.SetSelectedDateUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.DeleteMealUseCaseImpl
+import com.jacqulin.calcalc.core.data.usecase.GetMealDetailUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.RefineMealUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.UpdateMealUseCaseImpl
 import com.jacqulin.calcalc.core.domain.repository.AiRepository
@@ -30,6 +31,7 @@ import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SetSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.DeleteMealUseCase
+import com.jacqulin.calcalc.core.domain.usecase.GetMealDetailUseCase
 import com.jacqulin.calcalc.core.domain.usecase.RefineMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.UpdateMealUseCase
 import dagger.Module
@@ -113,5 +115,12 @@ object UseCaseModule {
         aiRepository: AiRepository
     ): RefineMealUseCase {
         return RefineMealUseCaseImpl(aiRepository)
+    }
+
+    @Provides
+    fun provideGetMealDetailUseCase(
+        mealRepository: MealRepository
+    ): GetMealDetailUseCase {
+        return GetMealDetailUseCaseImpl(mealRepository)
     }
 }

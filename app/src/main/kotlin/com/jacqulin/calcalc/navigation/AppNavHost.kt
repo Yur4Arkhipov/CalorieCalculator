@@ -9,6 +9,7 @@ import com.jacqulin.calcalc.feature.home.navigation.navigateToAiMealDescription
 import com.jacqulin.calcalc.feature.home.navigation.navigateToFavoriteChoose
 import com.jacqulin.calcalc.feature.home.navigation.navigateToMacroDetail
 import com.jacqulin.calcalc.feature.home.navigation.navigateToManualAddMeal
+import com.jacqulin.calcalc.feature.home.navigation.navigateToMealDetail
 import com.jacqulin.calcalc.feature.home.navigation.navigateToMealReview
 import com.jacqulin.calcalc.feature.profile.navigation.profileScreen
 import com.jacqulin.calcalc.feature.statistics.navigation.statisticsScreen
@@ -41,6 +42,9 @@ fun AppNavHost(
             },
             onNavigateToMealReview = { tempImage ->
                 navController.navigateToMealReview(tempImage)
+            },
+            onNavigateToMealDetail = { mealId ->
+                navController.navigateToMealDetail(mealId)
             },
             onBackClick = navController::popBackStack
         )

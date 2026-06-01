@@ -89,7 +89,7 @@ class MealRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateMeal(meal: Meal) {
-        val existing = mealDao.getMealById(meal.id) ?: return
+        val existing = mealDao.getMealById(meal.id)
         mealDao.updateMeal(
             existing.copy(
                 name = meal.name,
@@ -104,11 +104,15 @@ class MealRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteMeal(meal: Meal) {
-        val existing = mealDao.getMealById(meal.id) ?: return
+        val existing = mealDao.getMealById(meal.id)
         mealDao.deleteMeal(existing)
     }
 
     override suspend fun removeFromFavorites(ids: List<Int>) {
         mealDao.removeFromFavorites(ids)
+    }
+
+    override suspend fun getMealDetail(mealId: Int): Meal {
+        return mealDao.getMealById(mealId).toDomain()
     }
 }
