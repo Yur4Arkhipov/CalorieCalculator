@@ -1,4 +1,4 @@
-package com.jacqulin.calcalc.feature.home.ui.review.components
+package com.jacqulin.calcalc.core.designsystem.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +21,7 @@ import com.jacqulin.calcalc.core.designsystem.theme.AppOnPrimary
 fun TopOverlay(
     modifier: Modifier = Modifier,
     isError: Boolean,
+    isSaveIconEnable: Boolean,
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -48,7 +49,7 @@ fun TopOverlay(
             )
         }
 
-        if (!isError) {
+        if (!isError && isSaveIconEnable) {
             IconButton(
                 onClick = onSaveClick,
                 colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Transparent),

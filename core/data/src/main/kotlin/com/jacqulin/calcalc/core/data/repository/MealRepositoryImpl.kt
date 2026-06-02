@@ -4,6 +4,7 @@ import com.jacqulin.calcalc.core.data.local.dao.MealDao
 import com.jacqulin.calcalc.core.data.local.entities.IngredientEntity
 import com.jacqulin.calcalc.core.data.local.entities.MealEntity
 import com.jacqulin.calcalc.core.data.local.entities.toDomain
+import com.jacqulin.calcalc.core.data.local.models.toDomain
 import com.jacqulin.calcalc.core.domain.model.DayData
 import com.jacqulin.calcalc.core.domain.model.MacroNutrients
 import com.jacqulin.calcalc.core.domain.model.Meal
@@ -113,6 +114,8 @@ class MealRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getMealDetail(mealId: Int): Meal {
-        return mealDao.getMealById(mealId).toDomain()
+        return mealDao
+            .getMealWithIngredients(mealId)
+            .toDomain()
     }
 }

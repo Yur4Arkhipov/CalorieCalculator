@@ -61,6 +61,7 @@ import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.AddMealSnackbar
 import com.jacqulin.calcalc.core.designsystem.component.AiDescriptionTextField
 import com.jacqulin.calcalc.core.designsystem.component.MealTypeCard
+import com.jacqulin.calcalc.core.designsystem.component.TopOverlay
 import com.jacqulin.calcalc.core.designsystem.theme.Red
 import com.jacqulin.calcalc.core.designsystem.theme.reviewLoadingColor
 import com.jacqulin.calcalc.core.domain.model.MealType
@@ -72,7 +73,6 @@ import com.jacqulin.calcalc.feature.home.ui.review.components.MealReviewError
 import com.jacqulin.calcalc.feature.home.ui.review.components.MealReviewLoading
 import com.jacqulin.calcalc.feature.home.ui.review.components.MealWeightField
 import com.jacqulin.calcalc.feature.home.ui.review.components.NutrientsGrid
-import com.jacqulin.calcalc.feature.home.ui.review.components.TopOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -192,6 +192,7 @@ fun MealReviewScreen(
                             )
                             .align(Alignment.TopCenter),
                         isError = uiState.isError,
+                        isSaveIconEnable = true,
                         onSaveClick = { viewModel.saveMeal() },
                         onBackClick = onBackClick
                     )

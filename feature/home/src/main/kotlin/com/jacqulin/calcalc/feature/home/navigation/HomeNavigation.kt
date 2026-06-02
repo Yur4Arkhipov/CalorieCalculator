@@ -107,7 +107,9 @@ fun NavGraphBuilder.homeSection(
         }
 
         composable<MealDetailRoute> {
-            MealDetailScreen()
+            MealDetailScreen(
+                onBackClick = onBackClick
+            )
         }
     }
 }

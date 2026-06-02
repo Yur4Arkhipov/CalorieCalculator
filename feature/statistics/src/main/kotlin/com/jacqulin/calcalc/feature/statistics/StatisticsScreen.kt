@@ -97,7 +97,7 @@ fun StatisticsScreen(
                                 )
                                 Box(
                                     modifier = Modifier
-                                        .height(40.dp)
+                                        .height(28.dp)
                                         .widthIn(min = 80.dp)
                                         .clip(RoundedCornerShape(32.dp))
                                         .background(SelectedToRemoveLightRed)
@@ -113,7 +113,7 @@ fun StatisticsScreen(
                                             painter = painterResource(R.drawable.ic_remove),
                                             contentDescription = "Удалить",
                                             tint = White,
-                                            modifier = Modifier.height(16.dp)
+                                            modifier = Modifier.height(12.dp)
                                         )
                                     }
                                 }

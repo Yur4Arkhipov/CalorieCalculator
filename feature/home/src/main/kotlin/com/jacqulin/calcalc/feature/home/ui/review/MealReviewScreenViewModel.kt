@@ -209,6 +209,7 @@ class MealReviewScreenViewModel @Inject constructor(
 
                 val meal = Meal(
                     name = currentState.name,
+                    weight = currentState.weight.toIntOrNull() ?: 0,
                     calories = currentState.calories.toIntOrNull() ?: 0,
                     proteins = currentState.proteins.toIntOrNull() ?: 0,
                     fats = currentState.fats.toIntOrNull() ?: 0,
