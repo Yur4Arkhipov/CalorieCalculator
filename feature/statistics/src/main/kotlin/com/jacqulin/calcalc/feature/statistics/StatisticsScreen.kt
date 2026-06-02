@@ -110,8 +110,8 @@ fun StatisticsScreen(
                                         modifier = Modifier.padding(horizontal = 12.dp)
                                     ) {
                                         Icon(
-                                            painter = painterResource(R.drawable.ic_remove),
-                                            contentDescription = "Удалить",
+                                            painter = painterResource(R.drawable.ic_cancel),
+                                            contentDescription = "Убрать из избранного",
                                             tint = White,
                                             modifier = Modifier.height(12.dp)
                                         )

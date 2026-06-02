@@ -51,6 +51,8 @@ class HomeViewModel @Inject constructor(
     private val currentWeekIndexFlow = MutableStateFlow(0)
     private val editingMealFlow = MutableStateFlow<Pair<Meal?, Boolean>>(Pair(null, false))
 
+    private val _selectedMealIds = MutableStateFlow<Set<Int>>(emptySet())
+
     private val _uiEvents = Channel<HomeUiEvent>(Channel.BUFFERED)
     val uiEvents = _uiEvents.receiveAsFlow()
 
@@ -79,8 +81,9 @@ class HomeViewModel @Inject constructor(
                 combine(
                     getDayDataUseCase(selectedDate),
                     weeksFlow,
-                    editingMealFlow
-                ) { dayData, weeks, editingPair ->
+                    editingMealFlow,
+                    _selectedMealIds
+                ) { dayData, weeks, editingPair, selectedIds ->
 
                     val consumedCalories = dayData.meals.sumOf { it.calories }
 
@@ -97,6 +100,8 @@ class HomeViewModel @Inject constructor(
                         fatsGoal = profile.fatGoal
                     )
 
+                    Log.d("Selection", "combine=$selectedIds")
+
                     HomeUiState(
                         selectedDate = selectedDate,
                         weeks = updatedWeeks,
@@ -110,7 +115,8 @@ class HomeViewModel @Inject constructor(
                             .coerceAtLeast(0),
                         editingMeal = editingPair.first,
                         isEditingSheetOpen = editingPair.second,
-                        isLoading = false
+                        isLoading = false,
+                        selectedMealIds = selectedIds
                     )
                 }
             }
@@ -130,7 +136,7 @@ class HomeViewModel @Inject constructor(
         currentWeekIndexFlow.value = weekIndex
     }
 
-    fun onEditMeal(meal: Meal) {
+    private fun onEditMeal(meal: Meal) {
         editingMealFlow.value = Pair(meal, true)
     }
 
@@ -145,11 +151,18 @@ class HomeViewModel @Inject constructor(
         editingMealFlow.value = Pair(null, false)
     }
 
+    private suspend fun deleteMeal(meal: Meal) {
+        deleteMealUseCase(meal)
+
+        meal.imageUri?.let {
+            imageRepository.deleteImage(it)
+        }
+    }
+
     fun onDeleteMeal(meal: Meal) {
         viewModelScope.launch {
             try {
-                deleteMealUseCase(meal)
-                meal.imageUri?.let { imageRepository.deleteImage(it) }
+                deleteMeal(meal)
             } catch (e: Exception) {
                 Log.d("DeleteMeal", "Error delete: $e")
             }
@@ -194,6 +207,52 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             val temp = imageRepository.copyUriToTemp(uri)
             _uiEvents.send(HomeUiEvent.NavigateToMealReview(temp))
+        }
+    }
+
+    fun clearSelection() {
+        _selectedMealIds.value = emptySet()
+    }
+
+    fun onMealLongClick(meal: Meal) {
+        Log.d("Selection", "Long click ${meal.id}")
+        if (_selectedMealIds.value.isEmpty()) {
+            _selectedMealIds.value = setOf(meal.id)
+        }
+        Log.d("Selection", "selected=${_selectedMealIds.value}")
+    }
+
+    fun onMealClick(meal: Meal) {
+        val selected = _selectedMealIds.value
+
+        if (selected.isEmpty()) {
+            onEditMeal(meal)
+        } else {
+            _selectedMealIds.value =
+                if (meal.id in selected) {
+                    selected - meal.id
+                } else {
+                    selected + meal.id
+                }
+        }
+    }
+
+    fun deleteSelected() {
+        viewModelScope.launch {
+            try {
+                val selectedIds = _selectedMealIds.value
+
+                uiState.value.mealsToday
+                    .filter { it.id in selectedIds }
+                    .forEach { meal ->
+                        deleteMeal(meal)
+                    }
+
+                _selectedMealIds.value = emptySet()
+
+            } catch (e: Exception) {
+                Log.d("DeleteMeal", "Error delete: $e")
+            }
         }
     }
 
