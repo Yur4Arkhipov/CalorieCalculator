@@ -94,12 +94,14 @@ class MealRepositoryImpl @Inject constructor(
         mealDao.updateMeal(
             existing.copy(
                 name = meal.name,
+                weight = meal.weight,
                 calories = meal.calories,
                 protein = meal.proteins,
                 fat = meal.fats,
                 carbs = meal.carbs,
                 imageUri = meal.imageUri,
-                isFavorite = meal.isFavorite
+                isFavorite = meal.isFavorite,
+                type = meal.type
             )
         )
     }

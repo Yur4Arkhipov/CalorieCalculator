@@ -142,49 +142,49 @@ fun HomeScreen(
         }
     }
 
-    val isAtBottom by remember {
-        derivedStateOf {
-            val layoutInfo = lazyListState.layoutInfo
-            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-            lastVisibleItem != null &&
-                    lastVisibleItem.index == layoutInfo.totalItemsCount - 1 &&
-                    lastVisibleItem.offset + lastVisibleItem.size <= layoutInfo.viewportEndOffset
-        }
-    }
-    var fabHeight by remember { mutableFloatStateOf(0f) }
-    var fabOffsetY by remember { mutableFloatStateOf(0f) }
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(
-                available: Offset,
-                source: NestedScrollSource
-            ): Offset {
-                val delta = available.y
-                if (isAtBottom) {
-                    fabOffsetY = (fabOffsetY - delta)
-                        .coerceIn(0f, fabHeight)
-                }
-
-                return Offset.Zero
-            }
-
-            override suspend fun onPostFling(
-                consumed: Velocity,
-                available: Velocity
-            ): Velocity {
-                if (fabOffsetY > 0f) {
-                    animate(
-                        initialValue = fabOffsetY,
-                        targetValue = 0f
-                    ) { value, _ ->
-                        fabOffsetY = value
-                    }
-                }
-
-                return Velocity.Zero
-            }
-        }
-    }
+//    val isAtBottom by remember {
+//        derivedStateOf {
+//            val layoutInfo = lazyListState.layoutInfo
+//            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+//            lastVisibleItem != null &&
+//                    lastVisibleItem.index == layoutInfo.totalItemsCount - 1 &&
+//                    lastVisibleItem.offset + lastVisibleItem.size <= layoutInfo.viewportEndOffset
+//        }
+//    }
+//    var fabHeight by remember { mutableFloatStateOf(0f) }
+//    var fabOffsetY by remember { mutableFloatStateOf(0f) }
+//    val nestedScrollConnection = remember {
+//        object : NestedScrollConnection {
+//            override fun onPreScroll(
+//                available: Offset,
+//                source: NestedScrollSource
+//            ): Offset {
+//                val delta = available.y
+//                if (isAtBottom) {
+//                    fabOffsetY = (fabOffsetY - delta)
+//                        .coerceIn(0f, fabHeight)
+//                }
+//
+//                return Offset.Zero
+//            }
+//
+//            override suspend fun onPostFling(
+//                consumed: Velocity,
+//                available: Velocity
+//            ): Velocity {
+//                if (fabOffsetY > 0f) {
+//                    animate(
+//                        initialValue = fabOffsetY,
+//                        targetValue = 0f
+//                    ) { value, _ ->
+//                        fabOffsetY = value
+//                    }
+//                }
+//
+//                return Velocity.Zero
+//            }
+//        }
+//    }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
@@ -282,8 +282,8 @@ fun HomeScreen(
                     state = lazyListState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .nestedScroll(nestedScrollConnection),
+                        .background(MaterialTheme.colorScheme.background),
+//                        .nestedScroll(nestedScrollConnection),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(
                         bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 60.dp
@@ -313,25 +313,29 @@ fun HomeScreen(
                     }
                 }
 
-                AnimatedVisibility(
-                    visible = true,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 60.dp, end = 12.dp)
-                        .navigationBarsPadding()
-                        .onGloballyPositioned {
-                            fabHeight = it.size.height.toFloat()
-                        }
-                        .graphicsLayer {
-                            translationY = fabOffsetY
-                        }
-                ) {
+//                AnimatedVisibility(
+//                    visible = true,
+//                    modifier = Modifier
+//                        .align(Alignment.BottomEnd)
+//                        .padding(bottom = 60.dp, end = 12.dp)
+//                        .navigationBarsPadding()
+//                        .onGloballyPositioned {
+//                            fabHeight = it.size.height.toFloat()
+//                        }
+//                        .graphicsLayer {
+//                            translationY = fabOffsetY
+//                        }
+//                ) {
                     FloatingActionButton(
                         icon = painterResource(R.drawable.ic_add),
                         contentDescription = stringResource(R.string.home_add_meal),
                         onClick = { showAddFoodSheet = true },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(bottom = 40.dp, end = 12.dp)
+                            .navigationBarsPadding()
                     )
-                }
+//                }
 
                 if (showAddFoodSheet) {
                     AddMealBottomSheet(
