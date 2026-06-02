@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,7 +40,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -80,7 +78,6 @@ import com.jacqulin.calcalc.core.domain.model.TempImage
 import com.jacqulin.calcalc.feature.home.ui.home.sections.AddMealBottomSheet
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CalendarSection
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CaloriesSection
-import com.jacqulin.calcalc.feature.home.ui.home.sections.EditMealBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,12 +88,12 @@ fun HomeScreen(
     onNavigateToManualAddMeal: () -> Unit = {},
     onNavigateToAddFavoriteMeal: () -> Unit = {},
     onNavigateToMealReview: (TempImage) -> Unit,
+    onNavigateToMealDetail: (Int) -> Unit = { },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddFoodSheet by remember { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
     var cameraSession by remember { mutableStateOf<TempImage?>(null) }
-    val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showRationaleDialog by remember { mutableStateOf(false) }
     var showPermanentDeniedDialog by remember { mutableStateOf(false) }
 
@@ -310,7 +307,8 @@ fun HomeScreen(
                             onDetailClick = onNavigateToMacroDetail,
                             onMealClick = viewModel::onMealClick,
                             onMealLongClick = viewModel::onMealLongClick,
-                            onDeleteClick = viewModel::deleteSelected
+                            onDeleteClick = viewModel::deleteSelected,
+                            onNavigateToMealDetail = onNavigateToMealDetail
                         )
                     }
                 }
@@ -360,16 +358,6 @@ fun HomeScreen(
                         onDismiss = { showAddFoodSheet = false }
                     )
                 }
-
-                if (uiState.isEditingSheetOpen && uiState.editingMeal != null) {
-                    EditMealBottomSheet(
-                        meal = uiState.editingMeal!!,
-                        sheetState = editSheetState,
-                        onDismiss = viewModel::onDismissEditMeal,
-                        onSave = viewModel::onUpdateMeal,
-                        onDelete = viewModel::onDeleteMeal
-                    )
-                }
             }
         }
     }
@@ -382,7 +370,8 @@ private fun TodayMealsSection(
     onDetailClick: () -> Unit = {},
     onDeleteClick: () -> Unit = {},
     onMealClick: (Meal) -> Unit = {},
-    onMealLongClick: (Meal) -> Unit = {}
+    onMealLongClick: (Meal) -> Unit = {},
+    onNavigateToMealDetail: (Int) -> Unit
 ) {
     val isSelectionMode = selectedMealIds.isNotEmpty()
 
@@ -462,11 +451,15 @@ private fun TodayMealsSection(
                         meal = meal,
                         isSelectionEnabled = isSelectionMode,
                         isSelected = meal.id in selectedMealIds,
-                        onClick = { onMealClick(meal) },
+                        onClick = {
+                            if (isSelectionMode) {
+                                onMealClick(meal)
+                            } else {
+                                onNavigateToMealDetail(meal.id)
+                            }
+                        },
                         onLongClick = {
                             onMealLongClick(meal)
-                            Log.d("Selection", "UI long click ${meal.id}")
-                            Log.d("Selection", "UI long click ${meal.id}")
                         }
                     )
                 }

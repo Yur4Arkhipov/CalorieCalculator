@@ -13,7 +13,6 @@ import com.jacqulin.calcalc.core.domain.usecase.GetDayDataUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SetSelectedDateUseCase
-import com.jacqulin.calcalc.core.domain.usecase.UpdateMealUseCase
 import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,14 +42,11 @@ class HomeViewModel @Inject constructor(
     private val generateWeekDaysUseCase: GenerateWeekDaysUseCase,
     observeUserProfileUseCase: ObserveUserProfileUseCase,
     private val setSelectedDateUseCase: SetSelectedDateUseCase,
-    private val updateMealUseCase: UpdateMealUseCase,
     private val deleteMealUseCase: DeleteMealUseCase,
     private val imageRepository: ImageRepository
 ) : ViewModel() {
 
     private val currentWeekIndexFlow = MutableStateFlow(0)
-    private val editingMealFlow = MutableStateFlow<Pair<Meal?, Boolean>>(Pair(null, false))
-
     private val _selectedMealIds = MutableStateFlow<Set<Int>>(emptySet())
 
     private val _uiEvents = Channel<HomeUiEvent>(Channel.BUFFERED)
@@ -81,9 +77,8 @@ class HomeViewModel @Inject constructor(
                 combine(
                     getDayDataUseCase(selectedDate),
                     weeksFlow,
-                    editingMealFlow,
                     _selectedMealIds
-                ) { dayData, weeks, editingPair, selectedIds ->
+                ) { dayData, weeks, selectedIds ->
 
                     val consumedCalories = dayData.meals.sumOf { it.calories }
 
@@ -113,8 +108,6 @@ class HomeViewModel @Inject constructor(
                         dailyCaloriesGoal = profile.caloriesGoal,
                         remainingCalories = (profile.caloriesGoal - consumedCalories)
                             .coerceAtLeast(0),
-                        editingMeal = editingPair.first,
-                        isEditingSheetOpen = editingPair.second,
                         isLoading = false,
                         selectedMealIds = selectedIds
                     )
@@ -136,38 +129,12 @@ class HomeViewModel @Inject constructor(
         currentWeekIndexFlow.value = weekIndex
     }
 
-    private fun onEditMeal(meal: Meal) {
-        editingMealFlow.value = Pair(meal, true)
-    }
-
-    fun onDismissEditMeal() {
-        editingMealFlow.value = Pair(null, false)
-    }
-
-    fun onUpdateMeal(updatedMeal: Meal) {
-        viewModelScope.launch {
-            updateMealUseCase(updatedMeal)
-        }
-        editingMealFlow.value = Pair(null, false)
-    }
-
     private suspend fun deleteMeal(meal: Meal) {
         deleteMealUseCase(meal)
 
         meal.imageUri?.let {
             imageRepository.deleteImage(it)
         }
-    }
-
-    fun onDeleteMeal(meal: Meal) {
-        viewModelScope.launch {
-            try {
-                deleteMeal(meal)
-            } catch (e: Exception) {
-                Log.d("DeleteMeal", "Error delete: $e")
-            }
-        }
-        editingMealFlow.value = Pair(null, false)
     }
 
     fun onAddPhotoFromGallery() {
@@ -225,9 +192,7 @@ class HomeViewModel @Inject constructor(
     fun onMealClick(meal: Meal) {
         val selected = _selectedMealIds.value
 
-        if (selected.isEmpty()) {
-            onEditMeal(meal)
-        } else {
+        if (selected.isNotEmpty()) {
             _selectedMealIds.value =
                 if (meal.id in selected) {
                     selected - meal.id
@@ -241,15 +206,12 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val selectedIds = _selectedMealIds.value
-
                 uiState.value.mealsToday
                     .filter { it.id in selectedIds }
                     .forEach { meal ->
                         deleteMeal(meal)
                     }
-
                 _selectedMealIds.value = emptySet()
-
             } catch (e: Exception) {
                 Log.d("DeleteMeal", "Error delete: $e")
             }

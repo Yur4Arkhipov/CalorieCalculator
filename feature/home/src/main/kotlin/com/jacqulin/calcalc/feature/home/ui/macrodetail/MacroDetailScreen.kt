@@ -123,7 +123,6 @@ fun MacroDetailScreen(
             item {
                 MealCards(
                     meals = uiState.mealsToday,
-//                    onMealClick = { viewModel.onEditMeal(it) }
                     onMealClick = { meal ->
                         onNavigateToMealDetail(meal.id)
                     }

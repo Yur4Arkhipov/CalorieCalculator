@@ -74,7 +74,8 @@ fun NavGraphBuilder.homeSection(
                 onNavigateToMacroDetail = onNavigateToMacroDetail,
                 onNavigateToAiMealDescription = onNavigateToAiMealDescription,
                 onNavigateToManualAddMeal = onNavigateToManualAddMeal,
-                onNavigateToMealReview = onNavigateToMealReview
+                onNavigateToMealReview = onNavigateToMealReview,
+                onNavigateToMealDetail = onNavigateToMealDetail
             )
         }
 
