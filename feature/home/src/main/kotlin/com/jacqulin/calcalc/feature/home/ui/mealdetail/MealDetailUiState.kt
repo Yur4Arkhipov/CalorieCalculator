@@ -17,5 +17,6 @@ data class MealDetailUiState(
     val weight: String = "",
     val ingredients: List<IngredientUi> = emptyList(),
     val description: String = "",
-    val selectedMealType: MealType = MealType.BREAKFAST
+    val selectedMealType: MealType = MealType.BREAKFAST,
+    val isFavoriteMeal: Boolean = false
 )

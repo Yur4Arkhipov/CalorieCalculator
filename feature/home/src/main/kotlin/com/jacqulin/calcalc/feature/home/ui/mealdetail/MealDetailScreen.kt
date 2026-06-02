@@ -1,6 +1,11 @@
 package com.jacqulin.calcalc.feature.home.ui.mealdetail
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,9 +31,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,13 +54,19 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.component.AddMealSnackbar
 import com.jacqulin.calcalc.core.designsystem.component.MealTypeCard
 import com.jacqulin.calcalc.core.designsystem.component.TopOverlay
 import com.jacqulin.calcalc.core.domain.model.MealType
+import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
+import com.jacqulin.calcalc.core.util.effects.UiEffect
 import com.jacqulin.calcalc.feature.home.ui.review.components.IngredientCard
 import com.jacqulin.calcalc.feature.home.ui.review.components.MealNameField
 import com.jacqulin.calcalc.feature.home.ui.review.components.MealWeightField
 import com.jacqulin.calcalc.feature.home.ui.review.components.NutrientsGrid
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 
 @SuppressLint("ConfigurationScreenWidthHeight")
@@ -71,8 +85,64 @@ fun MealDetailScreen(
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val imageHeight = screenHeight * 0.35f
 
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
+    var snackbarIsError by remember { mutableStateOf(false) }
+    var snackbarVisible by remember { mutableStateOf(false) }
+    var snackbarJob by remember { mutableStateOf<Job?>(null) }
+
+    LaunchedEffect(viewModel) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is UiEffect.CloseScreen -> onBackClick()
+                is UiEffect.ShowSnackbar -> {
+                    snackbarJob?.cancel()
+
+                    snackbarMessage = when (effect.messageCode) {
+                        SnackbarMessageCode.MEAL_SAVED -> "Блюдо успешно сохранено!"
+                        SnackbarMessageCode.MEAL_SAVE_ERROR -> "Ошибка сохранения"
+                        SnackbarMessageCode.CHANGES_SAVED -> "Изменения сохранены"
+                    }
+                    snackbarIsError = effect.isError
+                    snackbarVisible = true
+
+                    snackbarJob = launch {
+                        if (effect.isError) {
+                            delay(3000)
+                            snackbarVisible = false
+                        } else {
+                            delay(2000)
+                            snackbarVisible = false
+                            onBackClick()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     Scaffold(
-        snackbarHost = {},
+        snackbarHost = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                AnimatedVisibility(
+                    visible = snackbarVisible,
+                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                ) {
+                    snackbarMessage?.let { msg ->
+                        AddMealSnackbar(
+                            message = msg,
+                            type = if (snackbarIsError) SnackbarMessageCode.MEAL_SAVE_ERROR
+                            else SnackbarMessageCode.MEAL_SAVED
+                        )
+                    }
+                }
+            }
+        },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
@@ -123,7 +193,7 @@ fun MealDetailScreen(
                             .align(Alignment.TopCenter),
                         isError = false,
                         isSaveIconEnable = uiState.isSaveIconEnable,
-                        onSaveClick = { },
+                        onSaveClick = { viewModel.onSaveUpdatedMeal() },
                         onBackClick = onBackClick
                     )
 
@@ -212,38 +282,6 @@ fun MealDetailScreen(
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
-
-//                        AiDescriptionTextField(
-//                            value = uiState.description,
-//                            onValueChange = viewModel::onDescriptionChange,
-//                            enabled = true,
-//                            isForReview = true,
-//                            isDropdownEnable = false
-//                        )
-//
-//                        if (uiState.isErrorRefine) {
-//                            Text(
-//                                text = uiState.errorText ?: stringResource(R.string.home_analyze_error),
-//                                color = Red
-//                            )
-//                        }
-//
-//                        Button(
-//                            onClick = { viewModel.onAnalyzeDescription() },
-//                            modifier = Modifier.fillMaxWidth(),
-//                            enabled = uiState.description.isNotBlank(),
-//                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-//                        ) {
-//                            Icon(
-//                                painter = painterResource(R.drawable.ic_send),
-//                                contentDescription = null,
-//                                modifier = Modifier.size(20.dp)
-//                            )
-//                            Spacer(modifier = Modifier.width(8.dp))
-//                            Text(text = stringResource(R.string.home_ai_text_analyze))
-//                        }
-//
-//                        Spacer(modifier = Modifier.height(12.dp))
 
                         Text(text = stringResource(R.string.review_meal_ingredients))
 

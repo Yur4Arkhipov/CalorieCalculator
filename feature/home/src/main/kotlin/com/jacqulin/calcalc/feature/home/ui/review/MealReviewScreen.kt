@@ -112,6 +112,7 @@ fun MealReviewScreen(
                     snackbarMessage = when (effect.messageCode) {
                         SnackbarMessageCode.MEAL_SAVED -> "Блюдо успешно сохранено!"
                         SnackbarMessageCode.MEAL_SAVE_ERROR -> "Ошибка сохранения"
+                        SnackbarMessageCode.CHANGES_SAVED -> "Изменения сохранены"
                     }
                     snackbarIsError = effect.isError
                     snackbarVisible = true

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.domain.usecase.GetMealDetailUseCase
+import com.jacqulin.calcalc.core.domain.usecase.UpdateMealUseCase
 import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
 import com.jacqulin.calcalc.core.util.effects.UiEffect
 import com.jacqulin.calcalc.core.util.funtions.filterNumericInput
@@ -24,7 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MealDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val getMealDetail: GetMealDetailUseCase
+    private val updateMealUseCase: UpdateMealUseCase,
+    private val getMealDetailUseCase: GetMealDetailUseCase
 ) : ViewModel() {
 
     private val route = savedStateHandle.toRoute<MealDetailRoute>()
@@ -37,7 +39,7 @@ class MealDetailViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val meal = getMealDetail(route.mealId)
+            val meal = getMealDetailUseCase(route.mealId)
 
             _uiState.update { it ->
                 it.copy(
@@ -58,7 +60,9 @@ class MealDetailViewModel @Inject constructor(
                             fat = it.fat.toString(),
                             carb = it.carb.toString()
                         )
-                    }
+                    },
+                    selectedMealType = meal.type,
+                    isFavoriteMeal = meal.isFavorite
                 )
             }
         }
@@ -164,7 +168,17 @@ class MealDetailViewModel @Inject constructor(
                      fats = currentState.fats.toIntOrNull() ?: 0,
                      carbs = currentState.carbs.toIntOrNull() ?: 0,
                      proteins = currentState.proteins.toIntOrNull() ?: 0,
-                     type = currentState.selectedMealType
+                     type = currentState.selectedMealType,
+                     isFavorite = currentState.isFavoriteMeal
+                 )
+
+                 updateMealUseCase(updatedMeal)
+
+                 _effect.send(
+                     element = UiEffect.ShowSnackbar(
+                         messageCode = SnackbarMessageCode.CHANGES_SAVED,
+                         isError = false
+                     )
                  )
 
              } catch (_: Exception) {

@@ -18,7 +18,6 @@ data class MealReviewUiState(
     val description: String = "",
     val selectedMealType: MealType = MealType.BREAKFAST,
     val isProcessingDescription: Boolean = false
-
 )
 
 data class IngredientUi(
