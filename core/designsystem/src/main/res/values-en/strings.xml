@@ -12,6 +12,7 @@
     <string name="weight_suffix">g</string>
     <string name="calories_suffix">kcal</string>
     <string name="save">Save</string>
+    <string name="selected_count">Selected: %d</string>
 
     // Home
     <string name="home_dialog_cancel">Cancel</string>
@@ -228,5 +229,10 @@
     <string name="macro_fat_short">F</string>
     <string name="macro_carbs_short">C</string>
     <string name="macro_weight_format">%1$dg</string>
+
+    // Favorites
+    <string name="favorites_title">Favorites</string>
+    <string name="favorites_remove">Remove from favorites</string>
+    <string name="favorites_no_meals">No favorite meals</string>
 
 </resources>

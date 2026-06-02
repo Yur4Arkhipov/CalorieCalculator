@@ -13,6 +13,7 @@
     <string name="calories_suffix">ккал</string>
     <string name="weight_suffix">г</string>
     <string name="save">Сохранить</string>
+    <string name="selected_count">Выделено: %d</string>
 
     // Home
     <string name="home_dialog_cancel">Отмена</string>
@@ -231,5 +232,9 @@
     <string name="macro_carbs_short">У</string>
     <string name="macro_weight_format">%1$dг</string>
 
+    // Favorites
+    <string name="favorites_title">Избранное</string>
+    <string name="favorites_remove">Убрать из избранного</string>
+    <string name="favorites_no_meals">Нет избранных блюд</string>
 
 </resources>

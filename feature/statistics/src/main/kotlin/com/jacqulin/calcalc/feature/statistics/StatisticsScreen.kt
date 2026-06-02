@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -41,7 +42,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.MealCard
 import com.jacqulin.calcalc.core.designsystem.theme.SelectedToRemoveLightRed
-import com.jacqulin.calcalc.core.designsystem.theme.TextSecondary
 import com.jacqulin.calcalc.core.designsystem.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,7 +90,7 @@ fun StatisticsScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Выделено: ${uiState.selectedCount}",
+                                    text = stringResource(R.string.selected_count, uiState.selectedCount),
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onBackground,
@@ -111,7 +111,7 @@ fun StatisticsScreen(
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.ic_cancel),
-                                            contentDescription = "Убрать из избранного",
+                                            contentDescription = stringResource(R.string.favorites_remove),
                                             tint = White,
                                             modifier = Modifier.height(12.dp)
                                         )
@@ -120,7 +120,7 @@ fun StatisticsScreen(
                             }
                         } else {
                             Text(
-                                text = "Избранное",
+                                text = stringResource(R.string.favorites_title),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onBackground,
@@ -151,16 +151,10 @@ fun StatisticsScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Нет избранных блюд",
+                        text = stringResource(R.string.favorites_no_meals),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        text = "Добавляйте блюда в избранное\nпри редактировании",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextSecondary,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                 }
             }
