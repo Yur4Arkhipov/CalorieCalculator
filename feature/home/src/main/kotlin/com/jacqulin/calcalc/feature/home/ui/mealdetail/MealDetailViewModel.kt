@@ -156,6 +156,15 @@ class MealDetailViewModel @Inject constructor(
         )
     }
 
+    fun onFavoriteChanged() {
+        _uiState.update {
+            it.copy(
+                isFavoriteMeal = !it.isFavoriteMeal,
+                isSaveIconEnable = true
+            )
+        }
+    }
+
      fun onSaveUpdatedMeal() {
          viewModelScope.launch {
              try {
@@ -173,6 +182,8 @@ class MealDetailViewModel @Inject constructor(
                  )
 
                  updateMealUseCase(updatedMeal)
+
+                 _uiState.update { it.copy(isSaveIconEnable = false) }
 
                  _effect.send(
                      element = UiEffect.ShowSnackbar(

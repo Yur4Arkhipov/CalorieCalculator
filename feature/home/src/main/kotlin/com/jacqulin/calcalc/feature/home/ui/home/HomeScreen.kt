@@ -63,7 +63,7 @@ import androidx.core.app.ActivityCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.R
-import com.jacqulin.calcalc.core.designsystem.component.AddMealFloatingActionButton
+import com.jacqulin.calcalc.core.designsystem.component.FloatingActionButton
 import com.jacqulin.calcalc.core.designsystem.component.MealCard
 import com.jacqulin.calcalc.core.designsystem.theme.White
 import com.jacqulin.calcalc.core.domain.model.Meal
@@ -310,7 +310,7 @@ fun HomeScreen(
                             translationY = fabOffsetY
                         }
                 ) {
-                    AddMealFloatingActionButton(
+                    FloatingActionButton(
                         icon = painterResource(R.drawable.ic_add),
                         contentDescription = stringResource(R.string.home_add_meal),
                         onClick = { showAddFoodSheet = true },

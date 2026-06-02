@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,14 +17,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.theme.AppOnPrimary
+import com.jacqulin.calcalc.core.designsystem.theme.Favorite
 
 @Composable
 fun TopOverlay(
     modifier: Modifier = Modifier,
     isError: Boolean,
-    isSaveIconEnable: Boolean,
-    onSaveClick: () -> Unit,
-    onBackClick: () -> Unit
+    isFavorite: Boolean = false,
+    showFavoriteButton: Boolean = false,
+    onSaveClick: () -> Unit = {},
+    onFavoriteClick: () -> Unit = {},
+    onBackClick: () -> Unit = {}
 ) {
     val buttonModifier = Modifier
         .size(40.dp)
@@ -49,7 +53,24 @@ fun TopOverlay(
             )
         }
 
-        if (!isError && isSaveIconEnable) {
+        if (showFavoriteButton) {
+            IconButton(
+                onClick = onFavoriteClick,
+                colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Transparent),
+                modifier = buttonModifier
+
+            ) {
+                Icon(
+                    painter = if (isFavorite)
+                        painterResource(R.drawable.ic_favorite_filled)
+                    else
+                        painterResource(R.drawable.ic_favorite),
+                    contentDescription = null,
+                    tint = if (isFavorite) Favorite else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        } else if (!isError) {
             IconButton(
                 onClick = onSaveClick,
                 colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Transparent),

@@ -193,7 +193,6 @@ fun MealReviewScreen(
                             )
                             .align(Alignment.TopCenter),
                         isError = uiState.isError,
-                        isSaveIconEnable = true,
                         onSaveClick = { viewModel.saveMeal() },
                         onBackClick = onBackClick
                     )

@@ -55,6 +55,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.AddMealSnackbar
+import com.jacqulin.calcalc.core.designsystem.component.FloatingActionButton
 import com.jacqulin.calcalc.core.designsystem.component.MealTypeCard
 import com.jacqulin.calcalc.core.designsystem.component.TopOverlay
 import com.jacqulin.calcalc.core.domain.model.MealType
@@ -192,8 +193,9 @@ fun MealDetailScreen(
                             )
                             .align(Alignment.TopCenter),
                         isError = false,
-                        isSaveIconEnable = uiState.isSaveIconEnable,
-                        onSaveClick = { viewModel.onSaveUpdatedMeal() },
+                        isFavorite = uiState.isFavoriteMeal,
+                        showFavoriteButton = true,
+                        onFavoriteClick = { viewModel.onFavoriteChanged() },
                         onBackClick = onBackClick
                     )
 
@@ -296,6 +298,17 @@ fun MealDetailScreen(
                         }
                     }
                 }
+            }
+
+            if (uiState.isSaveIconEnable) {
+                FloatingActionButton(
+                    icon = painterResource(R.drawable.ic_check),
+                    contentDescription = "Save",
+                    onClick = { viewModel.onSaveUpdatedMeal() },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
+                )
             }
         }
     }
