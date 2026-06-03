@@ -14,6 +14,7 @@
     <string name="weight_suffix">г</string>
     <string name="save">Сохранить</string>
     <string name="selected_count">Выделено: %d</string>
+    <string name="placeholder_image">Плейсхолдер картинка</string>
 
     // Home
     <string name="home_dialog_cancel">Отмена</string>
@@ -72,6 +73,7 @@
     <string name="home_manual_back">Вернуться назад</string>
     <string name="home_manual_add_meal">Добавить блюдо</string>
     <string name="home_manual_field_product_name">Название блюда</string>
+    <string name="home_manual_field_product_weight">Вес</string>
     <string name="home_manual_nutrition_value">Питательная ценность</string>
     
     // Home -> Calendar section
@@ -225,6 +227,7 @@
     <string name="detail_goal">Цель</string>
     <string name="detail_macro_progress_format">%1$d / %2$d г</string>
     <string name="detail_macro_percentage_format">%1$d%% от дневной нормы</string>
+    <string name="detail_no_ingredients">Ингредиентов сейчас нет</string>
 
     // Meal card
     <string name="macro_protein_short">Б</string>

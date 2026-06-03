@@ -13,6 +13,7 @@
     <string name="calories_suffix">kcal</string>
     <string name="save">Save</string>
     <string name="selected_count">Selected: %d</string>
+    <string name="placeholder_image">Placeholder image</string>
 
     // Home
     <string name="home_dialog_cancel">Cancel</string>
@@ -71,6 +72,7 @@
     <string name="home_manual_back">Go back</string>
     <string name="home_manual_add_meal">Add meal</string>
     <string name="home_manual_field_product_name">Meal name</string>
+    <string name="home_manual_field_product_weight">Weight</string>
     <string name="home_manual_nutrition_value">Nutritional value</string>
 
     // Home -> Calendar section
@@ -223,6 +225,7 @@
     <string name="detail_goal">Goal</string>
     <string name="detail_macro_progress_format">%1$d / %2$d g</string>
     <string name="detail_macro_percentage_format">%1$d%% of daily goal</string>
+    <string name="detail_no_ingredients">No ingredients now</string>
 
     // Meal card
     <string name="macro_protein_short">P</string>

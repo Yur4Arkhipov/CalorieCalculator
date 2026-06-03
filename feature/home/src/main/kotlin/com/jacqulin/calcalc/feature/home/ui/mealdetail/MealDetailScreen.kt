@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -175,11 +174,9 @@ fun MealDetailScreen(
                     } else {
                         Image(
                             painter = painterResource(R.drawable.ic_food),
-                            contentDescription = "Placeholder",
+                            contentDescription = stringResource(R.string.placeholder_image),
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                            modifier = Modifier.matchParentSize()
                         )
                     }
 
@@ -289,12 +286,19 @@ fun MealDetailScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            uiState.ingredients.forEach { ingredient ->
-                                IngredientCard(ingredient)
+                        if (uiState.ingredients.isNotEmpty()) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                uiState.ingredients.forEach { ingredient ->
+                                    IngredientCard(ingredient)
+                                }
                             }
+                        } else {
+                            Text(
+                                text = stringResource(R.string.detail_no_ingredients),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
                     }
                 }
@@ -303,7 +307,7 @@ fun MealDetailScreen(
             if (uiState.isSaveIconEnable) {
                 FloatingActionButton(
                     icon = painterResource(R.drawable.ic_check),
-                    contentDescription = "Save",
+                    contentDescription = stringResource(R.string.save),
                     onClick = { viewModel.onSaveUpdatedMeal() },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)

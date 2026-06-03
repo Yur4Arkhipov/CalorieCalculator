@@ -24,6 +24,7 @@ import javax.inject.Inject
 data class ManualAddMealUiState(
     val selectedMealType: MealType = MealType.BREAKFAST,
     val mealName: String = "",
+    val weight: String = "",
     val calories: String = "",
     val proteins: String = "",
     val fats: String = "",
@@ -32,6 +33,7 @@ data class ManualAddMealUiState(
 
 sealed class ManualAddMealEvent {
     data class MealNameChanged(val name: String) : ManualAddMealEvent()
+    data class MealWeightChanged(val weight: String) : ManualAddMealEvent()
     data class MealTypeSelected(val type: MealType) : ManualAddMealEvent()
     data class CaloriesChanged(val calories: String) : ManualAddMealEvent()
     data class ProteinsChanged(val proteins: String) : ManualAddMealEvent()
@@ -59,6 +61,11 @@ class ManualAddMealScreenViewModel @Inject constructor(
             is ManualAddMealEvent.MealNameChanged -> {
                 _uiState.update {
                     it.copy(mealName = event.name)
+                }
+            }
+            is ManualAddMealEvent.MealWeightChanged -> {
+                _uiState.update {
+                    it.copy(weight = event.weight)
                 }
             }
             is ManualAddMealEvent.MealTypeSelected -> {
@@ -100,9 +107,11 @@ class ManualAddMealScreenViewModel @Inject constructor(
                 val proteins = state.proteins.toIntOrNull()
                 val fats = state.fats.toIntOrNull()
                 val carbs = state.carbs.toIntOrNull()
+                val weight = state.weight.toIntOrNull()
 
                 val hasInvalidInput =
                     state.mealName.isBlank() ||
+                    weight == null ||
                     calories == null ||
                     proteins == null ||
                     fats == null ||
@@ -120,6 +129,7 @@ class ManualAddMealScreenViewModel @Inject constructor(
 
                 val meal = Meal(
                     name = state.mealName,
+                    weight = weight,
                     calories = calories,
                     proteins = proteins,
                     fats = fats,

@@ -95,8 +95,6 @@ class HomeViewModel @Inject constructor(
                         fatsGoal = profile.fatGoal
                     )
 
-                    Log.d("Selection", "combine=$selectedIds")
-
                     HomeUiState(
                         selectedDate = selectedDate,
                         weeks = updatedWeeks,
@@ -182,11 +180,9 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onMealLongClick(meal: Meal) {
-        Log.d("Selection", "Long click ${meal.id}")
         if (_selectedMealIds.value.isEmpty()) {
             _selectedMealIds.value = setOf(meal.id)
         }
-        Log.d("Selection", "selected=${_selectedMealIds.value}")
     }
 
     fun onMealClick(meal: Meal) {
@@ -213,7 +209,7 @@ class HomeViewModel @Inject constructor(
                     }
                 _selectedMealIds.value = emptySet()
             } catch (e: Exception) {
-                Log.d("DeleteMeal", "Error delete: $e")
+                Log.e("DeleteMeal", "Error delete: $e")
             }
         }
     }

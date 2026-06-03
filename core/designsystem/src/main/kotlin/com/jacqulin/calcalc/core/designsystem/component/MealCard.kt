@@ -58,7 +58,6 @@ fun MealCard(
             MaterialTheme.colorScheme.surface
 
     Card(
-
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
