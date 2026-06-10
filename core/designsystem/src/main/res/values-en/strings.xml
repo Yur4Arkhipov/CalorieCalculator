@@ -158,6 +158,8 @@
     <string name="profile_notifications">Notifications</string>
     <string name="profile_notifications_desc">Configure reminders</string>
     <string name="profile_about">About app</string>
+    <string name="profile_lang">Localization</string>
+    <string name="profile_lang_desc">Set up app language</string>
     <string name="profile_about_version">Version</string>
     <string name="profile_about_dialog_text">App version: %1$s</string>
 

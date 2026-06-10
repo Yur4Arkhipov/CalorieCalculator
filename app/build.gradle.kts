@@ -94,4 +94,7 @@ dependencies {
     implementation(libs.androidx.compose.adaptive.navigation)
 
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+
+    // For lang setup
+    implementation(libs.androidx.appcompat)
 }

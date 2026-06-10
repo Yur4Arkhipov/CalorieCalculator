@@ -39,8 +39,11 @@ import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.theme.White
 
 @Composable
-fun SettingsCard() {
+fun SettingsCard(
+//    onLanguageSelected: (AppLanguage) -> Unit
+) {
     var showVersionDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -75,11 +78,30 @@ fun SettingsCard() {
                 subtitle = stringResource(R.string.profile_about_version),
                 onClick = { showVersionDialog = true }
             )
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
+            SettingsRow(
+                icon = painterResource(R.drawable.ic_language),
+                title = stringResource(R.string.profile_lang),
+                subtitle = stringResource(R.string.profile_lang_desc),
+                onClick = { showLanguageDialog = true }
+            )
         }
     }
 
     if (showVersionDialog) {
         AboutAppDialog { showVersionDialog = false }
+    }
+
+    if (showLanguageDialog) {
+        LanguageDialog(
+            onDismiss = {
+                showLanguageDialog = false
+            },
+//            onLanguageSelected = { language ->
+//                onLanguageSelected(language)
+//                showLanguageDialog = false
+//            }
+        )
     }
 }
 
@@ -144,7 +166,7 @@ private fun SettingsRow(
 }
 
 @Composable
-fun AboutAppDialog(onDismiss: () -> Unit) {
+private fun AboutAppDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.profile_about)) },
@@ -162,5 +184,46 @@ fun AboutAppDialog(onDismiss: () -> Unit) {
             }
         },
         containerColor = White
+    )
+}
+
+@Composable
+private fun LanguageDialog(
+    onDismiss: () -> Unit,
+//    onLanguageSelected: (AppLanguage) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(stringResource(R.string.profile_lang))
+        },
+        text = {
+            Column {
+                TextButton(
+                    onClick = {
+//                        onLanguageSelected(AppLanguage.SYSTEM)
+                    }
+                ) {
+                    Text("System")
+                }
+
+                TextButton(
+                    onClick = {
+//                        onLanguageSelected(AppLanguage.ENGLISH)
+                    }
+                ) {
+                    Text("English")
+                }
+
+                TextButton(
+                    onClick = {
+//                        onLanguageSelected(AppLanguage.RUSSIAN)
+                    }
+                ) {
+                    Text("Русский")
+                }
+            }
+        },
+        confirmButton = {}
     )
 }

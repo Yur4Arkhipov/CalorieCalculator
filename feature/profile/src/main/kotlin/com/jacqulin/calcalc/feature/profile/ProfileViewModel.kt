@@ -91,7 +91,6 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-
     private fun saveParams(event: ProfileEvent.SaveParams) {
         val bmr = if (event.gender == Gender.MALE) {
             10.0 * event.weight + 6.25 * event.height - 5.0 * event.age + 5
