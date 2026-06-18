@@ -2,6 +2,7 @@ package com.jacqulin.calcalc.core.data.di
 
 import android.util.Log
 import com.jacqulin.calcalc.core.data.remote.service.BackendApiService
+import com.jacqulin.calcalc.core.platform.device.DeviceIdInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,7 +30,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(logging: HttpLoggingInterceptor): OkHttpClient =
+    fun provideOkHttpClient(
+        logging: HttpLoggingInterceptor,
+        deviceInterceptor: DeviceIdInterceptor
+    ): OkHttpClient =
         OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val request = chain
@@ -39,6 +43,7 @@ object NetworkModule {
                 chain.proceed(request)
             }
             .addInterceptor(logging)
+            .addInterceptor(deviceInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)

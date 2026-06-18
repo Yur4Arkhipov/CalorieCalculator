@@ -46,4 +46,7 @@ dependencies {
     // Dagger hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+
+    // Okhttp
+    implementation(libs.okhttp.logging.interceptor)
 }
