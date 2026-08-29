@@ -14,6 +14,7 @@ import com.jacqulin.calcalc.core.data.usecase.DeleteMealUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.GetMealDetailUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.RefineMealUseCaseImpl
 import com.jacqulin.calcalc.core.data.usecase.UpdateMealUseCaseImpl
+import com.jacqulin.calcalc.core.domain.repository.AiAccessRepository
 import com.jacqulin.calcalc.core.domain.repository.AiRepository
 import com.jacqulin.calcalc.core.domain.repository.ImageRepository
 import com.jacqulin.calcalc.core.domain.repository.MealRepository
@@ -74,16 +75,24 @@ object UseCaseModule {
     }
 
     @Provides
-    fun provideAnalyzeMealUseCase(aiRepository: AiRepository): AnalyzeMealUseCase {
-        return AnalyzeMealUseCaseImpl(aiRepository)
+    fun provideAnalyzeMealUseCase(
+        aiRepository: AiRepository,
+        aiAccessRepository: AiAccessRepository
+    ): AnalyzeMealUseCase {
+        return AnalyzeMealUseCaseImpl(aiRepository, aiAccessRepository)
     }
 
     @Provides
     fun provideAnalyzeMealFromImageUseCase(
         aiRepository: AiRepository,
-        imageRepository: ImageRepository
+        imageRepository: ImageRepository,
+        aiAccessRepository: AiAccessRepository
     ): AnalyzeMealFromImageUseCase {
-        return AnalyzeMealFromImageUseCaseImpl(aiRepository, imageRepository)
+        return AnalyzeMealFromImageUseCaseImpl(
+            aiRepository,
+            imageRepository,
+            aiAccessRepository
+        )
     }
 
     @Provides
@@ -112,9 +121,10 @@ object UseCaseModule {
 
     @Provides
     fun provideRefineMealUseCase(
-        aiRepository: AiRepository
+        aiRepository: AiRepository,
+        aiAccessRepository: AiAccessRepository
     ): RefineMealUseCase {
-        return RefineMealUseCaseImpl(aiRepository)
+        return RefineMealUseCaseImpl(aiRepository, aiAccessRepository)
     }
 
     @Provides

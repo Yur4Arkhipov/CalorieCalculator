@@ -34,7 +34,7 @@ object ErrorUiMapper {
             AppError.Http.EXPECTATION_FAILED -> "Http 418: Expectation failed"
             AppError.Http.I_AM_TEAPOT -> "Http 419: I am teapot"
             AppError.Http.LOCKED -> "Http 423: Locked"
-            AppError.Http.TOO_MANY_REQUESTS -> "Http 429: Too many requests"
+            AppError.Http.TOO_MANY_REQUESTS -> "AI request limit reached"
             AppError.Http.SERVER_ERROR -> "Http 5**: Server error"
             else -> "A network error has occurred. Please try again."
         }

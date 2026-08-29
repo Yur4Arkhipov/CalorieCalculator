@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.TempImage
+import com.jacqulin.calcalc.core.domain.model.UserProfile
+import com.jacqulin.calcalc.core.domain.repository.AiAccessRepository
 import com.jacqulin.calcalc.core.domain.repository.ImageRepository
 import com.jacqulin.calcalc.core.domain.usecase.DeleteMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GenerateWeekDaysUseCase
@@ -43,7 +45,8 @@ class HomeViewModel @Inject constructor(
     observeUserProfileUseCase: ObserveUserProfileUseCase,
     private val setSelectedDateUseCase: SetSelectedDateUseCase,
     private val deleteMealUseCase: DeleteMealUseCase,
-    private val imageRepository: ImageRepository
+    private val imageRepository: ImageRepository,
+    aiAccessRepository: AiAccessRepository
 ) : ViewModel() {
 
     private val currentWeekIndexFlow = MutableStateFlow(0)
@@ -64,18 +67,31 @@ class HomeViewModel @Inject constructor(
         emit(allWeeks)
     }
 
+    private data class HomeInputs(
+        val selectedDate: Date,
+        val weekIndex: Int,
+        val profile: UserProfile,
+        val isAiAccessAllowed: Boolean
+    )
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<HomeUiState> =
         combine(
             observeSelectedDateUseCase(),
             currentWeekIndexFlow,
-            observeUserProfileUseCase()
-        ) { selectedDate, weekIndex, profile ->
-            Triple(selectedDate, weekIndex, profile)
+            observeUserProfileUseCase(),
+            aiAccessRepository.observeAccessAllowed()
+        ) { selectedDate, weekIndex, profile, isAiAccessAllowed  ->
+            HomeInputs(
+                selectedDate = selectedDate,
+                weekIndex = weekIndex,
+                profile = profile,
+                isAiAccessAllowed = isAiAccessAllowed
+            )
         }
-            .flatMapLatest { (selectedDate, weekIndex, profile) ->
+            .flatMapLatest { inputs ->
                 combine(
-                    getDayDataUseCase(selectedDate),
+                    getDayDataUseCase(inputs.selectedDate),
                     weeksFlow,
                     _selectedMealIds
                 ) { dayData, weeks, selectedIds ->
@@ -84,30 +100,31 @@ class HomeViewModel @Inject constructor(
 
                     val updatedWeeks = weeks.mapValues { (_, days) ->
                         days.map {
-                            it.copy(isSelected = isSameDay(it.date, selectedDate))
+                            it.copy(isSelected = isSameDay(it.date, inputs.selectedDate))
                         }
                     }
 
                     val macrosWithGoals = dayData.macros.copy(
-                        caloriesGoal = profile.caloriesGoal,
-                        proteinsGoal = profile.proteinGoal,
-                        carbsGoal = profile.carbsGoal,
-                        fatsGoal = profile.fatGoal
+                        caloriesGoal = inputs.profile.caloriesGoal,
+                        proteinsGoal = inputs.profile.proteinGoal,
+                        carbsGoal = inputs.profile.carbsGoal,
+                        fatsGoal = inputs.profile.fatGoal
                     )
 
                     HomeUiState(
-                        selectedDate = selectedDate,
+                        selectedDate = inputs.selectedDate,
                         weeks = updatedWeeks,
-                        currentWeekIndex = weekIndex,
-                        weekDays = updatedWeeks[weekIndex] ?: emptyList(),
+                        currentWeekIndex = inputs.weekIndex,
+                        weekDays = updatedWeeks[inputs.weekIndex] ?: emptyList(),
                         mealsToday = dayData.meals,
                         todayMacros = macrosWithGoals,
                         consumedCalories = consumedCalories,
-                        dailyCaloriesGoal = profile.caloriesGoal,
-                        remainingCalories = (profile.caloriesGoal - consumedCalories)
+                        dailyCaloriesGoal = inputs.profile.caloriesGoal,
+                        remainingCalories = (inputs.profile.caloriesGoal - consumedCalories)
                             .coerceAtLeast(0),
                         isLoading = false,
-                        selectedMealIds = selectedIds
+                        selectedMealIds = selectedIds,
+                        isAiAccessAllowed = inputs.isAiAccessAllowed,
                     )
                 }
             }

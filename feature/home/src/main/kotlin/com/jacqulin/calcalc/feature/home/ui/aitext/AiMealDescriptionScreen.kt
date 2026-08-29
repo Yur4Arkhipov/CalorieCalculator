@@ -63,6 +63,7 @@ import com.jacqulin.calcalc.core.util.effects.UiEffect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,10 +97,10 @@ fun AiMealDescriptionScreen(
 
                     snackbarJob = launch {
                         if (effect.isError) {
-                            delay(3000)
+                            delay(3000.milliseconds)
                             snackbarVisible = false
                         } else {
-                            delay(2000)
+                            delay(2000.milliseconds)
                             snackbarVisible = false
                             onBackClick()
                         }

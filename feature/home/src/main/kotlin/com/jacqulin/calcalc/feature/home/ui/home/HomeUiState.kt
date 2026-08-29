@@ -26,5 +26,6 @@ data class HomeUiState(
         fatsGoal = 0
     ),
     val isLoading: Boolean = true,
-    val selectedMealIds: Set<Int> = emptySet()
+    val selectedMealIds: Set<Int> = emptySet(),
+    val isAiAccessAllowed: Boolean = true
 )
