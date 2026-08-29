@@ -2,11 +2,13 @@ package com.jacqulin.calcalc.core.data.di
 
 import com.jacqulin.calcalc.core.data.onboarding.OnboardingRepositoryImpl
 import com.jacqulin.calcalc.core.data.onboarding.UserPreferencesRepositoryImpl
+import com.jacqulin.calcalc.core.data.repository.AiAccessRepositoryImpl
 import com.jacqulin.calcalc.core.data.repository.AiRepositoryImpl
 import com.jacqulin.calcalc.core.data.repository.ImageRepositoryImpl
 import com.jacqulin.calcalc.core.data.repository.MealRepositoryImpl
 import com.jacqulin.calcalc.core.data.repository.SelectedDateHolderImpl
 import com.jacqulin.calcalc.core.data.repository.UiPreferencesRepositoryImpl
+import com.jacqulin.calcalc.core.domain.repository.AiAccessRepository
 import com.jacqulin.calcalc.core.domain.repository.AiRepository
 import com.jacqulin.calcalc.core.domain.repository.ImageRepository
 import com.jacqulin.calcalc.core.domain.repository.MealRepository
@@ -47,6 +49,11 @@ interface RepositoryModule {
     fun bindAiRepository(
         impl: AiRepositoryImpl
     ): AiRepository
+
+    @Binds
+    fun bindAiAccessRepository(
+        impl: AiAccessRepositoryImpl
+    ): AiAccessRepository
 
     @Binds
     fun bindImageRepository(

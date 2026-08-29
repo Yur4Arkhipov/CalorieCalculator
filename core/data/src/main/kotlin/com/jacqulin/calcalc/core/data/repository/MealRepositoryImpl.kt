@@ -4,6 +4,7 @@ import com.jacqulin.calcalc.core.data.local.dao.MealDao
 import com.jacqulin.calcalc.core.data.local.entities.IngredientEntity
 import com.jacqulin.calcalc.core.data.local.entities.MealEntity
 import com.jacqulin.calcalc.core.data.local.entities.toDomain
+import com.jacqulin.calcalc.core.data.local.models.toDomain
 import com.jacqulin.calcalc.core.domain.model.DayData
 import com.jacqulin.calcalc.core.domain.model.MacroNutrients
 import com.jacqulin.calcalc.core.domain.model.Meal
@@ -78,33 +79,45 @@ class MealRepositoryImpl @Inject constructor(
             IngredientEntity(
                 mealId = 0,
                 name = ing.name,
-                weight = ing.weight.toInt(),
-                calories = ing.calories.toInt(),
-                protein = ing.protein.toInt(),
-                carb = ing.carb.toInt(),
-                fat = ing.fat.toInt()
+                weight = ing.weight,
+                calories = ing.calories,
+                protein = ing.protein,
+                carb = ing.carb,
+                fat = ing.fat
             )
         }
         mealDao.insertMealWithIngredients(mealEntity, ingredientEntities)
     }
 
     override suspend fun updateMeal(meal: Meal) {
-        val existing = mealDao.getMealById(meal.id) ?: return
+        val existing = mealDao.getMealById(meal.id)
         mealDao.updateMeal(
             existing.copy(
                 name = meal.name,
+                weight = meal.weight,
                 calories = meal.calories,
                 protein = meal.proteins,
                 fat = meal.fats,
                 carbs = meal.carbs,
                 imageUri = meal.imageUri,
-                isFavorite = meal.isFavorite
+                isFavorite = meal.isFavorite,
+                type = meal.type
             )
         )
     }
 
     override suspend fun deleteMeal(meal: Meal) {
-        val existing = mealDao.getMealById(meal.id) ?: return
+        val existing = mealDao.getMealById(meal.id)
         mealDao.deleteMeal(existing)
+    }
+
+    override suspend fun removeFromFavorites(ids: List<Int>) {
+        mealDao.removeFromFavorites(ids)
+    }
+
+    override suspend fun getMealDetail(mealId: Int): Meal {
+        return mealDao
+            .getMealWithIngredients(mealId)
+            .toDomain()
     }
 }

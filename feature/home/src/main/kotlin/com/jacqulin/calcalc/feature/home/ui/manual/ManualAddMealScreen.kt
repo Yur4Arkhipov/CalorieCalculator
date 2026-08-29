@@ -96,6 +96,7 @@ fun ManualAddMealScreen(
                     snackbarMessage = when (effect.messageCode) {
                         SnackbarMessageCode.MEAL_SAVED -> "Блюдо успешно сохранено!"
                         SnackbarMessageCode.MEAL_SAVE_ERROR -> "Ошибка сохранения"
+                        SnackbarMessageCode.CHANGES_SAVED -> "Изменения сохранены"
                     }
                     snackbarIsError = effect.isError
                     snackbarVisible = true
@@ -212,6 +213,34 @@ fun ManualAddMealScreen(
                     }
                 },
                 label = { Text(text = stringResource(R.string.home_manual_field_product_name)) } ,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(nameFocus),
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                trailingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_edit),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(onNext = { caloriesFocus.requestFocus() })
+            )
+
+            OutlinedTextField(
+                value = uiState.weight,
+                onValueChange = { input ->
+                    val filtered = filterNumericInput(
+                        input = input,
+                        maxLength = 4,
+                        maxValue = 4000
+                    )
+                    viewModel.onEvent(ManualAddMealEvent.MealWeightChanged(filtered))
+                },
+                label = { Text(text = stringResource(R.string.home_manual_field_product_weight)) } ,
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(nameFocus),

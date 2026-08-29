@@ -4,7 +4,9 @@ import com.jacqulin.calcalc.core.domain.model.MealType
 
 data class MealReviewUiState(
     val isLoading: Boolean = false,
-    val isError: String? = null,
+    val isError: Boolean = false,
+    val isErrorRefine: Boolean = false,
+    val errorText: String? = null,
     val isSaved: Boolean = false,
     val name: String = "",
     val calories: String = "",
@@ -16,7 +18,6 @@ data class MealReviewUiState(
     val description: String = "",
     val selectedMealType: MealType = MealType.BREAKFAST,
     val isProcessingDescription: Boolean = false
-
 )
 
 data class IngredientUi(

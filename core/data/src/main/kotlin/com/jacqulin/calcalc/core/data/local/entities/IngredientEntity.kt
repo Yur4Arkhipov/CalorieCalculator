@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-
+import com.jacqulin.calcalc.core.domain.model.Ingredient
 
 @Entity(
     tableName = "ingredient",
@@ -29,3 +29,13 @@ data class IngredientEntity(
     val carb: Int,
     val fat: Int
 )
+
+fun IngredientEntity.toDomain(): Ingredient =
+    Ingredient(
+        name = name,
+        weight = weight,
+        calories = calories,
+        protein = protein,
+        carb = carb,
+        fat = fat,
+    )

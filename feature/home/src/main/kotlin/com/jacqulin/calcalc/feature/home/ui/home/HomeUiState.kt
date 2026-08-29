@@ -26,6 +26,6 @@ data class HomeUiState(
         fatsGoal = 0
     ),
     val isLoading: Boolean = true,
-    val editingMeal: Meal? = null,
-    val isEditingSheetOpen: Boolean = false
+    val selectedMealIds: Set<Int> = emptySet(),
+    val isAiAccessAllowed: Boolean = true
 )

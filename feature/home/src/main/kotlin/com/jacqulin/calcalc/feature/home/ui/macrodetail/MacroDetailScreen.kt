@@ -27,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,23 +42,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.jacqulin.calcalc.core.designsystem.R
+import com.jacqulin.calcalc.core.designsystem.component.MealCard
 import com.jacqulin.calcalc.core.designsystem.theme.AppColors
 import com.jacqulin.calcalc.core.designsystem.theme.CaloriesDark
 import com.jacqulin.calcalc.core.designsystem.theme.TextSecondary
 import com.jacqulin.calcalc.core.designsystem.theme.TextTertiary
 import com.jacqulin.calcalc.core.domain.model.Meal
-import com.jacqulin.calcalc.feature.home.ui.home.sections.EditMealBottomSheet
-import com.jacqulin.calcalc.core.designsystem.component.MealCard
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MacroDetailScreen(
     viewModel: MacroDetailViewModel = hiltViewModel(),
+    onNavigateToMealDetail: (Int) -> Unit = { },
     onBackClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+//    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     if (uiState.isLoading) {
         Box(
@@ -124,7 +123,9 @@ fun MacroDetailScreen(
             item {
                 MealCards(
                     meals = uiState.mealsToday,
-                    onMealClick = { viewModel.onEditMeal(it) }
+                    onMealClick = { meal ->
+                        onNavigateToMealDetail(meal.id)
+                    }
                 )
             }
             if (uiState.mealsToday.isEmpty()) {
@@ -150,15 +151,15 @@ fun MacroDetailScreen(
             item { Spacer(Modifier.height(12.dp)) }
         }
 
-        if (uiState.isEditingSheetOpen && uiState.editingMeal != null) {
-            EditMealBottomSheet(
-                meal = uiState.editingMeal!!,
-                sheetState = sheetState,
-                onDismiss = { viewModel.onDismissEditMeal() },
-                onSave = { viewModel.onUpdateMeal(it) },
-                onDelete = { viewModel.onDeleteMeal(it) }
-            )
-        }
+//        if (uiState.isEditingSheetOpen && uiState.editingMeal != null) {
+//            EditMealBottomSheet(
+//                meal = uiState.editingMeal!!,
+//                sheetState = sheetState,
+//                onDismiss = { viewModel.onDismissEditMeal() },
+//                onSave = { viewModel.onUpdateMeal(it) },
+//                onDelete = { viewModel.onDeleteMeal(it) }
+//            )
+//        }
     }
 }
 

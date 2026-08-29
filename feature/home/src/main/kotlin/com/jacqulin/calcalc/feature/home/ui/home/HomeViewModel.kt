@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.TempImage
+import com.jacqulin.calcalc.core.domain.model.UserProfile
+import com.jacqulin.calcalc.core.domain.repository.AiAccessRepository
 import com.jacqulin.calcalc.core.domain.repository.ImageRepository
 import com.jacqulin.calcalc.core.domain.usecase.DeleteMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.GenerateWeekDaysUseCase
@@ -13,7 +15,6 @@ import com.jacqulin.calcalc.core.domain.usecase.GetDayDataUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveUserProfileUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SetSelectedDateUseCase
-import com.jacqulin.calcalc.core.domain.usecase.UpdateMealUseCase
 import com.jacqulin.calcalc.feature.home.model.CalendarDay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,13 +44,13 @@ class HomeViewModel @Inject constructor(
     private val generateWeekDaysUseCase: GenerateWeekDaysUseCase,
     observeUserProfileUseCase: ObserveUserProfileUseCase,
     private val setSelectedDateUseCase: SetSelectedDateUseCase,
-    private val updateMealUseCase: UpdateMealUseCase,
     private val deleteMealUseCase: DeleteMealUseCase,
-    private val imageRepository: ImageRepository
+    private val imageRepository: ImageRepository,
+    aiAccessRepository: AiAccessRepository
 ) : ViewModel() {
 
     private val currentWeekIndexFlow = MutableStateFlow(0)
-    private val editingMealFlow = MutableStateFlow<Pair<Meal?, Boolean>>(Pair(null, false))
+    private val _selectedMealIds = MutableStateFlow<Set<Int>>(emptySet())
 
     private val _uiEvents = Channel<HomeUiEvent>(Channel.BUFFERED)
     val uiEvents = _uiEvents.receiveAsFlow()
@@ -66,51 +67,64 @@ class HomeViewModel @Inject constructor(
         emit(allWeeks)
     }
 
+    private data class HomeInputs(
+        val selectedDate: Date,
+        val weekIndex: Int,
+        val profile: UserProfile,
+        val isAiAccessAllowed: Boolean
+    )
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<HomeUiState> =
         combine(
             observeSelectedDateUseCase(),
             currentWeekIndexFlow,
-            observeUserProfileUseCase()
-        ) { selectedDate, weekIndex, profile ->
-            Triple(selectedDate, weekIndex, profile)
+            observeUserProfileUseCase(),
+            aiAccessRepository.observeAccessAllowed()
+        ) { selectedDate, weekIndex, profile, isAiAccessAllowed  ->
+            HomeInputs(
+                selectedDate = selectedDate,
+                weekIndex = weekIndex,
+                profile = profile,
+                isAiAccessAllowed = isAiAccessAllowed
+            )
         }
-            .flatMapLatest { (selectedDate, weekIndex, profile) ->
+            .flatMapLatest { inputs ->
                 combine(
-                    getDayDataUseCase(selectedDate),
+                    getDayDataUseCase(inputs.selectedDate),
                     weeksFlow,
-                    editingMealFlow
-                ) { dayData, weeks, editingPair ->
+                    _selectedMealIds
+                ) { dayData, weeks, selectedIds ->
 
                     val consumedCalories = dayData.meals.sumOf { it.calories }
 
                     val updatedWeeks = weeks.mapValues { (_, days) ->
                         days.map {
-                            it.copy(isSelected = isSameDay(it.date, selectedDate))
+                            it.copy(isSelected = isSameDay(it.date, inputs.selectedDate))
                         }
                     }
 
                     val macrosWithGoals = dayData.macros.copy(
-                        caloriesGoal = profile.caloriesGoal,
-                        proteinsGoal = profile.proteinGoal,
-                        carbsGoal = profile.carbsGoal,
-                        fatsGoal = profile.fatGoal
+                        caloriesGoal = inputs.profile.caloriesGoal,
+                        proteinsGoal = inputs.profile.proteinGoal,
+                        carbsGoal = inputs.profile.carbsGoal,
+                        fatsGoal = inputs.profile.fatGoal
                     )
 
                     HomeUiState(
-                        selectedDate = selectedDate,
+                        selectedDate = inputs.selectedDate,
                         weeks = updatedWeeks,
-                        currentWeekIndex = weekIndex,
-                        weekDays = updatedWeeks[weekIndex] ?: emptyList(),
+                        currentWeekIndex = inputs.weekIndex,
+                        weekDays = updatedWeeks[inputs.weekIndex] ?: emptyList(),
                         mealsToday = dayData.meals,
                         todayMacros = macrosWithGoals,
                         consumedCalories = consumedCalories,
-                        dailyCaloriesGoal = profile.caloriesGoal,
-                        remainingCalories = (profile.caloriesGoal - consumedCalories)
+                        dailyCaloriesGoal = inputs.profile.caloriesGoal,
+                        remainingCalories = (inputs.profile.caloriesGoal - consumedCalories)
                             .coerceAtLeast(0),
-                        editingMeal = editingPair.first,
-                        isEditingSheetOpen = editingPair.second,
-                        isLoading = false
+                        isLoading = false,
+                        selectedMealIds = selectedIds,
+                        isAiAccessAllowed = inputs.isAiAccessAllowed,
                     )
                 }
             }
@@ -130,31 +144,12 @@ class HomeViewModel @Inject constructor(
         currentWeekIndexFlow.value = weekIndex
     }
 
-    fun onEditMeal(meal: Meal) {
-        editingMealFlow.value = Pair(meal, true)
-    }
+    private suspend fun deleteMeal(meal: Meal) {
+        deleteMealUseCase(meal)
 
-    fun onDismissEditMeal() {
-        editingMealFlow.value = Pair(null, false)
-    }
-
-    fun onUpdateMeal(updatedMeal: Meal) {
-        viewModelScope.launch {
-            updateMealUseCase(updatedMeal)
+        meal.imageUri?.let {
+            imageRepository.deleteImage(it)
         }
-        editingMealFlow.value = Pair(null, false)
-    }
-
-    fun onDeleteMeal(meal: Meal) {
-        viewModelScope.launch {
-            try {
-                deleteMealUseCase(meal)
-                meal.imageUri?.let { imageRepository.deleteImage(it) }
-            } catch (e: Exception) {
-                Log.d("DeleteMeal", "Error delete: $e")
-            }
-        }
-        editingMealFlow.value = Pair(null, false)
     }
 
     fun onAddPhotoFromGallery() {
@@ -194,6 +189,45 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             val temp = imageRepository.copyUriToTemp(uri)
             _uiEvents.send(HomeUiEvent.NavigateToMealReview(temp))
+        }
+    }
+
+    fun clearSelection() {
+        _selectedMealIds.value = emptySet()
+    }
+
+    fun onMealLongClick(meal: Meal) {
+        if (_selectedMealIds.value.isEmpty()) {
+            _selectedMealIds.value = setOf(meal.id)
+        }
+    }
+
+    fun onMealClick(meal: Meal) {
+        val selected = _selectedMealIds.value
+
+        if (selected.isNotEmpty()) {
+            _selectedMealIds.value =
+                if (meal.id in selected) {
+                    selected - meal.id
+                } else {
+                    selected + meal.id
+                }
+        }
+    }
+
+    fun deleteSelected() {
+        viewModelScope.launch {
+            try {
+                val selectedIds = _selectedMealIds.value
+                uiState.value.mealsToday
+                    .filter { it.id in selectedIds }
+                    .forEach { meal ->
+                        deleteMeal(meal)
+                    }
+                _selectedMealIds.value = emptySet()
+            } catch (e: Exception) {
+                Log.e("DeleteMeal", "Error delete: $e")
+            }
         }
     }
 

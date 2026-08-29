@@ -61,16 +61,18 @@ import com.jacqulin.calcalc.core.designsystem.R
 import com.jacqulin.calcalc.core.designsystem.component.AddMealSnackbar
 import com.jacqulin.calcalc.core.designsystem.component.AiDescriptionTextField
 import com.jacqulin.calcalc.core.designsystem.component.MealTypeCard
+import com.jacqulin.calcalc.core.designsystem.component.TopOverlay
+import com.jacqulin.calcalc.core.designsystem.theme.Red
 import com.jacqulin.calcalc.core.designsystem.theme.reviewLoadingColor
 import com.jacqulin.calcalc.core.domain.model.MealType
 import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
 import com.jacqulin.calcalc.core.util.effects.UiEffect
 import com.jacqulin.calcalc.feature.home.ui.review.components.IngredientCard
 import com.jacqulin.calcalc.feature.home.ui.review.components.MealNameField
+import com.jacqulin.calcalc.feature.home.ui.review.components.MealReviewError
 import com.jacqulin.calcalc.feature.home.ui.review.components.MealReviewLoading
 import com.jacqulin.calcalc.feature.home.ui.review.components.MealWeightField
 import com.jacqulin.calcalc.feature.home.ui.review.components.NutrientsGrid
-import com.jacqulin.calcalc.feature.home.ui.review.components.TopOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -110,6 +112,7 @@ fun MealReviewScreen(
                     snackbarMessage = when (effect.messageCode) {
                         SnackbarMessageCode.MEAL_SAVED -> "Блюдо успешно сохранено!"
                         SnackbarMessageCode.MEAL_SAVE_ERROR -> "Ошибка сохранения"
+                        SnackbarMessageCode.CHANGES_SAVED -> "Изменения сохранены"
                     }
                     snackbarIsError = effect.isError
                     snackbarVisible = true
@@ -159,13 +162,13 @@ fun MealReviewScreen(
         ) {
             Column(
                 modifier = modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .focusable()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { focusManager.clearFocus() }
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .focusable()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { focusManager.clearFocus() }
             ) {
                 Box(
                     modifier = Modifier
@@ -189,6 +192,7 @@ fun MealReviewScreen(
                                 end = paddingValues.calculateEndPadding(LocalLayoutDirection.current) + 12.dp
                             )
                             .align(Alignment.TopCenter),
+                        isError = uiState.isError,
                         onSaveClick = { viewModel.saveMeal() },
                         onBackClick = onBackClick
                     )
@@ -222,6 +226,11 @@ fun MealReviewScreen(
                 ) {
                     if (uiState.isLoading) {
                         MealReviewLoading(color = reviewLoadingColor)
+                    } else if(uiState.isError) {
+                        MealReviewError(
+                            message = uiState.errorText ?: stringResource(R.string.home_analyze_error),
+                            onRetryClick = viewModel::onRetryClick
+                        )
                     } else {
                         MealNameField(
                             value = uiState.name,
@@ -284,6 +293,13 @@ fun MealReviewScreen(
                             isForReview = true,
                             isDropdownEnable = false
                         )
+
+                        if (uiState.isErrorRefine) {
+                            Text(
+                                text = uiState.errorText ?: stringResource(R.string.home_analyze_error),
+                                color = Red
+                            )
+                        }
 
                         Button(
                             onClick = { viewModel.onAnalyzeDescription() },

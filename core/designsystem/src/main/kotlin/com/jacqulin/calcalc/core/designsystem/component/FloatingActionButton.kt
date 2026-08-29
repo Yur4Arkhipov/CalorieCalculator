@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun AddMealFloatingActionButton(
+fun FloatingActionButton(
     icon: Painter,
     contentDescription: String?,
     onClick: () -> Unit,

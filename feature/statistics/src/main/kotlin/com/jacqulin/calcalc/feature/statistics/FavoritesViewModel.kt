@@ -10,33 +10,36 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class FavoritesUiState(
     val meals: List<Meal> = emptyList(),
     val isLoading: Boolean = true,
-    val editingMeal: Meal? = null,
-    val isEditingSheetOpen: Boolean = false
-)
+    val selectedMealIds: Set<Int> = emptySet()
+) {
+    val isSelectionMode: Boolean
+        get() = selectedMealIds.isNotEmpty()
+
+    val selectedCount: Int
+        get() = selectedMealIds.size
+}
 
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
-    mealRepository: MealRepository,
-//    private val updateMealUseCase: UpdateMealUseCase,
-//    private val deleteMealUseCase: DeleteMealUseCase
+    val mealRepository: MealRepository,
 ) : ViewModel() {
 
-    private val editingFlow = MutableStateFlow<Pair<Meal?, Boolean>>(Pair(null, false))
+    private val _selectedMealIds = MutableStateFlow<Set<Int>>(emptySet())
 
     val uiState: StateFlow<FavoritesUiState> = combine(
         mealRepository.observeFavoriteMeals(),
-        editingFlow
-    ) { meals, editingPair ->
+        _selectedMealIds
+    ) { meals, selectedIds ->
         FavoritesUiState(
             meals = meals,
             isLoading = false,
-            editingMeal = editingPair.first,
-            isEditingSheetOpen = editingPair.second
+            selectedMealIds = selectedIds
         )
     }.stateIn(
         scope = viewModelScope,
@@ -44,22 +47,34 @@ class FavoritesViewModel @Inject constructor(
         initialValue = FavoritesUiState(isLoading = true)
     )
 
-//    fun onEditMeal(meal: Meal) {
-//        editingFlow.value = Pair(meal, true)
-//    }
+    fun onMealLongClick(meal: Meal) {
+        _selectedMealIds.value = setOf(meal.id)
+    }
 
-//    fun onDismissEditMeal() {
-//        editingFlow.value = Pair(null, false)
-//    }
-//
-//    fun onUpdateMeal(meal: Meal) {
-//        viewModelScope.launch { updateMealUseCase(meal) }
-//        editingFlow.value = Pair(null, false)
-//    }
-//
-//    fun onDeleteMeal(meal: Meal) {
-//        viewModelScope.launch { deleteMealUseCase(meal) }
-//        editingFlow.value = Pair(null, false)
-//    }
+    fun onMealClick(meal: Meal) {
+        val selected = _selectedMealIds.value
+        if (selected.isEmpty()) {
+            return
+        }
+        _selectedMealIds.value =
+            if (meal.id in selected) {
+                selected - meal.id
+            } else {
+                selected + meal.id
+            }
+    }
+
+    fun clearSelection() {
+        _selectedMealIds.value = emptySet()
+    }
+
+    fun deleteSelected() {
+        viewModelScope.launch {
+            val ids = _selectedMealIds.value.toList()
+            if (ids.isEmpty()) return@launch
+            mealRepository.removeFromFavorites(ids)
+            _selectedMealIds.value = emptySet()
+        }
+    }
 }
 

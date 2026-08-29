@@ -46,3 +46,7 @@ val AppPrimaryContainer = Color(0xFFA9D1FF)
 val AppOnPrimaryContainer = Color(0xFF003875)
 val AppSecondary = Color(0xFF6CBDC7)
 val AppSecondaryContainer = Color(0xFF73A9D7)
+
+val Red = Color.Red
+val SelectedToRemoveLightRed = Color(0xFFEF5350)
+val SelectedToRemoveWhite = Color(0xFFEBF4FF)

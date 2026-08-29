@@ -9,6 +9,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.jacqulin.calcalc.core.data.local.entities.IngredientEntity
 import com.jacqulin.calcalc.core.data.local.entities.MealEntity
+import com.jacqulin.calcalc.core.data.local.models.MealWithIngredients
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -21,7 +22,11 @@ interface MealDao {
     fun observeFavoriteMeals(): Flow<List<MealEntity>>
 
     @Query("SELECT * FROM meal WHERE id = :id LIMIT 1")
-    suspend fun getMealById(id: Int): MealEntity?
+    suspend fun getMealById(id: Int): MealEntity
+
+    @Transaction
+    @Query("SELECT * FROM meal WHERE id = :id")
+    suspend fun getMealWithIngredients(id: Int): MealWithIngredients
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMeal(meal: MealEntity): Long
@@ -29,8 +34,8 @@ interface MealDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertIngredients(ingredients: List<IngredientEntity>)
 
-//    @Query("SELECT * FROM ingredient WHERE mealId = :mealId")
-//    suspend fun getIngredientsByMealId(mealId: Int): List<IngredientEntity>
+    @Query("UPDATE meal SET isFavorite = 0 WHERE id IN (:ids)")
+    suspend fun removeFromFavorites(ids: List<Int>)
 
     @Update
     suspend fun updateMeal(meal: MealEntity)

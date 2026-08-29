@@ -13,9 +13,10 @@ import com.jacqulin.calcalc.core.domain.usecase.AnalyzeMealFromImageUseCase
 import com.jacqulin.calcalc.core.domain.usecase.ObserveSelectedDateUseCase
 import com.jacqulin.calcalc.core.domain.usecase.RefineMealUseCase
 import com.jacqulin.calcalc.core.domain.usecase.SaveManualAddMealDBUseCase
-import com.jacqulin.calcalc.core.util.NotFoodException
+import com.jacqulin.calcalc.core.util.Result
 import com.jacqulin.calcalc.core.util.effects.SnackbarMessageCode
 import com.jacqulin.calcalc.core.util.effects.UiEffect
+import com.jacqulin.calcalc.core.util.errors.ErrorUiMapper
 import com.jacqulin.calcalc.core.util.funtions.filterNumericInput
 import com.jacqulin.calcalc.feature.home.ui.review.mapper.toDomainIngredients
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -54,50 +55,66 @@ class MealReviewScreenViewModel @Inject constructor(
     val effect = _effect.receiveAsFlow()
 
     init {
-//        analyzeImage()
-        analyzeImageMock()
+        analyzeImage()
+//        analyzeImageMock()
     }
 
     private fun analyzeImage() {
         viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                )
+            }
+
+            // TODO: Добавить логику обработки ошибок для imageRepository
             try {
                 val bytes = imageRepository.readImageBytesFromFile(filePath)
                     ?: throw IllegalStateException("Failed to read image bytes")
                 cachedBytes = bytes
-                val result = analyzeMealFromImageUseCase(bytes)
-                _uiState.update { it ->
-                    it.copy(
-                        isLoading = false,
-                        name = result.nutrition.name.ifBlank { "Meal" },
-                        calories = result.nutrition.calories.toString(),
-                        proteins = result.nutrition.protein.toString(),
-                        fats = result.nutrition.fat.toString(),
-                        carbs = result.nutrition.carb.toString(),
-                        weight = result.nutrition.weight.toString(),
-                        ingredients = result.nutrition.ingredient.map {
-                            IngredientUi(
-                                name = it.name,
-                                weight = it.weight.toString(),
-                                calories = it.calories.toString(),
-                                protein = it.protein.toString(),
-                                fat = it.fat.toString(),
-                                carb = it.carb.toString()
+
+                when(val result = analyzeMealFromImageUseCase(bytes)) {
+                    is Result.Success -> {
+                        _uiState.update { it ->
+                            it.copy(
+                                isLoading = false,
+                                name = result.data.name.ifBlank { "Meal" },
+                                calories = result.data.calories.toString(),
+                                proteins = result.data.protein.toString(),
+                                fats = result.data.fat.toString(),
+                                carbs = result.data.carb.toString(),
+                                weight = result.data.weight.toString(),
+                                ingredients = result.data.ingredient.map {
+                                    IngredientUi(
+                                        name = it.name,
+                                        weight = it.weight.toString(),
+                                        calories = it.calories.toString(),
+                                        protein = it.protein.toString(),
+                                        fat = it.fat.toString(),
+                                        carb = it.carb.toString()
+                                    )
+                                }
                             )
                         }
-                    )
+                    }
+                    is Result.Error -> {
+                        val message = ErrorUiMapper.toMessage(result.error)
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                isError = true,
+                                errorText = message
+                            )
+                        }
+                    }
                 }
-            } catch (_: NotFoodException) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isError = "На фото не обнаружена еда"
-                    )
-                }
+
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        isError = "Ошибка анализа: ${e.message}"
+                        isError = true,
+                        errorText =  "Ошибка анализа: ${e.message}"
                     )
                 }
                 Log.d("Error", "Error: $e")
@@ -163,7 +180,7 @@ class MealReviewScreenViewModel @Inject constructor(
                 val savedPath = bytes?.let {
                     imageRepository.saveImage(it)
                 } ?: run {
-                    _uiState.update { it.copy(isError = "Не удалось сохранить изображение") }
+                    _uiState.update { it.copy(errorText = "Не удалось сохранить изображение") }
                     _effect.send(
                         UiEffect.ShowSnackbar(
                             messageCode = SnackbarMessageCode.MEAL_SAVE_ERROR,
@@ -192,6 +209,7 @@ class MealReviewScreenViewModel @Inject constructor(
 
                 val meal = Meal(
                     name = currentState.name,
+                    weight = currentState.weight.toIntOrNull() ?: 0,
                     calories = currentState.calories.toIntOrNull() ?: 0,
                     proteins = currentState.proteins.toIntOrNull() ?: 0,
                     fats = currentState.fats.toIntOrNull() ?: 0,
@@ -285,32 +303,34 @@ class MealReviewScreenViewModel @Inject constructor(
 
     fun onAnalyzeDescription() {
         viewModelScope.launch {
-            try {
-                _uiState.update {
-                    it.copy(
-                        isProcessingDescription = true,
-                        isLoading = true
-                    )
-                }
+            _uiState.update {
+                it.copy(
+                    isProcessingDescription = true,
+                    isLoading = true,
+                    isError = false,
+                    isErrorRefine = false
+                )
+            }
 
-                val currentMeal = uiState.value.toNutrition()
+            val currentMeal = uiState.value.toNutrition()
 
-                val refinedMeal = refineMealUseCase(
+            when(
+                val result = refineMealUseCase(
                     currentMeal = currentMeal,
                     userPrompt = uiState.value.description
                 )
-
-                _uiState.update {
+            ) {
+                is Result.Success -> _uiState.update {
                     it.copy(
                         isProcessingDescription = false,
                         isLoading = false,
-                        name = refinedMeal.name,
-                        calories = refinedMeal.calories.toString(),
-                        proteins = refinedMeal.protein.toString(),
-                        fats = refinedMeal.fat.toString(),
-                        carbs = refinedMeal.carb.toString(),
-                        weight = refinedMeal.weight.toString(),
-                        ingredients = refinedMeal.ingredient.map { ingredient ->
+                        name = result.data.name,
+                        calories = result.data.calories.toString(),
+                        proteins = result.data.protein.toString(),
+                        fats = result.data.fat.toString(),
+                        carbs = result.data.carb.toString(),
+                        weight = result.data.weight.toString(),
+                        ingredients = result.data.ingredient.map { ingredient ->
                             IngredientUi(
                                 name = ingredient.name,
                                 weight = ingredient.weight.toString(),
@@ -323,12 +343,15 @@ class MealReviewScreenViewModel @Inject constructor(
                         description = ""
                     )
                 }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isProcessingDescription = false,
-                        isError = e.message
-                    )
+                is Result.Error -> {
+                    val message = ErrorUiMapper.toMessage(result.error)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            isErrorRefine = true,
+                            errorText = message
+                        )
+                    }
                 }
             }
         }
@@ -357,5 +380,16 @@ class MealReviewScreenViewModel @Inject constructor(
 
     fun onMealTypeSelected(type: MealType) {
         _uiState.value = _uiState.value.copy(selectedMealType = type)
+    }
+
+    fun onRetryClick() {
+        _uiState.update {
+            it.copy(
+                isLoading = false,
+                isError = false,
+                errorText = null
+            )
+        }
+        analyzeImage()
     }
 }

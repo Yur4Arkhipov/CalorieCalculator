@@ -14,6 +14,7 @@ import com.jacqulin.calcalc.feature.home.ui.review.MealReviewScreen
 import kotlinx.serialization.Serializable
 import androidx.navigation.toRoute
 import com.jacqulin.calcalc.core.domain.model.TempImage
+import com.jacqulin.calcalc.feature.home.ui.mealdetail.MealDetailScreen
 
 @Serializable
 data object HomeRoute
@@ -38,6 +39,11 @@ data class MealReviewRoute(
     val filePath: String
 )
 
+@Serializable
+data class MealDetailRoute(
+    val mealId: Int
+)
+
 fun NavController.navigateToHome(navOptions: NavOptions) = navigate(route = HomeRoute, navOptions)
 
 fun NavController.navigateToFavoriteChoose() = navigate(route = FavoriteMealChooseRoute)
@@ -50,12 +56,15 @@ fun NavController.navigateToManualAddMeal() = navigate(route = ManualAddMealRout
 
 fun NavController.navigateToMealReview(temp: TempImage) = navigate(MealReviewRoute(temp.file.absolutePath))
 
+fun NavController.navigateToMealDetail(mealId: Int) = navigate(MealDetailRoute(mealId))
+
 fun NavGraphBuilder.homeSection(
     onNavigateToFavoriteChoose: () -> Unit,
     onNavigateToMacroDetail: () -> Unit,
     onNavigateToAiMealDescription: () -> Unit,
     onNavigateToManualAddMeal: () -> Unit,
     onNavigateToMealReview: (TempImage) -> Unit,
+    onNavigateToMealDetail: (Int) -> Unit,
     onBackClick: () -> Unit
 ) {
     navigation<HomeBaseRoute>(startDestination = HomeRoute) {
@@ -65,7 +74,8 @@ fun NavGraphBuilder.homeSection(
                 onNavigateToMacroDetail = onNavigateToMacroDetail,
                 onNavigateToAiMealDescription = onNavigateToAiMealDescription,
                 onNavigateToManualAddMeal = onNavigateToManualAddMeal,
-                onNavigateToMealReview = onNavigateToMealReview
+                onNavigateToMealReview = onNavigateToMealReview,
+                onNavigateToMealDetail = onNavigateToMealDetail
             )
         }
 
@@ -74,7 +84,10 @@ fun NavGraphBuilder.homeSection(
         }
 
         composable<MacroDetailRoute> {
-            MacroDetailScreen(onBackClick = onBackClick)
+            MacroDetailScreen(
+                onNavigateToMealDetail = onNavigateToMealDetail,
+                onBackClick = onBackClick
+            )
         }
 
         composable<AiMealDescriptionRoute> {
@@ -90,6 +103,12 @@ fun NavGraphBuilder.homeSection(
 
             MealReviewScreen(
                 filePath = route.filePath,
+                onBackClick = onBackClick
+            )
+        }
+
+        composable<MealDetailRoute> {
+            MealDetailScreen(
                 onBackClick = onBackClick
             )
         }

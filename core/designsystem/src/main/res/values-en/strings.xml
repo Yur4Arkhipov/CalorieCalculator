@@ -12,6 +12,8 @@
     <string name="weight_suffix">g</string>
     <string name="calories_suffix">kcal</string>
     <string name="save">Save</string>
+    <string name="selected_count">Selected: %d</string>
+    <string name="placeholder_image">Placeholder image</string>
 
     // Home
     <string name="home_dialog_cancel">Cancel</string>
@@ -70,6 +72,7 @@
     <string name="home_manual_back">Go back</string>
     <string name="home_manual_add_meal">Add meal</string>
     <string name="home_manual_field_product_name">Meal name</string>
+    <string name="home_manual_field_product_weight">Weight</string>
     <string name="home_manual_nutrition_value">Nutritional value</string>
 
     // Home -> Calendar section
@@ -99,6 +102,7 @@
     <string name="review_meal_weight_desc">AI Rating - Can Be Changed</string>
     <string name="review_meal_ai_desc">You can add or edit information:</string>
     <string name="review_meal_ingredients">Ingredients</string>
+    <string name="review_meal_retry_send">Повторить</string>
 
     // Effects
     <string name="effect_meal_saved">"The dish is saved!"</string>
@@ -154,6 +158,8 @@
     <string name="profile_notifications">Notifications</string>
     <string name="profile_notifications_desc">Configure reminders</string>
     <string name="profile_about">About app</string>
+    <string name="profile_lang">Localization</string>
+    <string name="profile_lang_desc">Set up app language</string>
     <string name="profile_about_version">Version</string>
     <string name="profile_about_dialog_text">App version: %1$s</string>
 
@@ -221,11 +227,17 @@
     <string name="detail_goal">Goal</string>
     <string name="detail_macro_progress_format">%1$d / %2$d g</string>
     <string name="detail_macro_percentage_format">%1$d%% of daily goal</string>
+    <string name="detail_no_ingredients">No ingredients now</string>
 
     // Meal card
     <string name="macro_protein_short">P</string>
     <string name="macro_fat_short">F</string>
     <string name="macro_carbs_short">C</string>
     <string name="macro_weight_format">%1$dg</string>
+
+    // Favorites
+    <string name="favorites_title">Favorites</string>
+    <string name="favorites_remove">Remove from favorites</string>
+    <string name="favorites_no_meals">No favorite meals</string>
 
 </resources>

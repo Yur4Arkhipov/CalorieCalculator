@@ -4,74 +4,57 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacqulin.calcalc.core.designsystem.R
-import com.jacqulin.calcalc.core.designsystem.component.AddMealFloatingActionButton
-import com.jacqulin.calcalc.core.designsystem.component.MealCard
+import com.jacqulin.calcalc.core.designsystem.component.FloatingActionButton
 import com.jacqulin.calcalc.core.designsystem.theme.White
-import com.jacqulin.calcalc.core.domain.model.Meal
 import com.jacqulin.calcalc.core.domain.model.TempImage
 import com.jacqulin.calcalc.feature.home.ui.home.sections.AddMealBottomSheet
+import com.jacqulin.calcalc.feature.home.ui.home.sections.AiAccessBlockedSection
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CalendarSection
 import com.jacqulin.calcalc.feature.home.ui.home.sections.CaloriesSection
-import com.jacqulin.calcalc.feature.home.ui.home.sections.EditMealBottomSheet
+import com.jacqulin.calcalc.feature.home.ui.home.sections.TodayMealsSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,17 +65,23 @@ fun HomeScreen(
     onNavigateToManualAddMeal: () -> Unit = {},
     onNavigateToAddFavoriteMeal: () -> Unit = {},
     onNavigateToMealReview: (TempImage) -> Unit,
+    onNavigateToMealDetail: (Int) -> Unit = { },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddFoodSheet by remember { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
     var cameraSession by remember { mutableStateOf<TempImage?>(null) }
-    val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showRationaleDialog by remember { mutableStateOf(false) }
     var showPermanentDeniedDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val activity = context as? ComponentActivity
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.clearSelection()
+        }
+    }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -130,49 +119,49 @@ fun HomeScreen(
         }
     }
 
-    val isAtBottom by remember {
-        derivedStateOf {
-            val layoutInfo = lazyListState.layoutInfo
-            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-            lastVisibleItem != null &&
-                    lastVisibleItem.index == layoutInfo.totalItemsCount - 1 &&
-                    lastVisibleItem.offset + lastVisibleItem.size <= layoutInfo.viewportEndOffset
-        }
-    }
-    var fabHeight by remember { mutableFloatStateOf(0f) }
-    var fabOffsetY by remember { mutableFloatStateOf(0f) }
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(
-                available: Offset,
-                source: NestedScrollSource
-            ): Offset {
-                val delta = available.y
-                if (isAtBottom) {
-                    fabOffsetY = (fabOffsetY - delta)
-                        .coerceIn(0f, fabHeight)
-                }
-
-                return Offset.Zero
-            }
-
-            override suspend fun onPostFling(
-                consumed: Velocity,
-                available: Velocity
-            ): Velocity {
-                if (fabOffsetY > 0f) {
-                    animate(
-                        initialValue = fabOffsetY,
-                        targetValue = 0f
-                    ) { value, _ ->
-                        fabOffsetY = value
-                    }
-                }
-
-                return Velocity.Zero
-            }
-        }
-    }
+//    val isAtBottom by remember {
+//        derivedStateOf {
+//            val layoutInfo = lazyListState.layoutInfo
+//            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+//            lastVisibleItem != null &&
+//                    lastVisibleItem.index == layoutInfo.totalItemsCount - 1 &&
+//                    lastVisibleItem.offset + lastVisibleItem.size <= layoutInfo.viewportEndOffset
+//        }
+//    }
+//    var fabHeight by remember { mutableFloatStateOf(0f) }
+//    var fabOffsetY by remember { mutableFloatStateOf(0f) }
+//    val nestedScrollConnection = remember {
+//        object : NestedScrollConnection {
+//            override fun onPreScroll(
+//                available: Offset,
+//                source: NestedScrollSource
+//            ): Offset {
+//                val delta = available.y
+//                if (isAtBottom) {
+//                    fabOffsetY = (fabOffsetY - delta)
+//                        .coerceIn(0f, fabHeight)
+//                }
+//
+//                return Offset.Zero
+//            }
+//
+//            override suspend fun onPostFling(
+//                consumed: Velocity,
+//                available: Velocity
+//            ): Velocity {
+//                if (fabOffsetY > 0f) {
+//                    animate(
+//                        initialValue = fabOffsetY,
+//                        targetValue = 0f
+//                    ) { value, _ ->
+//                        fabOffsetY = value
+//                    }
+//                }
+//
+//                return Velocity.Zero
+//            }
+//        }
+//    }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
@@ -270,8 +259,8 @@ fun HomeScreen(
                     state = lazyListState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .nestedScroll(nestedScrollConnection),
+                        .background(MaterialTheme.colorScheme.background),
+//                        .nestedScroll(nestedScrollConnection),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(
                         bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 60.dp
@@ -288,37 +277,58 @@ fun HomeScreen(
                     item {
                         CaloriesSection(uiState = uiState)
                     }
+
+                    Log.d("AI", "${uiState.isAiAccessAllowed}")
+                    if (!uiState.isAiAccessAllowed) {
+                        item {
+                            AiAccessBlockedSection(
+                                onSubscribeClick = {
+                                    // пока ничего
+                                }
+                            )
+                        }
+                    }
+
                     item {
                         TodayMealsSection(
                             meals = uiState.mealsToday,
+                            selectedMealIds = uiState.selectedMealIds,
                             onDetailClick = onNavigateToMacroDetail,
-                            onMealClick = viewModel::onEditMeal
+                            onMealClick = viewModel::onMealClick,
+                            onMealLongClick = viewModel::onMealLongClick,
+                            onDeleteClick = viewModel::deleteSelected,
+                            onNavigateToMealDetail = onNavigateToMealDetail
                         )
                     }
                 }
 
-                AnimatedVisibility(
-                    visible = true,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 60.dp, end = 12.dp)
-                        .navigationBarsPadding()
-                        .onGloballyPositioned {
-                            fabHeight = it.size.height.toFloat()
-                        }
-                        .graphicsLayer {
-                            translationY = fabOffsetY
-                        }
-                ) {
-                    AddMealFloatingActionButton(
+//                AnimatedVisibility(
+//                    visible = true,
+//                    modifier = Modifier
+//                        .align(Alignment.BottomEnd)
+//                        .padding(bottom = 60.dp, end = 12.dp)
+//                        .navigationBarsPadding()
+//                        .onGloballyPositioned {
+//                            fabHeight = it.size.height.toFloat()
+//                        }
+//                        .graphicsLayer {
+//                            translationY = fabOffsetY
+//                        }
+//                ) {
+                    FloatingActionButton(
                         icon = painterResource(R.drawable.ic_add),
                         contentDescription = stringResource(R.string.home_add_meal),
                         onClick = { showAddFoodSheet = true },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(bottom = 40.dp, end = 12.dp)
+                            .navigationBarsPadding()
                     )
-                }
+//                }
 
                 if (showAddFoodSheet) {
                     AddMealBottomSheet(
+                        isAiAccessAllowed = uiState.isAiAccessAllowed,
                         onFavorite = {
                             showAddFoodSheet = false
                             onNavigateToAddFavoriteMeal()
@@ -328,85 +338,24 @@ fun HomeScreen(
                             onNavigateToManualAddMeal()
                         },
                         onAiDescription = {
-                            showAddFoodSheet = false
-                            onNavigateToAiMealDescription()
+                            if (uiState.isAiAccessAllowed) {
+                                showAddFoodSheet = false
+                                onNavigateToAiMealDescription()
+                            }
                         },
                         onCamera = {
-                            viewModel.onRequestCameraPermission()
-                            showAddFoodSheet = false
+                            if (uiState.isAiAccessAllowed) {
+                                viewModel.onRequestCameraPermission()
+                                showAddFoodSheet = false
+                            }
                         },
                         onGallery = {
-                            viewModel.onAddPhotoFromGallery()
-                            showAddFoodSheet = false
+                            if (uiState.isAiAccessAllowed) {
+                                viewModel.onAddPhotoFromGallery()
+                                showAddFoodSheet = false
+                            }
                         },
                         onDismiss = { showAddFoodSheet = false }
-                    )
-                }
-
-                if (uiState.isEditingSheetOpen && uiState.editingMeal != null) {
-                    EditMealBottomSheet(
-                        meal = uiState.editingMeal!!,
-                        sheetState = editSheetState,
-                        onDismiss = viewModel::onDismissEditMeal,
-                        onSave = viewModel::onUpdateMeal,
-                        onDelete = viewModel::onDeleteMeal
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TodayMealsSection(
-    meals: List<Meal>,
-    onDetailClick: () -> Unit = {},
-    onMealClick: (Meal) -> Unit = {}
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.home_meals),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            TextButton(
-                onClick = onDetailClick
-            ) {
-                Text(stringResource(R.string.home_more_details))
-            }
-        }
-
-        if (meals.isEmpty()) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.home_no_meals_add),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-                }
-            }
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                meals.forEach { meal ->
-                    MealCard(
-                        meal = meal,
-                        onClick = { onMealClick(meal) }
                     )
                 }
             }

@@ -63,6 +63,7 @@ import com.jacqulin.calcalc.core.util.effects.UiEffect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,16 +90,17 @@ fun AiMealDescriptionScreen(
                     snackbarMessage = when (effect.messageCode) {
                         SnackbarMessageCode.MEAL_SAVED -> "Блюдо успешно сохранено!"
                         SnackbarMessageCode.MEAL_SAVE_ERROR -> "Ошибка сохранения"
+                        SnackbarMessageCode.CHANGES_SAVED -> "Изменения сохранены"
                     }
                     snackbarIsError = effect.isError
                     snackbarVisible = true
 
                     snackbarJob = launch {
                         if (effect.isError) {
-                            delay(3000)
+                            delay(3000.milliseconds)
                             snackbarVisible = false
                         } else {
-                            delay(2000)
+                            delay(2000.milliseconds)
                             snackbarVisible = false
                             onBackClick()
                         }
@@ -241,7 +243,7 @@ fun AiMealDescriptionScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(R.string.home_ai_text_analyze_error),
+                            text = uiState.error ?: stringResource(R.string.home_ai_text_analyze_error),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.weight(1f)
