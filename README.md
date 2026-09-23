@@ -1,5 +1,7 @@
 # CalCalc (Calorie Calculator & Nutrition Tracker)
 
+Screeshots: https://disk.yandex.ru/d/kMpjQAsWxFCoGw
+
 CalCalc is an Android application designed to help users track their daily calorie intake, macronutrients (proteins, carbs, and fats), and manage their diet with ease. The app features AI-powered meal recognition, allowing users to take photos of their food to automatically estimate nutritional value.
 
 ## Features
